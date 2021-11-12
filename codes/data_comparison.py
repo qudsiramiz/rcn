@@ -3,6 +3,7 @@ import matplotlib as mpl
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.patches as patches
 
+
 # Set the fontstyle to Times New Roman
 font = { 'family' : 'Times New Roman', 'weight' : 'normal', 'size' : 10 }
 plt.rc( 'font', **font )
