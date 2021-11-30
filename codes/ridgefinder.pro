@@ -14,7 +14,7 @@ pro ridgefinder, image=image,first_deri=first_deri,second_deri=second_deri,ridge
 
     smooth_image=CONVOL(image, smooth_kernel, 64)
     image=smooth_image
-    
+
  ridge=image
  ridge[*]=0
      x_size=(SIZE(image, /DIMENSIONS))[0]
