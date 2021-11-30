@@ -1,16 +1,28 @@
 # This the python version of IDL code named 'RX_model_batch.pro'
-import geopack
-from geopack import geopack
-from geopack.t96 import t96
+import datetime
+import time
+import warnings
+
+import geopack.geopack as gp
+import h5py as hf
+import matplotlib as mpl
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import numpy as np
 import pyspedas as spd
 import pytplot as ptt
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import warnings
 from dateutil import parser
-import datetime
-import h5py as hf
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from skimage.filters import meijering  # sato, frangi, hessian
+
+# Set the fontstyle to Times New Roman
+font = {'family': 'sans-serif', 'weight': 'normal', 'size': 10}
+plt.rc('font', **font)
+plt.rc('text', usetex=True)
+
+start = time.time()
+
+today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
 def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     r"""
@@ -67,12 +79,11 @@ def get_rxben(b_vec_1, b_vec_2):
         Input magnetic field vector.
     b_vec_2 : array of shape 1x3
         Input magnetic field vector.
-    angle_unit : str, optional
-        Preferred unit of angle returned by the code. Default is "radians".
 
     Returns
     -------
-    rxben : Find out
+    rxben : float
+        Reconnection field energy density in nPa
     """
     # TODO: Update the documentation of this function
 
@@ -196,14 +207,109 @@ def get_ca(b_vec, angle_unit="radians"):
         raise KeyError("angle_unit must be radians or degrees")
 
 
+def ridge_finder(
+    image=None,
+    xrange=[-15.1, 15],
+    yrange=[-15.1, 15],
+    dr=0.5,
+    sigma=2.2,
+    mode="nearest",
+    alpha=0.5,
+    save_fig=True,
+    fig_name='new'
+    ):
+    r"""
+    Finds ridges in an image and plot the points with maximum ridge value on the given image.
+
+    Parameters
+    ----------
+    image : ndarray
+            The image to find ridges in. Default is None.
+    xrange : list of floats, optional
+            The range of x-values for image. Default is [-15.1, 15].
+    yrange : list of floats, optional
+            The range of y-values for image. Default is [-15.1, 15].
+    dr : float, optional
+            The step size for the grid. Default is 0.5.
+    sigma : float
+            The size of the filter. Default is 2.2.
+    mode : str
+            The mode of the filter. Can be 'nearest', 'reflect', 'constant', 'mirror', 'wrap' or
+            'linear'. Default is 'nearest'.
+    alpha : float
+            The alpha value for the filter. Default is 0.5.
+
+    Raises
+    ------
+    ValueError: If the image is not a numpy array.
+
+    Returns
+    -------
+    ridge_points : ndarray
+    """
+    if image is None:
+         raise ValueError("No image given")
+    image = np.transpose(image)
+
+    cmap = plt.cm.Spectral
+
+    kwargs = {'sigmas': [sigma], 'black_ridges': False, 'mode': mode, 'alpha': alpha}
+
+    result = meijering(image, **kwargs)
+
+    x_len = image.shape[0]
+    y_len = image.shape[1]
+    y_val = np.full(y_len, np.nan)
+    for i in range(y_len):
+        y_val[i] = np.argmax(result[:, i]) * dr + yrange[0]
+
+    # plt.close('all')
+    fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
+
+    im1 = axs1.imshow(abs(image), extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
+                      origin='lower', cmap=cmap)
+    divider1 = make_axes_locatable(axs1)
+
+    axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val, 'k-', ms=2)
+
+    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData)
+    im1.set_clip_path(patch)
+
+    axs1.set_xlabel(r'Y [$R_\oplus$]', fontsize=18)
+    axs1.set_ylabel(r'Z [$R_\oplus$]', fontsize=18)
+
+    # Define the location of the colorbar, it's size relative to main figure and the padding
+    # between the colorbar and the figure, the orientation the colorbar
+    cax1 = divider1.append_axes("top", size="5%", pad=0.01)
+    cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
+                         pad=0.01)
+    cbar1.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=False,
+                         labelbottom=False, pad=0.01)
+    cbar1.ax.xaxis.set_label_position('top')
+    cbar1.ax.set_xlabel(f'{fig_name}', fontsize=18)
+
+    fig.show()
+
+    if save_fig:
+        fig_name = f'../figures/ridge_plot_{fig_name}_{dr}dr_{mp}mp.pdf'
+        plt.savefig(fig_name, bbox_inches='tight', pad_inches= 0.05, format='pdf', dpi=300)
+        print(f'Figure saved as {fig_name}')
+    plt.close()
+    return y_val
+
 #def rx_model_batch(
 #    probe=None,
 #    omni_level='hro',
 #    maximum_shear=True,
 #    mms_probe='mms1',
 #    movie=None,
-#    trange=None
+#    trange=None,
+#    model_type='t96',
+#    mp=0.5,
+#    dr=0.25
+#    save_data=False,
 #):
+
 for i in range(1):
     r"""
     RX model from the IDL code.
@@ -220,6 +326,14 @@ for i in range(1):
         DESCRIPTION. The default is mmsprobe.
     times : TYPE, optional
         DESCRIPTION. The default is times.
+    trange : TYPE, optional
+        Range of times to use. The default is trange.
+    model_type : TYPE, optional
+        Type of Tsyganenko model. The default is 't96'.
+    mp : float, optional
+        Thickness of the magnetopause. The default is 0.5.
+    dr : float, optional
+        Resolution of the model. The default is 0.25.
 
     Returns
     -------
@@ -228,9 +342,13 @@ for i in range(1):
     probe = None
     omni_level = 'hro'
     maximum_shear = True
-    mms_probe = 'mms1'
+    mms_probe = None
     movie = None
-    trange = ['2016-12-24 15:08', '2016-12-24 15:12']
+    trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+    model_type = 't96'
+    mp = 0.5  # Magnetopause thichkness
+    dr = 0.5  # Resolution of model run in R_E units
+    save_data = True
 
     # Get time range as a datetime object
     trange_unix = [parser.parse(xx) for xx in trange]
@@ -241,10 +359,10 @@ for i in range(1):
     trange_mms = [xx.strftime('%Y-%m-%d %H-%M-%S') for xx in trange_mms_dt]
 
     # Download the OMNI data (default level of 'hro_1min') for the specified timerange.
-    if ('omni_vars' in locals()):
-        pass
-    else:
-        omni_vars = spd.omni.data(trange=trange, level=omni_level)
+    #if ('omni_vars' in locals()):
+    #    pass
+    #else:
+    omni_vars = spd.omni.data(trange=trange, level=omni_level)
 
     omni_time = ptt.get_data('BX_GSE')[0]
     # omni_time_unix = np.vectorize(datetime.utcfromtimestamp)(omni_time[:]) # converting omni_time
@@ -275,12 +393,12 @@ for i in range(1):
             sc_pos.append(ptt.get_data(f'th{xx}_pos_gse')[1])
 
     if (mms_probe is not None):
-        if('mms_mec_vars' in locals()):
-            pass
-        else:
-            mms_mec_vars = spd.mms.mec(trange=trange_mms, data_rate='srvy', probe='1')
-            mms_time = ptt.get_data('mms1_mec_r_gse')[0]
-            mms_sc_pos = ptt.get_data('mms1_mec_r_gse')[1:3]
+        #if('mms_mec_vars' in locals()):
+        #    pass
+        #else:
+        mms_mec_vars = spd.mms.mec(trange=trange_mms, data_rate='srvy', probe='1')
+        mms_time = ptt.get_data('mms1_mec_r_gse')[0]
+        mms_sc_pos = ptt.get_data('mms1_mec_r_gse')[1:3]
     else:
         pass
 
@@ -326,17 +444,18 @@ for i in range(1):
         param = [p_dyn, sym_h_imf, b_imf_y, b_imf_z, 0, 0, 0, 0, 0, 0]
 
         # Compute the dipole tilt angle
-        ps = geopack.recalc(time_imf)
+        ps = gp.recalc(time_imf)
+        #ps = -0.25666021186831828
 
-        n_arr = 150
+        n_arr = int(30/dr) + 1
 
         bx = np.full((n_arr, n_arr), np.nan)
         by = np.full((n_arr, n_arr), np.nan)
         bz = np.full((n_arr, n_arr), np.nan)
 
-        bx_t96 = np.full((n_arr, n_arr), np.nan)
-        by_t96 = np.full((n_arr, n_arr), np.nan)
-        bz_t96 = np.full((n_arr, n_arr), np.nan)
+        bx_ext = np.full((n_arr, n_arr), np.nan)
+        by_ext = np.full((n_arr, n_arr), np.nan)
+        bz_ext = np.full((n_arr, n_arr), np.nan)
 
         bx_igrf = np.full((n_arr, n_arr), np.nan)
         by_igrf = np.full((n_arr, n_arr), np.nan)
@@ -384,13 +503,13 @@ for i in range(1):
         rmp = ro * (2/(1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
 
         A = 2
-        len_y = 80
-        len_z = 80
+        len_y = int(30/dr) + 1
+        len_z = int(30/dr) + 1
         count = 0
         for j in range(0, len_y):
-            y0 = 40 - j
+            y0 = 15 - int(j * dr)
             for k in range(0, len_z):
-                z0 = 40 - k
+                z0 = 15 - int(k * dr)
                 rp = np.sqrt(y0**2 + z0**2)  # Projection of r into yz-plane
 
                 for index in range(0, 100):
@@ -422,19 +541,19 @@ for i in range(1):
 
                         y_coord[j, k] = y0
                         z_coord[j, k] = z0
-                        #print( j, k, y0, z0)
-                        x_shu[j, k] = (r - 0.5) * np.cos(theta)
+                        x_shu[j, k] = (r - mp) * np.cos(theta)
                         phi = np.arctan2(z0, y0)
+                        #print( j, k, theta, x_shu[j,k])
     
                         if (abs(y0) == 0 or abs(z0) == 0):
                             if(abs(y0) == 0):
                                 y_shu[j, k] = 0
-                                z_shu[j, k] = (r - 0.5) * np.sin(theta)
+                                z_shu[j, k] = (r - mp) * np.sin(theta)
                             elif (abs(z0) == 0):
                                 z_shu[j, k] = 0
-                                y_shu[j, k] = (r - 0.5) * np.sin(theta)
+                                y_shu[j, k] = (r - mp) * np.sin(theta)
                         else:
-                            z_shu[j, k] = np.sqrt((rp - 0.5)**2/(1 + np.tan(phi)**(-2)))
+                            z_shu[j, k] = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
                             y_shu[j, k] = z_shu[j, k]/np.tan(phi)
     
                         rho_sh[j, k] = rho * (1.509 * np.exp(x_shu[j, k]/rmp) + .1285)
@@ -455,18 +574,42 @@ for i in range(1):
                         # TODO: Implement Geopack T96!!!
                         # Compute the external magnetic field from the T95 model for a given
                         # position and time, in GSM coordinate
-                        bx_t96[j, k], by_t96[j, k], bz_t96[j, k] = t96(param, ps, x_shu[j, k],
-                                                                       y_shu[j, k], z_shu[j, k])
-    
+                        try:
+                            if(model_type=='t96'):
+                                bx_ext[j, k], by_ext[j, k], bz_ext[j, k] = gp.t96.t96(
+                                                                                      param,
+                                                                                      ps,
+                                                                                      x_shu[j, k],
+                                                                                      y_shu[j, k],
+                                                                                      z_shu[j, k]
+                                                                                      )
+                            elif(model_type=='t01'):
+                                bx_ext[j, k], by_ext[j, k], bz_ext[j, k] = gp.t01.t01(
+                                                                                      param,
+                                                                                      ps,
+                                                                                      x_shu[j, k],
+                                                                                      y_shu[j, k],
+                                                                                      z_shu[j, k]
+                                                                                      )
+                            else :
+                                raise ValueError("Model type must be set to 't96' or 't01'.")
+                        except:
+                            if((y_shu[j,k] < 15 and y_shu[j, k] > -15) or
+                               (z_shu[j,k] < 15 and z_shu[j, k] > -15)):
+                                print(f'Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
+                                count += 1
+                            else:
+                                print(f'~Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
+
                         # Compute the internal magnetic field from the IGRF model for a given
                         # position in GSM coordinate
-                        bx_igrf[j, k], by_igrf[j, k], bz_igrf[j, k] = geopack.igrf_gsm(x_shu[j, k],
-                                                                                       y_shu[j, k],
-                                                                                       z_shu[j, k])
+                        bx_igrf[j, k], by_igrf[j, k], bz_igrf[j, k] = gp.igrf_gsm(x_shu[j, k],
+                                                                                  y_shu[j, k],
+                                                                                  z_shu[j, k])
     
-                        bx[j, k] = bx_t96[j, k] + bx_igrf[j, k]
-                        by[j, k] = by_t96[j, k] + by_igrf[j, k]
-                        bz[j, k] = bz_t96[j, k] + bz_igrf[j, k]
+                        bx[j, k] = bx_ext[j, k] + bx_igrf[j, k]
+                        by[j, k] = by_ext[j, k] + by_igrf[j, k]
+                        bz[j, k] = bz_ext[j, k] + bz_igrf[j, k]
     
                         if (np.sqrt(y_shu[j, k]**2 + z_shu[j, k]**2) > 31):
                             shear[j, k] = np.nan
@@ -485,46 +628,55 @@ for i in range(1):
                         n_sh[j, k] = rho_sh[j, k]
                         break
 
-    # Save the outputs to a file
-    data_file = hf.File('../data/all_data_rx_model_0.5re_20211005_v02.h5', 'w')
+    if save_data:
 
-    data_file.create_dataset('bx', data=bx)
-    data_file.create_dataset('by', data=by)
-    data_file.create_dataset('bz', data=bz)
+        fn = f'../data/all_data_rx_model_{dr}re_{mp}mp_{model_type}_{today_date}.h5'
+        data_file = hf.File(fn, 'w')
 
-    data_file.create_dataset('bx_t96', data=bx_t96)
-    data_file.create_dataset('by_t96', data=by_t96)
-    data_file.create_dataset('bz_t96', data=bz_t96)
+        data_file.create_dataset('bx', data=bx)
+        data_file.create_dataset('by', data=by)
+        data_file.create_dataset('bz', data=bz)
+
+        data_file.create_dataset('bx_ext', data=bx_ext)
+        data_file.create_dataset('by_ext', data=by_ext)
+        data_file.create_dataset('bz_ext', data=bz_ext)
                                                   
-    data_file.create_dataset('bx_igrf', data=bx_igrf)
-    data_file.create_dataset('by_igrf', data=by_igrf)
-    data_file.create_dataset('bz_igrf', data=bz_igrf)
+        data_file.create_dataset('bx_igrf', data=bx_igrf)
+        data_file.create_dataset('by_igrf', data=by_igrf)
+        data_file.create_dataset('bz_igrf', data=bz_igrf)
                                                   
-    data_file.create_dataset('b_msx', data=b_msx)
-    data_file.create_dataset('b_msy', data=b_msy)
-    data_file.create_dataset('b_msz', data=b_msz)
+        data_file.create_dataset('b_msx', data=b_msx)
+        data_file.create_dataset('b_msy', data=b_msy)
+        data_file.create_dataset('b_msz', data=b_msz)
                                                       
-    data_file.create_dataset('x_shu', data=x_shu)
-    data_file.create_dataset('y_shu', data=y_shu)
-    data_file.create_dataset('z_shu', data=z_shu)
+        data_file.create_dataset('x_shu', data=x_shu)
+        data_file.create_dataset('y_shu', data=y_shu)
+        data_file.create_dataset('z_shu', data=z_shu)
                                                       
-    data_file.create_dataset('rho_sh', data=rho_sh)
-    #data_file.create_dataset('rp', data=rp)
+        data_file.create_dataset('rho_sh', data=rho_sh)
+        #data_file.create_dataset('rp', data=rp)
                                                   
-    #data_file.create_dataset('r', data=r)
-    #data_file.create_dataset('zp', data=zp)
-    #data_file.create_dataset('x0', data=x0)
+        #data_file.create_dataset('r', data=r)
+        #data_file.create_dataset('zp', data=zp)
+        #data_file.create_dataset('x0', data=x0)
                                                       
-    data_file.create_dataset('shear', data=shear)
-    data_file.create_dataset('rx_en', data=rx_en)
-    data_file.create_dataset('va_cs', data=va_cs)
-    data_file.create_dataset('bisec', data=bisec)
-    data_file.create_dataset('y_coord', data=y_coord)
-    data_file.create_dataset('z_coord', data=z_coord)
-    data_file.create_dataset('b_sh_ca', data=b_sh_ca)
-    data_file.create_dataset('b_sh_mag', data=b_sh_mag)
-    data_file.create_dataset('n_sh', data=n_sh)
+        data_file.create_dataset('shear', data=shear)
+        data_file.create_dataset('rx_en', data=rx_en)
+        data_file.create_dataset('va_cs', data=va_cs)
+        data_file.create_dataset('bisec', data=bisec)
+        data_file.create_dataset('y_coord', data=y_coord)
+        data_file.create_dataset('z_coord', data=z_coord)
+        data_file.create_dataset('b_sh_ca', data=b_sh_ca)
+        data_file.create_dataset('b_sh_mag', data=b_sh_mag)
+        data_file.create_dataset('n_sh', data=n_sh)
 
-    data_file.close()
+        data_file.close()
+        print(f'Date saved to file {fn}')
 
+    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear')
+    ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en')
+    ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs')
+    ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec')
     # TODO: Code for plotting rx_en contours/energy density
+
+print(f'Took {round(time.time() - start, 3)} seconds')

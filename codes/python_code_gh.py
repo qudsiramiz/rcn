@@ -95,7 +95,7 @@ bx_t01_total = bx_igrf + bx_t01
 by_t01_total = by_igrf + by_t01
 bz_t01_total = bz_igrf + bz_t01
 
-data_file = hf.File('python_data.h5')
+data_file = hf.File('python_data.h5', 'w')
 data_file.create_dataset('bx_t96', data=bx_t96)
 data_file.create_dataset('by_t96', data=by_t96)
 data_file.create_dataset('bz_t96', data=bz_t96)
