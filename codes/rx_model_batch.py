@@ -260,8 +260,10 @@ def ridge_finder(
     x_len = image.shape[0]
     y_len = image.shape[1]
     y_val = np.full(y_len, np.nan)
+    im_max_val = np.full(y_len, np.nan)
     for i in range(y_len):
         y_val[i] = np.argmax(result[:, i]) * dr + yrange[0]
+        im_max_val[i] = np.argmax(image[:, i]) * dr + yrange[0]
 
     # plt.close('all')
     fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
@@ -272,11 +274,13 @@ def ridge_finder(
 
     axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val, 'k-', ms=2)
 
+    axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'r*', ms=2)
+
     patch = patches.Circle((0, 0), radius=15, transform=axs1.transData)
     im1.set_clip_path(patch)
 
-    axs1.set_xlabel(r'Y [$R_\oplus$]', fontsize=18)
-    axs1.set_ylabel(r'Z [$R_\oplus$]', fontsize=18)
+    axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
+    axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
 
     # Define the location of the colorbar, it's size relative to main figure and the padding
     # between the colorbar and the figure, the orientation the colorbar
@@ -288,7 +292,7 @@ def ridge_finder(
     cbar1.ax.xaxis.set_label_position('top')
     cbar1.ax.set_xlabel(f'{fig_name}', fontsize=18)
 
-    fig.show()
+    # fig.show()
 
     if save_fig:
         fig_name = f'../figures/ridge_plot_{fig_name}_{dr}dr_{mp}mp.pdf'
@@ -296,6 +300,63 @@ def ridge_finder(
         print(f'Figure saved as {fig_name}')
     plt.close()
     return y_val
+
+
+def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None, save_fig=True,
+                       fig_name="draping_field"):
+    r"""
+    Plots the draping field.
+
+    Parameters
+    ----------
+    x_coord : ndarray
+        The x-coordinates of the points.
+    y_coord : ndarray
+        The y-coordinates of the points.
+    by : ndarray
+        The y-component of the draping field.
+    bz : ndarray
+        The z-component of the draping field.
+    scale : float, optional
+        Number of data units per arrow length unit. Default is None.
+    save_fig : bool, optional
+        Whether to save the figure. Default is True.
+    fig_name : str, optional
+        The name of the figure. Default is 'draping_field'.
+
+    Raises
+    ------
+    ValueError: If the x_coord, y_coord, by or bz are not numpy arrays.
+
+    Returns
+    -------
+    fig : matplotlib figure
+    """
+    if x_coord is None or y_coord is None or by is None or bz is None:
+        raise ValueError("No coordinates or field components given")
+
+    fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
+    axs1.quiver(x_coord, y_coord, by, bz, scale=scale, scale_units='xy', angles='xy', width=0.001)
+    axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
+    axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
+    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData)
+    axs1.set_clip_path(patch)
+    axs1.set_xlim([-15, 15])
+    axs1.set_ylim([-15, 15])
+    axs1.set_aspect('equal')
+    if fig_name == "magnetosheath":
+        axs1.set_title(r'Magnetosheath Field (nT)', fontsize=18)
+    elif fig_name == "magnetosphere":
+        axs1.set_title(r'Magnetosphere Field (nT)', fontsize=18)
+    else:
+        axs1.set_title(r'Draping Field (nT)', fontsize=18)
+
+    if save_fig:
+        fig_name = f'../figures/draping_field_plot_{fig_name}.png'
+        plt.savefig(fig_name, bbox_inches='tight', pad_inches= 0.05, format='png', dpi=300)
+        print(f'Figure saved as {fig_name}')
+    return fig
+
 
 #def rx_model_batch(
 #    probe=None,
@@ -420,21 +481,24 @@ for i in range(1):
         vz_imf = np.nanmedian(omni_vz)
         sym_h_imf = np.nanmedian(omni_sym_h)
 
+        # Check if the values are finite, if not then assign a default value to each of them
         if ~(np.isfinite(np_imf)):
             np_imf = 5
         if ~(np.isfinite(vx_imf)):
-            np_imf = 500
+            vx_imf = -500
+        if ~(np.isfinite(vy_imf)):
+            vy_imf = 0
+        if ~(np.isfinite(vz_imf)):
+            vz_imf = 0
         if ~(np.isfinite(sym_h_imf)):
-            np_imf = -1
+            sym_h_imf = -1
 
         m_p = 1.672e-27  # Mass of proton in SI unit
 
         rho = np_imf * m_p * 1.15
-        p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2) #  Solar wind ram
-                                                                                #  pressure
-                                                                                #  in nPa,
-                                                                                #  including
-        # roughly 4% Helium++ contribution
+
+        #  Solar wind ram pressure in nPa, including roughly 4% Helium++ contribution
+        p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2) 
 
         if (p_dyn > 8.5 or p_dyn < 0.5):
             warnings.warn(
@@ -445,7 +509,7 @@ for i in range(1):
 
         # Compute the dipole tilt angle
         ps = gp.recalc(time_imf)
-        #ps = -0.25666021186831828
+        # ps = -0.25666021186831828
 
         n_arr = int(30/dr) + 1
 
@@ -471,7 +535,7 @@ for i in range(1):
 
         rho_sh = np.full((n_arr, n_arr), np.nan)
 
-        #rp = np.full((n_arr, n_arr), np.nan)
+        # rp = np.full((n_arr, n_arr), np.nan)
 
         # r = np.full((n_arr, n_arr), np.nan)
         # zp = np.full((n_arr, n_arr), np.nan)
@@ -490,15 +554,15 @@ for i in range(1):
         d_theta = np.pi/100
 
         # Shue et al.,1998, equation 10
-        #if (b_imf_z >=0):
-        #    ro = (11.44 + 0.013 * b_imf_z) * (p_dyn)**(-1.0/6.6)
-        #    #ro = (10.22 + 1.29 * np.tanh(0.184 * (b_imf_z + 8.14))) * (p_dyn)**(-1.0/6.6)
-        #else:
+        # if (b_imf_z >=0):
+        #     ro = (11.44 + 0.013 * b_imf_z) * (p_dyn)**(-1.0/6.6)
+        #     #ro = (10.22 + 1.29 * np.tanh(0.184 * (b_imf_z + 8.14))) * (p_dyn)**(-1.0/6.6)
+        # else:
         #    ro = (11.44 + 0.14 * b_imf_z) * (p_dyn)**(-1.0/6.6)
         ro = (10.22 + 1.29 * np.tanh(0.184 * (b_imf_z + 8.14))) * (p_dyn)**(-1.0/6.6)
 
         # Shue et al.,1998, equation 11
-        #alpha = (0.58 - 0.010 * b_imf_z) * (1 + 0.010 * p_dyn)
+        # alpha = (0.58 - 0.010 * b_imf_z) * (1 + 0.010 * p_dyn)
         alpha = (0.58 - 0.007 * b_imf_z) * (1 + 0.024 * np.log(p_dyn))
         rmp = ro * (2/(1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
 
@@ -516,8 +580,7 @@ for i in range(1):
 
                     theta = index * d_theta
                     r = ro * (2/(1 + np.cos(theta))) ** alpha
-                    zp = r * np.sin(theta)  # not really in z direction, but a
-                                                        # distance in yz plane
+                    zp = r * np.sin(theta)  # not really in z direction, but a distance in yz plane
                     x0 = r * np.cos(theta)
 
                     if x0 == 0:
@@ -536,15 +599,15 @@ for i in range(1):
                         signz = np.sign(z0)
 
                     if (rp <= zp):
-                        #print(index, rp, zp)
-                        #print(f'Value of theta = {theta}')
+                        # print(index, rp, zp)
+                        # print(f'Value of theta = {theta}')
 
                         y_coord[j, k] = y0
                         z_coord[j, k] = z0
                         x_shu[j, k] = (r - mp) * np.cos(theta)
                         phi = np.arctan2(z0, y0)
-                        #print( j, k, theta, x_shu[j,k])
-    
+                        # print( j, k, theta, x_shu[j,k])
+
                         if (abs(y0) == 0 or abs(z0) == 0):
                             if(abs(y0) == 0):
                                 y_shu[j, k] = 0
@@ -555,27 +618,27 @@ for i in range(1):
                         else:
                             z_shu[j, k] = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
                             y_shu[j, k] = z_shu[j, k]/np.tan(phi)
-    
+
                         rho_sh[j, k] = rho * (1.509 * np.exp(x_shu[j, k]/rmp) + .1285)
-    
+
                         y_shu[j, k] = abs(y_shu[j, k])*signy
                         z_shu[j, k] = abs(z_shu[j, k])*signz
-    
+
                         # Cooling JGR 2001 Model, equation 9 to 12
-                        ll = 3 * rmp/2 - x0  # the distance from the focus to the
-                                                   # magnetopause surface
+                        # the distance from the focus to the magnetopause surface
+                        ll = 3 * rmp/2 - x0
                         b_msx[j, k] = - A * (- b_imf_x * (1 - rmp / (2 * ll)) + b_imf_y * (y0 / ll)
                                       + b_imf_z * (z0 / ll))
                         b_msy[j, k] = A * (- b_imf_x * (y0 / (2 * ll)) + b_imf_y * (2 - y0**2/(
                                       ll * rmp)) - b_imf_z * (y0 * z0 / (ll * rmp)))
                         b_msz[j, k] = A * (- b_imf_x * (z0 / (2 * ll)) - b_imf_y * (y0 * z0 / (ll
                                       * rmp)) + b_imf_z * (2 - z0**2 / (ll * rmp)))
-    
+
                         # TODO: Implement Geopack T96!!!
                         # Compute the external magnetic field from the T95 model for a given
                         # position and time, in GSM coordinate
                         try:
-                            if(model_type=='t96'):
+                            if(model_type == 't96'):
                                 bx_ext[j, k], by_ext[j, k], bz_ext[j, k] = gp.t96.t96(
                                                                                       param,
                                                                                       ps,
@@ -583,7 +646,7 @@ for i in range(1):
                                                                                       y_shu[j, k],
                                                                                       z_shu[j, k]
                                                                                       )
-                            elif(model_type=='t01'):
+                            elif(model_type == 't01'):
                                 bx_ext[j, k], by_ext[j, k], bz_ext[j, k] = gp.t01.t01(
                                                                                       param,
                                                                                       ps,
@@ -591,7 +654,7 @@ for i in range(1):
                                                                                       y_shu[j, k],
                                                                                       z_shu[j, k]
                                                                                       )
-                            else :
+                            else:
                                 raise ValueError("Model type must be set to 't96' or 't01'.")
                         except:
                             if((y_shu[j,k] < 15 and y_shu[j, k] > -15) or
@@ -606,17 +669,17 @@ for i in range(1):
                         bx_igrf[j, k], by_igrf[j, k], bz_igrf[j, k] = gp.igrf_gsm(x_shu[j, k],
                                                                                   y_shu[j, k],
                                                                                   z_shu[j, k])
-    
+
                         bx[j, k] = bx_ext[j, k] + bx_igrf[j, k]
                         by[j, k] = by_ext[j, k] + by_igrf[j, k]
                         bz[j, k] = bz_ext[j, k] + bz_igrf[j, k]
-    
+
                         if (np.sqrt(y_shu[j, k]**2 + z_shu[j, k]**2) > 31):
                             shear[j, k] = np.nan
                         else:
                             shear[j, k] = get_shear([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
                                                    b_msy[j, k], b_msz[j, k]], angle_unit="degrees")
-    
+
                         rx_en[j, k] = get_rxben([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
                                                  b_msy[j, k], b_msz[j, k]])
                         va_cs[j, k] = get_vcs([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
@@ -678,5 +741,10 @@ for i in range(1):
     ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs')
     ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec')
     # TODO: Code for plotting rx_en contours/energy density
+
+    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=30,
+                            fig_name="magnetosheath")
+    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=90,
+                            fig_name="magnetosphere")
 
 print(f'Took {round(time.time() - start, 3)} seconds')
