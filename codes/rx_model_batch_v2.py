@@ -67,11 +67,11 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
 
 def get_rxben(b_vec_1, b_vec_2):
     r"""
-    Get rxben between two magnetic field lines.
+    Get the reconnection energy between two magnetic field lines.
 
-    As of now I am not sure what this is, but it has the following mathematical expression:
+    It has the following mathematical expression:
 
-    .. math:: rexben = 0.5 ( |\vec{B_1}| + \vec{B_2} ) (1 - \hat{B_1} \cdot \hat{B_2})
+    .. math:: rexben = 0.5 (|\vec{B_1}| + \vec{B_2}) (1 - \hat{B_1} \cdot \hat{B_2})
 
     Parameters
     ----------
@@ -87,15 +87,24 @@ def get_rxben(b_vec_1, b_vec_2):
     """
     # TODO: Update the documentation of this function
 
+    b_vec_1 = np.array(b_vec_1)
+    b_vec_2 = np.array(b_vec_2)
     mag_vec_1 = np.linalg.norm(b_vec_1)
     mag_vec_2 = np.linalg.norm(b_vec_2)
 
     unit_vec_1 = b_vec_1/mag_vec_1
     unit_vec_2 = b_vec_2/mag_vec_2
 
+    bisector = mag_vec_1*b_vec_1 + mag_vec_2*b_vec_2
+    u_bisect = bisector/np.linalg.norm(bisector)
+    rx_bmag1 = np.dot(u_bisect, b_vec_1)
+    rx_bmag2 = np.dot(u_bisect, b_vec_2)
     b1_b2_dotp = np.dot(unit_vec_1, - unit_vec_2)
 
-    return 0.5 * (mag_vec_1 + mag_vec_2) * (1 + b1_b2_dotp)
+    #rx_en = 0.5 * (mag_vec_1 + mag_vec_2) * (1 + b1_b2_dotp)
+    rx_en = 0.5*(rx_bmag1**2 + rx_bmag2**2) * 3.98e-4  #nPa
+    #rx_en = (rx_bmag1**2 + rx_bmag2**2) * 1.03  # MJ/RE^3
+    return rx_en
 
 
 def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
@@ -115,7 +124,7 @@ def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
 
     Returns
     -------
-    Some scalar
+    The exhaust velocity in km/s
 
     """
     va_p1 = 21.812  # conv. nT, m_P/cm ^ 3 product to km/s cassak-shay
@@ -134,8 +143,13 @@ def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
     rx_mag_1 = mag_vec_1 * (1 + b1_b2_dotp)/2
     rx_mag_2 = mag_vec_2 * (1 + b1_b2_dotp)/2
 
-    return va_p1 * np.sqrt(rx_mag_1 * rx_mag_2 * (rx_mag_1 + rx_mag_2)/(rx_mag_1 * n_1 +
-                                                                        rx_mag_2 * n_2))
+    vcs = va_p1 * np.sqrt(rx_mag_1 * rx_mag_2 * (rx_mag_1 + rx_mag_2)/(rx_mag_1 * n_2 +
+                                                                       rx_mag_2 * n_1))
+
+    # vcs = va_p1 * np.sqrt(mag_vec_1 * mag_vec_2 * (mag_vec_1 + mag_vec_2)/(mag_vec_1 * n_2 +
+    #                                                                         mag_vec_2 * n_1))
+
+    return vcs
 
 
 def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
@@ -216,7 +230,9 @@ def ridge_finder(
     mode="nearest",
     alpha=0.5,
     save_fig=True,
-    fig_name='new'
+    fig_name="new",
+    c_label="none",
+    c_unit="none",
     ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -238,6 +254,14 @@ def ridge_finder(
             'linear'. Default is 'nearest'.
     alpha : float
             The alpha value for the filter. Default is 0.5.
+    save_fig : bool, optional
+            Whether to save the figure. Default is True.
+    fig_name : str, optional
+            The name of the figure. Default is "new".
+    c_label : str, optional
+            The label for the colorbar. Default is "none".
+    c_unit : str, optional
+            The units for the colorbar label. Default is "none".
 
     Raises
     ------
@@ -251,7 +275,7 @@ def ridge_finder(
          raise ValueError("No image given")
     image = np.transpose(image)
 
-    cmap = plt.cm.Spectral
+    cmap = plt.cm.viridis
 
     kwargs = {'sigmas': [sigma], 'black_ridges': False, 'mode': mode, 'alpha': alpha}
 
@@ -276,9 +300,9 @@ def ridge_finder(
 
     axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'r*', ms=2)
 
-    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData)
+    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none', ec='k', lw=0.1)
+    axs1.add_patch(patch)
     im1.set_clip_path(patch)
-
     axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
     axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
 
@@ -290,20 +314,21 @@ def ridge_finder(
     cbar1.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=False,
                          labelbottom=False, pad=0.01)
     cbar1.ax.xaxis.set_label_position('top')
-    cbar1.ax.set_xlabel(f'{fig_name}', fontsize=18)
+    cbar1.ax.set_xlabel(f'{c_label} ({c_unit})', fontsize=18)
 
     # fig.show()
 
     if save_fig:
-        fig_name = f'../figures/ridge_plot_{fig_name}_{dr}dr_{mp}mp.pdf'
-        plt.savefig(fig_name, bbox_inches='tight', pad_inches= 0.05, format='pdf', dpi=300)
+        fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{mp}mp.png'
+        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format='png', dpi=300)
         print(f'Figure saved as {fig_name}')
     plt.close()
     return y_val
 
 
 def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None, save_fig=True,
-                       fig_name="draping_field", figure_format="pdf"):
+                       fig_name="draping_field", figure_format="pdf", tick_fontsize=16,
+                       label_fontsize=18):
     r"""
     Plots the draping field.
 
@@ -337,24 +362,29 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
         raise ValueError("No coordinates or field components given")
 
     fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
-    axs1.quiver(x_coord, y_coord, by, bz, scale=scale, scale_units='xy', angles='xy', width=0.001)
-    axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
-    axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
-    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData)
+    im1 = axs1.quiver(x_coord, y_coord, by, bz, scale=scale, scale_units='xy', angles='xy', width=0.001)
+    axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_fontsize)
+    axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_fontsize)
+    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none', ec='none', lw=0.1)
+    axs1.add_patch(patch)
     axs1.set_clip_path(patch)
+    im1.set_clip_path(patch)
+
     axs1.set_xlim([-15, 15])
     axs1.set_ylim([-15, 15])
     axs1.set_aspect('equal')
     if fig_name == "magnetosheath":
-        axs1.set_title(r'Magnetosheath Field (nT)', fontsize=18)
+        axs1.set_title(r'Magnetosheath Field (nT)', fontsize=label_fontsize)
     elif fig_name == "magnetosphere":
-        axs1.set_title(r'Magnetosphere Field (nT)', fontsize=18)
+        axs1.set_title(r'Magnetosphere Field (nT)', fontsize=label_fontsize)
     else:
-        axs1.set_title(r'Draping Field (nT)', fontsize=18)
+        axs1.set_title(r'Draping Field (nT)', fontsize=label_fontsize)
+    
+    axs1.tick_params(axis='both', which='major', labelsize=tick_fontsize)
 
     if save_fig:
         fig_name = f'../figures/draping_field_plot_{fig_name}.{figure_format}'
-        plt.savefig(fig_name, bbox_inches='tight', pad_inches= 0.05, format=figure_format, dpi=300)
+        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=figure_format, dpi=300)
         print(f'Figure saved as {fig_name}')
     return fig
 
@@ -371,8 +401,9 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
 #    dr=0.25
 #    save_data=False,
 #):
-
-for i in range(1):
+code_run = 'y'
+if(code_run):
+#for i in range(1):
     r"""
     RX model from the IDL code.
 
@@ -737,15 +768,23 @@ for i in range(1):
         data_file.close()
         print(f'Date saved to file {fn}')
 
-    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear')
-    ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en')
-    ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs')
-    ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec')
-    # TODO: Code for plotting rx_en contours/energy density
-
+    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
+    ridge_finder(image=rx_en, sigma=2.8, dr=dr, fig_name='rx-en_nPa', c_label='Reconnection Energy', c_unit='nPa')
+    ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
+    ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec', c_label='Bisection Field', c_unit='nT')
     _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=30,
-                            fig_name="magnetosheath")
+                           fig_name="magnetosheath")
     _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=90,
-                            fig_name="magnetosphere")
+                       fig_name="magnetosphere")
+'''
 
+ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
+ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en', c_label='Reconnection Energy', c_unit='nPa')
+ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
+ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec', c_label='Bisection Field', c_unit='nT')
+_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=30,
+                           fig_name="magnetosheath")
+_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=90,
+                           fig_name="magnetosphere")
+'''
 print(f'Took {round(time.time() - start, 3)} seconds')
