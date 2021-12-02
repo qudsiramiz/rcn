@@ -162,7 +162,8 @@ def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
         First input magnetic field vector.
     b_vec_2 : array of shape 1x3
         Second input magnetic field vector.
-
+    angle_unit : str, optional
+        Preferred unit of angle returned by the code. Ddefault is "radians".
     Raises
     ------
     KeyError If the key is not input_angle is not set to "radians" or "degrees" then the code raises
@@ -172,6 +173,9 @@ def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
     -------
      Returns bisect stuff
     """
+    b_vec_1 = np.array(b_vec_1)
+    b_vec_2 = np.array(b_vec_2)
+
     mag_vec_1 = np.linalg.norm(b_vec_1)
     mag_vec_2 = np.linalg.norm(b_vec_2)
 
@@ -182,12 +186,23 @@ def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
 
     angle = np.arccos(b1_b2_dotp)
 
-    if (angle_unit == "radians"):
-        return angle
-    elif (angle_unit == "degrees"):
-        return angle * 180/np.pi
-    else:
-        raise KeyError("angle_unit must be radians or degrees")
+    bisector = mag_vec_1*b_vec_1 + mag_vec_2*b_vec_2
+    u_bisect = bisector/np.linalg.norm(bisector)
+
+    bis_theta = np.arccos(np.dot(u_bisect, unit_vec_1))
+    rx_mag_1 = np.dot(u_bisect, b_vec_1)
+    rx_mag_2 = np.dot(u_bisect, b_vec_2)
+
+    bis_field = mag_vec_2 * np.sin(bis_theta)
+    # bis_field = rx_mag_1**2 + rx_mag_2**2
+
+    #if (angle_unit == "radians"):
+    #    return angle
+    #elif (angle_unit == "degrees"):
+    #    return angle * 180/np.pi
+    #else:
+    #    raise KeyError("angle_unit must be radians or degrees")
+    return bis_field
 
 
 def get_ca(b_vec, angle_unit="radians"):
@@ -231,6 +246,7 @@ def ridge_finder(
     alpha=0.5,
     save_fig=True,
     fig_name="new",
+    fig_format="pdf",
     c_label="none",
     c_unit="none",
     ):
@@ -319,8 +335,8 @@ def ridge_finder(
     # fig.show()
 
     if save_fig:
-        fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{mp}mp.png'
-        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format='png', dpi=300)
+        fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{mp}mp.{fig_format}'
+        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
         print(f'Figure saved as {fig_name}')
     plt.close()
     return y_val
@@ -362,7 +378,7 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
         raise ValueError("No coordinates or field components given")
 
     fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
-    im1 = axs1.quiver(x_coord, y_coord, by, bz, scale=scale, scale_units='xy', angles='xy', width=0.001)
+    im1 = axs1.quiver(x_coord, y_coord, by, bz, scale=scale, scale_units='inches', angles='uv', width=0.002)
     axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_fontsize)
     axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_fontsize)
     patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none', ec='none', lw=0.1)
@@ -401,7 +417,7 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
 #    dr=0.25
 #    save_data=False,
 #):
-code_run = 'y'
+code_run = '1'
 if(code_run):
 #for i in range(1):
     r"""
@@ -769,22 +785,22 @@ if(code_run):
         print(f'Date saved to file {fn}')
 
     ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
-    ridge_finder(image=rx_en, sigma=2.8, dr=dr, fig_name='rx-en_nPa', c_label='Reconnection Energy', c_unit='nPa')
+    ridge_finder(image=rx_en, sigma=2.8, dr=dr, fig_name='rx-en_nPa_v2', c_label='Reconnection Energy', c_unit='nPa')
     ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
     ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec', c_label='Bisection Field', c_unit='nT')
-    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=30,
+    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=40,
                            fig_name="magnetosheath")
-    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=90,
+    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
                        fig_name="magnetosphere")
-'''
+
 
 ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
 ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en', c_label='Reconnection Energy', c_unit='nPa')
 ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
-ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec', c_label='Bisection Field', c_unit='nT')
-_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=30,
+ridge_finder(image=bisec, sigma=3, dr=dr, fig_name='bisec_sh', c_label='Bisection Field', c_unit='nT')
+_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=90,
                            fig_name="magnetosheath")
-_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=90,
+_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=270,
                            fig_name="magnetosphere")
-'''
+
 print(f'Took {round(time.time() - start, 3)} seconds')
