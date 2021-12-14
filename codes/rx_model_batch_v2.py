@@ -24,6 +24,7 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
+
 def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     r"""
     Get the shear angle between two magnetic field lines.
@@ -35,7 +36,7 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     b_vec_2 : array of shape 1x3
         Input magnetic field vector.
     angle_unit : str, optional
-        Preferred unit of angle returned by the code. Ddefault is "radians".
+        Preferred unit of angle returned by the code. Default is "radians".
 
     Raises
     ------
@@ -109,7 +110,7 @@ def get_rxben(b_vec_1, b_vec_2):
 
 def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
     r"""
-    Get vec code.
+    Get vcs code.
 
     Parameters
     ----------
@@ -124,8 +125,8 @@ def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
 
     Returns
     -------
-    The exhaust velocity in km/s
-
+    vcs : float
+        The exhaust velocity in km/s
     """
     va_p1 = 21.812  # conv. nT, m_P/cm ^ 3 product to km/s cassak-shay
 
@@ -163,7 +164,7 @@ def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
     b_vec_2 : array of shape 1x3
         Second input magnetic field vector.
     angle_unit : str, optional
-        Preferred unit of angle returned by the code. Ddefault is "radians".
+        Preferred unit of angle returned by the code. Default is "radians".
     Raises
     ------
     KeyError If the key is not input_angle is not set to "radians" or "degrees" then the code raises
@@ -288,7 +289,7 @@ def ridge_finder(
     ridge_points : ndarray
     """
     if image is None:
-         raise ValueError("No image given")
+        raise ValueError("No image given")
     image = np.transpose(image)
 
     cmap = plt.cm.viridis
@@ -550,8 +551,8 @@ if(code_run):
 
         if (p_dyn > 8.5 or p_dyn < 0.5):
             warnings.warn(
-            f"The given parameters produced a dynamic pressure of {p_dyn} nPa which is out of"
-            f" range in which model is valid (0.5 nPa < p_dyn < 8.5 nPa)",
+                f"The given parameters produced a dynamic pressure of {p_dyn} nPa which is out of"
+                f" range in which model is valid (0.5 nPa < p_dyn < 8.5 nPa)",
             )
         param = [p_dyn, sym_h_imf, b_imf_y, b_imf_z, 0, 0, 0, 0, 0, 0]
 

@@ -24,6 +24,7 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
+
 def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     r"""
     Get the shear angle between two magnetic field lines.
@@ -35,7 +36,7 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     b_vec_2 : array of shape 1x3
         Input magnetic field vector.
     angle_unit : str, optional
-        Preferred unit of angle returned by the code. Ddefault is "radians".
+        Preferred unit of angle returned by the code. Default is "radians".
 
     Raises
     ------
@@ -67,23 +68,23 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
 
 def get_rxben(b_vec_1, b_vec_2):
     r"""
-    Get rxben between two magnetic field lines.
+    Get the reconnection energy between two magnetic field lines.
 
-    As of now I am not sure what this is, but it has the following mathematical expression:
+    It has the following mathematical expression:
 
-    .. math:: rexben = 0.5 ( |\vec{B_1}| + \vec{B_2} ) (1 - \hat{B_1} \cdot \hat{B_2})
+    .. math:: rexben = 0.5 (|\vec{B_1}| + \vec{B_2}) (1 - \hat{B_1} \cdot \hat{B_2})
 
     Parameters
     ----------
-    b_vec_1 : array of shape 1x3
-        Input magnetic field vector.
-    b_vec_2 : array of shape 1x3
-        Input magnetic field vector.
+    b_vec_1: array of shape 1x3
+    Input magnetic field vector.
+    b_vec_2: array of shape 1x3
+    Input magnetic field vector.
 
     Returns
     -------
-    rxben : float
-        Reconnection field energy density in nPa
+    rxben: float
+    Reconnection field energy density in nPa
     """
     # TODO: Update the documentation of this function
 
