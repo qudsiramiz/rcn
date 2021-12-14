@@ -21,7 +21,7 @@ function getrxben, bx0,by0,bz0,bx1,by1,bz1
 ;  u_bisect = bisector / norm(bisector)
 ;  rxbmag0 = dotp(u_bisect,[bx0,by0,bz0])
 ;  rxbmag1 = dotp(u_bisect,[bx1,by1,bz1])
-  return, 0.5*(mag0+mag1)*(1+dtp)
+  return, 0.5*(mag0+mag1)*(1+dtp) ;# should be product of magnitudes
   ;return, (rxbmag0^2 + rxbmag1^2)*1.03 ; MJ/RE^3
   ;return, (rxbmag0^2 + rxbmag1^2)*3.98*10^(-4);nPa
 end
