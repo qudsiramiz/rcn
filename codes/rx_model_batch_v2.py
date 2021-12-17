@@ -95,7 +95,7 @@ def get_rxben(b_vec_1, b_vec_2):
     unit_vec_1 = b_vec_1/mag_vec_1
     unit_vec_2 = b_vec_2/mag_vec_2
 
-    u_bisect = (unit_vec_1 + unit_vec_2)/2
+    u_bisect = (unit_vec_1 + unit_vec_2) / 2
     rx_bmag1 = np.dot(u_bisect, b_vec_1)
     rx_bmag2 = np.dot(u_bisect, b_vec_2)
     b1_b2_dotp = np.dot(unit_vec_1, - unit_vec_2)
@@ -179,14 +179,14 @@ def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
     mag_vec_1 = np.linalg.norm(b_vec_1)
     mag_vec_2 = np.linalg.norm(b_vec_2)
 
-    unit_vec_1 = b_vec_1/mag_vec_1
-    unit_vec_2 = b_vec_2/mag_vec_2
+    unit_vec_1 = b_vec_1 / mag_vec_1
+    unit_vec_2 = b_vec_2 / mag_vec_2
 
     b1_b2_dotp = np.dot(unit_vec_1, - unit_vec_2)
 
     angle = np.arccos(b1_b2_dotp)
 
-    u_bisect = (unit_vec_1 + unit_vec_2)/2
+    u_bisect = (unit_vec_1 + unit_vec_2) / 2
 
     bis_theta = np.arccos(np.dot(u_bisect, unit_vec_1))
     rx_mag_1 = np.dot(u_bisect, b_vec_1)
