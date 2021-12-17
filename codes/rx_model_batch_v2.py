@@ -95,13 +95,13 @@ def get_rxben(b_vec_1, b_vec_2):
     unit_vec_1 = b_vec_1/mag_vec_1
     unit_vec_2 = b_vec_2/mag_vec_2
 
-    u_bisect = (unit_vec_1 + unit_vec_2)/np.sqrt(2)
+    u_bisect = (unit_vec_1 + unit_vec_2)/2
     rx_bmag1 = np.dot(u_bisect, b_vec_1)
     rx_bmag2 = np.dot(u_bisect, b_vec_2)
     b1_b2_dotp = np.dot(unit_vec_1, - unit_vec_2)
 
     #rx_en = 0.5 * (mag_vec_1 * mag_vec_2) * (1 + b1_b2_dotp)
-    rx_en = (rx_bmag1 + rx_bmag2)**2 * 3.98e-4  # nPa
+    rx_en = (rx_bmag1**2 + rx_bmag2**2)   # nPa
     #rx_en = (rx_bmag1**2 + rx_bmag2**2) * 1.03  # MJ/RE^3
 
     return rx_en
@@ -186,14 +186,13 @@ def get_bis(b_vec_1, b_vec_2, angle_unit="radians"):
 
     angle = np.arccos(b1_b2_dotp)
 
-    bisector = mag_vec_1*b_vec_1 + mag_vec_2*b_vec_2
-    u_bisect = bisector/np.linalg.norm(bisector)
+    u_bisect = (unit_vec_1 + unit_vec_2)/2
 
     bis_theta = np.arccos(np.dot(u_bisect, unit_vec_1))
     rx_mag_1 = np.dot(u_bisect, b_vec_1)
     rx_mag_2 = np.dot(u_bisect, b_vec_2)
 
-    bis_field = mag_vec_2 * np.sin(bis_theta)
+    bis_field = mag_vec_1 * abs(np.sin(bis_theta))
     # bis_field = rx_mag_1**2 + rx_mag_2**2
 
     #if (angle_unit == "radians"):
