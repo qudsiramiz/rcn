@@ -46,7 +46,7 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     Returns
     -------
     angle: float
-        Angle between the two vectors in radians by default
+        Angle between the two vectors, in radians by default
     """
     unit_vec_1 = b_vec_1/np.linalg.norm(b_vec_1)
     unit_vec_2 = b_vec_2/np.linalg.norm(b_vec_2)
@@ -86,7 +86,6 @@ def get_rxben(b_vec_1, b_vec_2):
     rxben : float
         Reconnection field energy density in nPa
     """
-    # TODO: Update the documentation of this function
 
     b_vec_1 = np.array(b_vec_1)
     b_vec_2 = np.array(b_vec_2)
@@ -96,15 +95,13 @@ def get_rxben(b_vec_1, b_vec_2):
     unit_vec_1 = b_vec_1/mag_vec_1
     unit_vec_2 = b_vec_2/mag_vec_2
 
-    bisector = mag_vec_2 * b_vec_1 + mag_vec_1 * b_vec_2
-    #u_bisect = bisector/np.linalg.norm(bisector)
     u_bisect = (unit_vec_1 + unit_vec_2)/np.sqrt(2)
     rx_bmag1 = np.dot(u_bisect, b_vec_1)
     rx_bmag2 = np.dot(u_bisect, b_vec_2)
     b1_b2_dotp = np.dot(unit_vec_1, - unit_vec_2)
 
     #rx_en = 0.5 * (mag_vec_1 * mag_vec_2) * (1 + b1_b2_dotp)
-    rx_en = (rx_bmag1 - rx_bmag2)**2 * 3.98e-4  #nPa
+    rx_en = (rx_bmag1 + rx_bmag2)**2 * 3.98e-4  # nPa
     #rx_en = (rx_bmag1**2 + rx_bmag2**2) * 1.03  # MJ/RE^3
 
     return rx_en
@@ -549,7 +546,7 @@ if(code_run):
         rho = np_imf * m_p * 1.15
 
         #  Solar wind ram pressure in nPa, including roughly 4% Helium++ contribution
-        p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2) 
+        p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2)
 
         if (p_dyn > 8.5 or p_dyn < 0.5):
             warnings.warn(
@@ -562,7 +559,7 @@ if(code_run):
         ps = gp.recalc(time_imf)
         # ps = -0.25666021186831828
 
-        n_arr = int(30/dr) + 1
+        n_arr = int(30 / dr) + 1
 
         bx = np.full((n_arr, n_arr), np.nan)
         by = np.full((n_arr, n_arr), np.nan)
@@ -754,26 +751,26 @@ if(code_run):
         data_file.create_dataset('bx_ext', data=bx_ext)
         data_file.create_dataset('by_ext', data=by_ext)
         data_file.create_dataset('bz_ext', data=bz_ext)
-                                                  
+
         data_file.create_dataset('bx_igrf', data=bx_igrf)
         data_file.create_dataset('by_igrf', data=by_igrf)
         data_file.create_dataset('bz_igrf', data=bz_igrf)
-                                                  
+
         data_file.create_dataset('b_msx', data=b_msx)
         data_file.create_dataset('b_msy', data=b_msy)
         data_file.create_dataset('b_msz', data=b_msz)
-                                                      
+
         data_file.create_dataset('x_shu', data=x_shu)
         data_file.create_dataset('y_shu', data=y_shu)
         data_file.create_dataset('z_shu', data=z_shu)
-                                                      
+
         data_file.create_dataset('rho_sh', data=rho_sh)
         #data_file.create_dataset('rp', data=rp)
-                                                  
+
         #data_file.create_dataset('r', data=r)
         #data_file.create_dataset('zp', data=zp)
         #data_file.create_dataset('x0', data=x0)
-                                                      
+
         data_file.create_dataset('shear', data=shear)
         data_file.create_dataset('rx_en', data=rx_en)
         data_file.create_dataset('va_cs', data=va_cs)
