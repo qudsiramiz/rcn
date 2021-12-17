@@ -783,23 +783,23 @@ if(code_run):
         data_file.close()
         print(f'Date saved to file {fn}')
 
-    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
+   # ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
     ridge_finder(image=rx_en, sigma=2.8, dr=dr, fig_name='rx-en_nPa_v2', c_label='Reconnection Energy', c_unit='nPa')
-    ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
+   # ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
     ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec', c_label='Bisection Field', c_unit='nT')
-    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=40,
-                           fig_name="magnetosheath")
-    _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
-                       fig_name="magnetosphere")
+   # _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=40,
+   #                        fig_name="magnetosheath")
+   # _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
+   #                    fig_name="magnetosphere")
 
 
-ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
-ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en', c_label='Reconnection Energy', c_unit='nPa')
-ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
-ridge_finder(image=bisec, sigma=3, dr=dr, fig_name='bisec_sh', c_label='Bisection Field', c_unit='nT')
-_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=90,
-                           fig_name="magnetosheath")
-_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=270,
-                           fig_name="magnetosphere")
+#ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
+#ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en', c_label='Reconnection Energy', c_unit='nPa')
+#ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
+#ridge_finder(image=bisec, sigma=3, dr=dr, fig_name='bisec_sh', c_label='Bisection Field', c_unit='nT')
+#_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=90,
+#                           fig_name="magnetosheath")
+#_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=270,
+#                           fig_name="magnetosphere")
 
 print(f'Took {round(time.time() - start, 3)} seconds')
