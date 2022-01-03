@@ -726,7 +726,7 @@ if(code_run):
                             shear[j, k] = np.nan
                         else:
                             shear[j, k] = get_shear([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
-                                                   b_msy[j, k], b_msz[j, k]], angle_unit="degrees")
+                                                    b_msy[j, k], b_msz[j, k]], angle_unit="degrees")
 
                         rx_en[j, k] = get_rxben([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
                                                  b_msy[j, k], b_msz[j, k]])
