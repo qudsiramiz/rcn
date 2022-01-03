@@ -2,7 +2,7 @@ from mpl_toolkits.axes_grid1.axes_divider import Divider
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
-import geopack as gp
+import geopack.geopack as gp
 import datetime
 import logging
 import traceback
@@ -99,7 +99,7 @@ def shear_angle_calculator(
     else:
         print("Using current time in UTC to compute the dipole tilt angle")
         time_obsevation = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        time_obsevation = time_obsevation.replace(tzinfo=datetime.timezone.utc).timestamp()
+        #time_obsevation = time_obsevation.replace(tzinfo=datetime.timezone.utc).timestamp()
 
     # Compute the dipole tilt angle
     dipole_tilt_angle = gp.recalc(time_obsevation)
