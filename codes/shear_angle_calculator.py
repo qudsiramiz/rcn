@@ -51,43 +51,24 @@ def get_shear(b_vec_1, b_vec_2, angle_units="radians"):
         raise KeyError("angle_unit must be radians or degrees")
 
 
-#def shear_angle_calculator(
-#    b_imf=None,
-#    np_imf=None,
-#    v_imf=None,
-#    dmp=0.5,
-#    dr=0.5,
-#    model_type="t96",
-#    angle_units="radians",
-#    use_real_data=False,
-#    time_observation=None,
-#    dt=30,
-#    save_data=False,
-#    data_file="shear_data",
-#    plot_figure=False,
-#    save_figure=False,
-#    figure_file="shear_angle_calculator",
-#    figure_format="png",
-#):
-for xxx in range(1):
-    b_imf = np.array([-5, 0, 0])
-    np_imf=None
-    v_imf=None
-    dmp=0.5
-    dr=0.5
-    model_type="t96"
-    angle_units="degrees"
-    use_real_data=False
-    time_observation="2021-01-01 00:00:00"
-    dt=30
-    save_data=False
-    data_file="shear_data"
-    plot_figure=True
-    save_figure=True
-    figure_file="shear_angle_calculator"
-    figure_format="png"
-   
-    print(time_observation)
+def shear_angle_calculator(
+    b_imf=None,
+    np_imf=None,
+    v_imf=None,
+    dmp=0.5,
+    dr=0.5,
+    model_type="t96",
+    angle_units="radians",
+    use_real_data=False,
+    time_observation=None,
+    dt=30,
+    save_data=False,
+    data_file="shear_data",
+    plot_figure=False,
+    save_figure=False,
+    figure_file="shear_angle_calculator",
+    figure_format="png",
+):
     r"""
     Calculate the shear angle between the IMF and the Magnetosheath magnetic field. The code also
     saves the data to a hdf5 file and plots the figure.
@@ -175,8 +156,8 @@ for xxx in range(1):
         sym_h_imf = np.nanmedian(omni_sym_h)
 
     if use_real_data is False:
-        print("Using default solar wind parameter values. If you want to use real time data, please\
-               use the function with the argument 'use_real_data=True'")
+        print("Using default solar wind parameter values. If you want to use real time data, please" +
+              "use the function with the argument 'use_real_data=True'")
         v_imf = np.array([-500, 0.0, 0.0])
         np_imf = 5.0
         sym_h_imf = -30
@@ -197,11 +178,9 @@ for xxx in range(1):
 
     # Compute the dipole tilt angle
     if use_real_data:
-        time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
         time_dipole = calendar.timegm(time_observation.utctimetuple())
     else:
-        print("Using current time in UTC to compute the dipole tilt angle")
-        time_observation = datetime.datetime.utcnow()
+        time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
         time_dipole = calendar.timegm(time_observation.utctimetuple())
 
     # Compute the dipole tilt angle
