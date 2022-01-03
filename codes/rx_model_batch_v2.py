@@ -512,6 +512,7 @@ if(code_run):
 
     if (movie is None):
         time_imf = np.nanmedian(omni_time)
+        print(time_imf, type(time_imf))
         b_imf_x = np.nanmedian(omni_bx_gse)
         b_imf_y = np.nanmedian(omni_by_gsm)
         b_imf_z = np.nanmedian(omni_bz_gsm)

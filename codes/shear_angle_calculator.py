@@ -13,6 +13,8 @@ from skimage.util import pad
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pyspedas as spd
 import pytplot as ptt
+import calendar
+
 
 def get_shear(b_vec_1, b_vec_2, angle_units="radians"):
     r"""
@@ -49,24 +51,43 @@ def get_shear(b_vec_1, b_vec_2, angle_units="radians"):
         raise KeyError("angle_unit must be radians or degrees")
 
 
-def shear_angle_calculator(
-    b_imf=None,
-    np_imf=None,
-    v_imf=None,
-    dmp=0.5,
-    dr=0.5,
-    model_type="t96",
-    angle_units="radians",
-    use_real_data=False,
-    time_obsevation=None,
-    dt=30,
-    save_data=False,
-    data_file="shear_data",
-    plot_figure=False,
-    save_figure=False,
-    figure_file="shear_angle_calculator",
-    figure_format="png",
-):
+#def shear_angle_calculator(
+#    b_imf=None,
+#    np_imf=None,
+#    v_imf=None,
+#    dmp=0.5,
+#    dr=0.5,
+#    model_type="t96",
+#    angle_units="radians",
+#    use_real_data=False,
+#    time_observation=None,
+#    dt=30,
+#    save_data=False,
+#    data_file="shear_data",
+#    plot_figure=False,
+#    save_figure=False,
+#    figure_file="shear_angle_calculator",
+#    figure_format="png",
+#):
+for xxx in range(1):
+    b_imf = np.array([-5, 0, 0])
+    np_imf=None
+    v_imf=None
+    dmp=0.5
+    dr=0.5
+    model_type="t96"
+    angle_units="degrees"
+    use_real_data=False
+    time_observation="2021-01-01 00:00:00"
+    dt=30
+    save_data=False
+    data_file="shear_data"
+    plot_figure=True
+    save_figure=True
+    figure_file="shear_angle_calculator"
+    figure_format="png"
+   
+    print(time_observation)
     r"""
     Calculate the shear angle between the IMF and the Magnetosheath magnetic field. The code also
     saves the data to a hdf5 file and plots the figure.
@@ -102,7 +123,7 @@ def shear_angle_calculator(
         If set to True, then the code will use the real data from the CDAWEB website. If set to
         False, then the code will use the default values for the parameters.
 
-    time_obsevation : datetime.datetime
+    time_observation : datetime.datetime
         Time of observation. If not given, then the code assumes the time of observation is the
         current time
 
@@ -110,15 +131,15 @@ def shear_angle_calculator(
     if (b_imf is None and use_real_data is False):
         raise ValueError("Interplanetary magnetic field b_imf is not defined")
     if use_real_data:
-        if time_obsevation is None:
-            raise ValueError("Time of observation must be provided in order to use real time data\
-                              Please provide time_obsevation in the format YYYY-MM-DD HH:MM:SS")
+        if time_observation is None:
+            raise ValueError("Time of observation must be provided in order to use real time data" +
+                             "Please provide time_observation in the format YYYY-MM-DD HH:MM:SS")
         else:
-            time_obsevation = datetime.datetime.strptime(time_obsevation, "%Y-%m-%d %H:%M:%S")
+            time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
             if dt is None:
                 dt = 30
-                time_range = [(time_obsevation - datetime.timedelta(minutes=dt)).strftime(
-                    "%Y-%m-%d %H:%M:%S"), (time_obsevation + datetime.timedelta(minutes=dt)).strftime(
+                time_range = [(time_observation - datetime.timedelta(minutes=dt)).strftime(
+                    "%Y-%m-%d %H:%M:%S"), (time_observation + datetime.timedelta(minutes=dt)).strftime(
                     "%Y-%m-%d %H:%M:%S")]
 
         omni_vars = spd.omni.data(trange=trange, level="hro")
@@ -176,15 +197,15 @@ def shear_angle_calculator(
 
     # Compute the dipole tilt angle
     if use_real_data:
-        time_obsevation = datetime.datetime.strptime(time_obsevation, "%Y-%m-%d %H:%M:%S")
-        time_obsevation = time_obsevation.replace(tzinfo=datetime.timezone.utc).timestamp()
+        time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
+        time_dipole = calendar.timegm(time_observation.utctimetuple())
     else:
         print("Using current time in UTC to compute the dipole tilt angle")
-        time_obsevation = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        #time_obsevation = time_obsevation.replace(tzinfo=datetime.timezone.utc).timestamp()
+        time_observation = datetime.datetime.utcnow()
+        time_dipole = calendar.timegm(time_observation.utctimetuple())
 
     # Compute the dipole tilt angle
-    dipole_tilt_angle = gp.recalc(time_obsevation)
+    dipole_tilt_angle = gp.recalc(time_dipole)
 
     n_arr = int(30 / dr) + 1
 
@@ -377,9 +398,9 @@ def shear_angle_calculator(
     if (plot_figure):
         fig, axs = plt.subplots(1, 1, figsize=(10, 10))
 
-        im1 = axs.imshow(abs(shear), origin='lower', cmap=plt.cm.viridis)
+        im1 = axs.imshow(abs(np.transpose(shear)), origin='lower', cmap=plt.cm.viridis)
         divider = make_axes_locatable(axs)
-        cax = divider.append_axes("right", size="5%", pad=0.01)
+        cax = divider.append_axes("top", size="5%", pad=0.01)
         cbar = fig.colorbar(im1, cax=cax, orientation='horizontal', ticks=None, fraction=0.05, pad=0.01)
         cbar.ax.tick_params(axis='x', direction='in', top=True, bottom=False, labeltop=True, labelbottom=False, labelsize=18)
         cbar.ax.set_xlabel(f'Shear ({angle_units})', fontsize=18)
