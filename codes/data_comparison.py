@@ -250,4 +250,5 @@ c1 = axes.contourf(dat_ipy['y_shu'][:,:], dat_ipy['z_shu'][:,:], dat_ipy['bx'][:
 pl.colorbar(c1, ax=axes, cmin=-30, cmax=30)
 axes.set_xlim(-15, 15)
 axes.set_ylim(-15, 15);
+
 '''
