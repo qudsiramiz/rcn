@@ -1,20 +1,19 @@
-from time import strftime
-from mpl_toolkits.axes_grid1.axes_divider import Divider
-import numpy as np
-import matplotlib.pyplot as plt
-import warnings
-import geopack.geopack as gp
+import calendar
 import datetime
 import logging
-import traceback
 import os
-import h5py
-from skimage.util import pad
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import pyspedas as spd
-import pytplot as ptt
-import calendar
+import traceback
+import warnings
 
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+# Set the fontstyle to Times New Roman
+font = {'family': 'sans-serif', 'weight': 'normal', 'size': 10}
+plt.rc('font', **font)
+plt.rc('text', usetex=True)
 
 def get_shear(b_vec_1, b_vec_2, angle_units="radians"):
     r"""
@@ -68,10 +67,14 @@ def shear_angle_calculator(
     save_figure=False,
     figure_file="shear_angle_calculator",
     figure_format="png",
+    verbose=True,
 ):
     r"""
     Calculate the shear angle between the IMF and the Magnetosheath magnetic field. The code also
     saves the data to a hdf5 file and plots the figure.
+    For this code to work, the following modules must be available/installed:
+        - geopack (https://github.com/tsssss/geopack)
+        - pyspedas (https://github.com/spedas/pyspedas)
 
     Parameters
     ----------
@@ -95,43 +98,99 @@ def shear_angle_calculator(
         Grid size in earth radii units. Default is 0.5.
 
     model_type : str
-        Model type to use. Default is "t96". Other option is "t01".
+        Model type to use. Default is "t96". Other option is "t01". Needs "geopack" to be installed.
 
     angle_units : str
         Units of the angle returned by the code. Default is "radians".
 
     use_real_data : bool
         If set to True, then the code will use the real data from the CDAWEB website. If set to
-        False, then the code will use the default values for the parameters.
+        False, then the code will use the default values for the parameters. For this to work, you
+        must have the following modules installed:
+        - pyspedas (https://github.com/spedas/pyspedas)
 
-    time_observation : datetime.datetime
+    time_observation : str
         Time of observation. If not given, then the code assumes the time of observation is the
-        current time
+        current time. The time of observation must be in the format "YYYY-MM-DDTHH:MM:SS".
 
+    dt : float
+        Time duration, in minutes, for which the IMF data is to be considered. Default is 30
+        mcentered around the time of observation.
+
+    save_data : bool
+        If set to True, then the data will be saved to a hdf5 file. Default is False. Needs the h5py
+        package to be installed.
+
+    data_file : str
+        Name of the hdf5 file to which data is to be saved. Default is "shear_data".
+
+    plot_figure : bool
+        If set to True, then the figure will be plotted and shown. Default is False.
+
+    save_figure : bool
+        If set to True, then the figure will be saved. Default is False.
+
+    figure_file : str
+        Name of the figure file. Default is "shear_angle_calculator".
+
+    figure_format : str
+        Format of the figure file. Default is "png". Other option can be "pdf".
+
+    verbose : bool If set to True, then the code will print out the progress of the code at several
+        points. Default is True. For this to work, you must have the following modules installed:
+         - tabulate (https://pypi.org/project/tabulate/)
     """
-    if (b_imf is None and use_real_data is False):
-        raise ValueError("Interplanetary magnetic field b_imf is not defined")
+    # Check if the required modules are installed
+    try:
+        import geopack.geopack as gp
+    except ImportError:
+        raise ImportError("geopack is not installed. Please install it using the command: pip install geopack or directly from the source at GitHub (https://github.com/tsssss/geopack).")
+
     if use_real_data:
+        try:
+            import pyspedas as spd
+            import pytplot as ptt
+        except ImportError:
+            raise ImportError("pyspedas is not installed. Please install it using the command: pip install pyspedas")
+
+    if save_data:
+        try:
+            import h5py as hf
+        except ImportError:
+            raise ImportError("h5py is not installed. Please install it using the command: pip install h5py")
+
+    if verbose:
+        try:
+            from tabulate import tabulate
+        except ImportError:
+            raise ImportError("The required module 'tabulate' is not installed. Please install it using the command pip install tabulate.")
+
+    if (b_imf is None and use_real_data is False):
+        raise ValueError("Interplanetary magnetic field b_imf is not defined. If you do not wish to provide IMF magnetic field, set use_real_data to True")
+    if use_real_data:
+        if verbose:
+            print("Attempting to download real data from the CDSAWEB website using PysSpedas \n")
         if time_observation is None:
             raise ValueError("Time of observation must be provided in order to use real time data" +
                              "Please provide time_observation in the format YYYY-MM-DD HH:MM:SS")
         else:
             time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
             if dt is None:
+                print("dt, observation time range, is not defined. Setting dt to 30 minutes \n")
                 dt = 30
-                time_range = [(time_observation - datetime.timedelta(minutes=dt)).strftime(
-                    "%Y-%m-%d %H:%M:%S"), (time_observation + datetime.timedelta(minutes=dt)).strftime(
-                    "%Y-%m-%d %H:%M:%S")]
+            time_range = [(time_observation - datetime.timedelta(minutes=dt)).strftime(
+                "%Y-%m-%d %H:%M:%S"), (time_observation + datetime.timedelta(minutes=dt)).strftime(
+                "%Y-%m-%d %H:%M:%S")]
+            if verbose:
+                print(f"Downloading data from {time_range[0]} to {time_range[1]} \n")
 
-        omni_vars = spd.omni.data(trange=trange, level="hro")
+        spd.omni.data(trange=time_range, level="hro", time_clip=True)
 
         omni_time = ptt.get_data('BX_GSE')[0]
         # omni_time_unix = np.vectorize(datetime.utcfromtimestamp)(omni_time[:]) # converting omni_time
         # from unixtime to utc datetime object array in python
 
-        omni_bx_gse = ptt.get_data('BX_GSE')[1]
-        omni_by_gse = ptt.get_data('BY_GSE')[1]
-        omni_bz_gse = ptt.get_data('BZ_GSE')[1]
+        omni_bx_gse = ptt.get_data('BX_GSE')[1]  # NOTE: x-direction of GSE and GSM are same
         omni_by_gsm = ptt.get_data('BY_GSM')[1]
         omni_bz_gsm = ptt.get_data('BZ_GSM')[1]
         omni_np = ptt.get_data('proton_density')[1]
@@ -140,6 +199,8 @@ def shear_angle_calculator(
         omni_vz = ptt.get_data('Vz')[1]
         omni_sym_h = ptt.get_data('SYM_H')[1]
 
+        if verbose:
+            print("Data downloaded, processing data to find IMF parameters \n")
         time_imf = np.nanmedian(omni_time)
         b_imf = np.array([np.nanmedian(omni_bx_gse),
                           np.nanmedian(omni_by_gsm),
@@ -155,9 +216,21 @@ def shear_angle_calculator(
         v_imf = np.array([np.nanmedian(omni_vx), np.nanmedian(omni_vy), np.nanmedian(omni_vz)])
         sym_h_imf = np.nanmedian(omni_sym_h)
 
+        if verbose:
+            print("Computed IMF parameters:")
+            print(tabulate(
+                [["Time of observation (UTC)", time_observation],
+                 ["IMF Magnetic field (nT)", b_imf],
+                 ["IMF Proton density (1/cm^-3)", np_imf],
+                 ["IMF Plasma velocity (km/sec)", v_imf],
+                 ["IMF Sym H", sym_h_imf]],
+                headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
+                numalign="center"))
+
     if use_real_data is False:
-        print("Using default solar wind parameter values. If you want to use real time data, please" +
-              "use the function with the argument 'use_real_data=True'")
+        if verbose:
+            print("Using default solar wind parameter values. If you want to use real time " +
+                  "data, please use the function with the argument 'use_real_data=True' \n")
         v_imf = np.array([-500, 0.0, 0.0])
         np_imf = 5.0
         sym_h_imf = -30
@@ -176,6 +249,16 @@ def shear_angle_calculator(
         )
     param = [p_dyn, sym_h_imf, b_imf[1], b_imf[2], 0, 0, 0, 0, 0, 0]
 
+    if verbose:
+        print("Input parameters for the model:")
+        print(tabulate(
+            [["Solar wind dynamic pressure (nPa)", p_dyn],
+             ["IMF Sym H", sym_h_imf],
+             ["B_IMF_Y (nT)", b_imf[1]],
+             ["B_IMF_Z (nT)", b_imf[2]]],
+            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
+            numalign="center"))
+
     # Compute the dipole tilt angle
     if use_real_data:
         time_dipole = calendar.timegm(time_observation.utctimetuple())
@@ -186,6 +269,25 @@ def shear_angle_calculator(
     # Compute the dipole tilt angle
     dipole_tilt_angle = gp.recalc(time_dipole)
 
+    if verbose:
+        if angle_units == "radians":
+            print(tabulate([["Dipole tilt angle units", angle_units],
+                            ["Dipole tilt angle", dipole_tilt_angle]],
+                           headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".3f",
+                           numalign="center"))
+        elif angle_units == "degrees":
+            print(tabulate([["Dipole tilt angle units", angle_units],
+                            ["Dipole tilt angle", dipole_tilt_angle * 180 / np.pi]],
+                           headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".3f",
+                           numalign="center"))
+
+    if verbose:
+        print("Computing Earth's magnetic field \n")
+
+    if dr is None:
+        dr = 0.5
+    if dmp is None:
+        dmp = 0.5        
     n_arr = int(30 / dr) + 1
 
     bx = np.full((n_arr, n_arr), np.nan)
@@ -293,7 +395,7 @@ def shear_angle_calculator(
                     ll = 3 * rmp/2 - x0
                     b_msx[j, k] = - A * (- b_imf[0] * (1 - rmp / (2 * ll)) + b_imf[1] * (y0 / ll)
                                     + b_imf[2] * (z0 / ll))
-                    b_msy[j, k] = A * (- b_imf[0] * (y0 / (2 * ll)) + b_imf[2] * (2 - y0**2/(
+                    b_msy[j, k] = A * (- b_imf[0] * (y0 / (2 * ll)) + b_imf[1] * (2 - y0**2/(
                                   ll * rmp)) - b_imf[2]* (y0 * z0 / (ll * rmp)))
                     b_msz[j, k] = A * (- b_imf[0] * (z0 / (2 * ll)) - b_imf[1] * (y0 * z0 / (ll
                                   * rmp)) + b_imf[2] * (2 - z0**2 / (ll * rmp)))
@@ -324,10 +426,12 @@ def shear_angle_calculator(
                         logging.error(traceback.format_exc())
                         if((y_shu[j, k] < 15 and y_shu[j, k] > -15) or
                            (z_shu[j, k] < 15 and z_shu[j, k] > -15)):
-                            print(f'Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
+                            if verbose:
+                                print(f'Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
                             count += 1
                         else:
-                            print(f'~Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
+                            if verbose:
+                                print(f'~Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
 
                     # Compute the internal magnetic field from the IGRF model for a given
                     # position in GSM coordinate
@@ -338,6 +442,7 @@ def shear_angle_calculator(
                     bx[j, k] = bx_ext[j, k] + bx_igrf[j, k]
                     by[j, k] = by_ext[j, k] + by_igrf[j, k]
                     bz[j, k] = bz_ext[j, k] + bz_igrf[j, k]
+
                     if (np.sqrt(y_shu[j, k]**2 + z_shu[j, k]**2) > 31):
                         shear[j, k] = np.nan
                     else:
@@ -345,14 +450,19 @@ def shear_angle_calculator(
                                                 [b_msx[j, k], b_msy[j, k], b_msz[j, k]],
                                                 angle_units=angle_units)
                     break
+    if verbose:
+        print("Earth's magnetic field computed at the location of the magnetopause and shear"+\
+            " calculated \n")
 
     if (save_data):
         # Check if the data folder exists, if not then create it.
         if not os.path.exists("data_folder"):
             os.makedirs("data_folder")
+            if verbose:
+                print("Created data_folder folder")
 
         # Save shear data to an hdf5 file
-        with h5py.File(f'data_folder/{data_file}_{model_type}_{dr}dr.hdf5', 'w') as f:
+        with hf.File(f'data_folder/{data_file}_{model_type}_{dr}dr.hdf5', 'w') as f:
             f.create_dataset('x_shu', data=x_shu)
             f.create_dataset('y_shu', data=y_shu)
             f.create_dataset('z_shu', data=z_shu)
@@ -374,21 +484,58 @@ def shear_angle_calculator(
             f.close()
         print(f"Data saved to {data_file}_{model_type}_{dr}dr.hdf5")
 
-    if (plot_figure):
-        fig, axs = plt.subplots(1, 1, figsize=(10, 10))
+    if (save_figure):
+        fig, axs = plt.subplots(1, 1, figsize=(8, 6))
 
-        im1 = axs.imshow(abs(np.transpose(shear)), origin='lower', cmap=plt.cm.viridis)
+        im = axs.imshow(abs(np.transpose(shear)), extent=[-15, 15, -15, 15], origin='lower',
+                        cmap=plt.cm.viridis)
         divider = make_axes_locatable(axs)
-        cax = divider.append_axes("top", size="5%", pad=0.01)
-        cbar = fig.colorbar(im1, cax=cax, orientation='horizontal', ticks=None, fraction=0.05, pad=0.01)
-        cbar.ax.tick_params(axis='x', direction='in', top=True, bottom=False, labeltop=True, labelbottom=False, labelsize=18)
-        cbar.ax.set_xlabel(f'Shear ({angle_units})', fontsize=18)
+
+        patch = patches.Circle((0, 0), radius=15, transform=axs.transData, fc='none', ec='k', lw=0.1)
+        axs.add_patch(patch)
+        im.set_clip_path(patch)
+
+        axs.tick_params(axis="both", direction="in", top=True, labeltop=False, bottom=True,
+                        labelbottom=True, left=True, labelleft=True, right=True, labelright=False, labelsize=14)
         axs.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
         axs.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
-        plt.show()
 
-    if save_figure:
-        fig.savefig(f'{figure_file}_{data_file}_{model_type}_{dr}dr.{figure_format}',
+        cax = divider.append_axes("top", size="5%", pad=0.01)
+        cbar = plt.colorbar(im, cax=cax, orientation='horizontal', ticks=None, fraction=0.05,
+                         pad=0.01)
+        cbar.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=True,
+                            labelbottom=False, pad=0.01, labelsize=14)
+        cbar.ax.xaxis.set_label_position('top')
+        cbar.ax.set_xlabel(f'Shear Angle ({angle_units})', fontsize=18)
+        if (plot_figure):
+            plt.show()
+
+        fig.savefig(f'{figure_file}_{model_type}_{dr}dr.{figure_format}',
                     bbox_inches='tight', pad_inches=0.05, format=figure_format, dpi=300)
         plt.close()
         print(f"Figure saved to figures/{figure_file}_{data_file}_{model_type}_{dr}dr.png")
+
+    return shear
+'''
+inputs = {
+    "b_imf" : None,
+    "np_imf" : None,
+    "v_imf" : None,
+    "dmp" : None,
+    "dr" : None,
+    "model_type" : "t96",
+    "angle_units" : "degrees",
+    "use_real_data" : True,
+    "time_observation" : "2016-12-24 15:10:00",
+    "dt" : 2,
+    "save_data" : False,
+    "data_file" : None,
+    "plot_figure" : False,
+    "save_figure" : True,
+    "figure_file" : "shear_angle_calculator",
+    "figure_format" : "pdf",
+    "verbose" : True
+}
+
+shear_angle_calculator(**inputs)
+'''

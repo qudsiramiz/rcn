@@ -528,6 +528,17 @@ if(code_run):
         vy_imf = np.nanmedian(omni_vy)
         vz_imf = np.nanmedian(omni_vz)
         sym_h_imf = np.nanmedian(omni_sym_h)
+        #v_imf = [vx_imf, vy_imf, vz_imf]
+        #b_imf = [b_imf_x, b_imf_y, b_imf_z]
+        #print("IMF parameters found:")
+        #print(tabulate(
+        #    [["Time of observation (UTC)", time_imf],
+        #     ["IMF Magnetic field (nT)", b_imf],
+        #     ["IMF Proton density (1/cm^-3)", np_imf],
+        #     ["IMF Plasma velocity (km/sec)", v_imf],
+        #     ["IMF Sym H", sym_h_imf]],
+        #    headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
+        #    numalign="center"))
 
         # Check if the values are finite, if not then assign a default value to each of them
         if ~(np.isfinite(np_imf)):
@@ -784,7 +795,7 @@ if(code_run):
         data_file.close()
         print(f'Date saved to file {fn}')
 
-   # ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
+    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
     ridge_finder(image=rx_en, sigma=2.8, dr=dr, fig_name='rx-en_nPa_v2', c_label='Reconnection Energy', c_unit='nPa')
    # ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
     ridge_finder(image=bisec, sigma=2.2, dr=dr, fig_name='bisec', c_label='Bisection Field', c_unit='nT')
