@@ -13,6 +13,7 @@ function getrxben, bx0,by0,bz0,bx1,by1,bz1
   dp = (bx0*bx1+by0*by1+bz0*bz1)
   hat0 = [bx0,by0,bz0]/mag0
   hat1 = [bx1,by1,bz1]/mag1
+  
   dtp = dotp(hat0,-hat1)
 ;  angle = acos(dp/(mag0*mag1))*180./!PI
 ;  b0 = [bx0,by0,bz0]
