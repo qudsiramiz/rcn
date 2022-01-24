@@ -14,6 +14,8 @@ import pytplot as ptt
 from dateutil import parser
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.filters import meijering  # sato, frangi, hessian
+import multiprocessing as mp
+from tabulate import tabulate
 
 # Set the fontstyle to Times New Roman
 font = {'family': 'sans-serif', 'weight': 'normal', 'size': 10}
@@ -382,7 +384,7 @@ def ridge_finder(
     # fig.show()
 
     if save_fig:
-        fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{mp}mp.{fig_format}'
+        fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{m_p}mp.{fig_format}'
         plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
         print(f'Figure saved as {fig_name}')
     plt.close()
@@ -452,6 +454,106 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
     return fig
 
 
+def model_run(*args):
+    """
+    Returns the value of the magnetic field at a given point in the model grid using three different
+    models
+    """
+    j = args[0][0]
+    k = args[0][1]
+    model_type = args[0][2]
+
+
+    y0 = 15 - int(j * dr)
+    z0 = 15 - int(k * dr)
+    rp = np.sqrt(y0**2 + z0**2)  # Projection of r into yz-plane
+
+    for index in range(0, 100):
+
+        theta = index * d_theta
+        r = ro * (2/(1 + np.cos(theta))) ** alpha
+        zp = r * np.sin(theta)  # not really in z direction, but a distance in yz plane
+        x0 = r * np.cos(theta)
+
+        if x0 == 0:
+            signx = 1.0
+        else:
+            signx = np.sign(x0)
+
+        if y0 == 0:
+            signy = 1.0
+        else:
+            signy = np.sign(y0)
+
+        if z0 == 0:
+            signz = 1.0
+        else:
+            signz = np.sign(z0)
+
+        if (rp <= zp):
+            # print(index, rp, zp)
+            # print(f'Value of theta = {theta}')
+
+            y_coord = y0
+            z_coord = z0
+            x_shu = (r -m_p) * np.cos(theta)
+            phi = np.arctan2(z0, y0)
+            # print( j, k, theta, x_shu[j,k])
+
+            if (abs(y0) == 0 or abs(z0) == 0):
+                if(abs(y0) == 0):
+                    y_shu = 0
+                    z_shu = (r -m_p) * np.sin(theta)
+                elif (abs(z0) == 0):
+                    z_shu = 0
+                    y_shu = (r -m_p) * np.sin(theta)
+            else:
+                z_shu = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
+                y_shu = z_shu/np.tan(phi)
+
+            rho_sh = rho * (1.509 * np.exp(x_shu/rmp) + .1285)
+            n_sh = rho_sh/m_proton
+
+            y_shu = abs(y_shu)*signy
+            z_shu = abs(z_shu)*signz
+
+            # Cooling JGR 2001 Model, equation 9 to 12
+            # the distance from the focus to the magnetopause surface
+            ll = 3 * rmp/2 - x0
+            b_msx = - A * (- b_imf_x * (1 - rmp / (2 * ll)) + b_imf_y * (y0 / ll)
+                           + b_imf_z * (z0 / ll))
+            b_msy = A * (- b_imf_x * (y0 / (2 * ll)) + b_imf_y * (2 - y0**2/(
+                           ll * rmp)) - b_imf_z * (y0 * z0 / (ll * rmp)))
+            b_msz = A * (- b_imf_x * (z0 / (2 * ll)) - b_imf_y * (y0 * z0 / (ll
+                         * rmp)) + b_imf_z * (2 - z0**2 / (ll * rmp)))
+            try:
+                if model_type == 't96':
+                    bx_ext, by_ext, bz_ext = gp.t96.t96(param, ps, x_shu, y_shu, z_shu)
+                elif model_type == 't01':
+                    bx_ext, by_ext, bz_ext = gp.t01.t01(param, ps, x_shu, y_shu, z_shu)
+            except:
+                    print(f'Skipped for {x_shu, y_shu, z_shu}')
+                    pass
+
+            bx_igrf, by_igrf, bz_igrf = gp.igrf_gsm(x_shu, y_shu, z_shu)
+
+            bx = bx_ext + bx_igrf
+            by = by_ext + by_igrf
+            bz = bz_ext + bz_igrf
+
+            if (np.sqrt(y_shu**2 + z_shu**2) > 31):
+                shear = np.nan
+            else:
+                shear = get_shear([bx, by, bz], [b_msx, b_msy, b_msz], angle_unit="radians")
+
+                rx_en = get_rxben([bx, by, bz], [b_msx, b_msy, b_msz])
+                va_cs = get_vcs([bx, by, bz], [b_msx, b_msy, b_msz], n_sh, 0.1)
+                bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
+            break
+
+    return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh
+    
+
 #def rx_model_batch(
 #    probe=None,
 #    omni_level='hro',
@@ -460,7 +562,7 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
 #    movie=None,
 #    trange=None,
 #    model_type='t96',
-#    mp=0.5,
+#   m_p=0.5,
 #    dr=0.25
 #    save_data=False,
 #):
@@ -486,7 +588,7 @@ if(code_run):
         Range of times to use. The default is trange.
     model_type : TYPE, optional
         Type of Tsyganenko model. The default is 't96'.
-    mp : float, optional
+   m_p : float, optional
         Thickness of the magnetopause. The default is 0.5.
     dr : float, optional
         Resolution of the model. The default is 0.25.
@@ -502,9 +604,9 @@ if(code_run):
     movie = None
     trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
     model_type = 't96'
-    mp = 0.5  # Magnetopause thichkness
+    m_p = 0.5  # Magnetopause thichkness
     dr = 0.5  # Resolution of model run in R_E units
-    save_data = True
+    save_data = False
 
     # Get time range as a datetime object
     trange_unix = [parser.parse(xx) for xx in trange]
@@ -571,22 +673,25 @@ if(code_run):
             f"which is out of range in which model is valid (-18 nT < b_imf_z < 15 nT)"
             )
 
+        time_imf_hrf = datetime.datetime.utcfromtimestamp(time_imf)
         np_imf = np.nanmedian(omni_np)
         vx_imf = np.nanmedian(omni_vx)
         vy_imf = np.nanmedian(omni_vy)
         vz_imf = np.nanmedian(omni_vz)
         sym_h_imf = np.nanmedian(omni_sym_h)
-        #v_imf = [vx_imf, vy_imf, vz_imf]
-        #b_imf = [b_imf_x, b_imf_y, b_imf_z]
-        #print("IMF parameters found:")
-        #print(tabulate(
-        #    [["Time of observation (UTC)", time_imf],
-        #     ["IMF Magnetic field (nT)", b_imf],
-        #     ["IMF Proton density (1/cm^-3)", np_imf],
-        #     ["IMF Plasma velocity (km/sec)", v_imf],
-        #     ["IMF Sym H", sym_h_imf]],
-        #    headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
-        #    numalign="center"))
+        v_imf = [vx_imf, vy_imf, vz_imf]
+        b_imf = [b_imf_x, b_imf_y, b_imf_z]
+        imf_clok_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
+        print("IMF parameters found:")
+        print(tabulate(
+            [["Time of observation (UTC)", time_imf_hrf],
+             ["IMF Magnetic field [GSM] (nT)", b_imf],
+             ["IMF Proton density (1/cm^-3)", np_imf],
+             ["IMF Plasma velocity (km/sec)", v_imf],
+             ["IMF clock angle (degrees)", imf_clok_angle],
+             ["IMF Sym H", sym_h_imf]],
+            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
+            numalign="center"))
 
         # Check if the values are finite, if not then assign a default value to each of them
         if ~(np.isfinite(np_imf)):
@@ -600,9 +705,9 @@ if(code_run):
         if ~(np.isfinite(sym_h_imf)):
             sym_h_imf = -1
 
-        m_p = 1.672e-27  # Mass of proton in SI unit
+        m_proton = 1.672e-27  # Mass of proton in SI unit
 
-        rho = np_imf * m_p * 1.15
+        rho = np_imf * m_proton * 1.15
 
         #  Solar wind ram pressure in nPa, including roughly 4% Helium++ contribution
         p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2)
@@ -679,192 +784,60 @@ if(code_run):
         A = 2
         len_y = int(30/dr) + 1
         len_z = int(30/dr) + 1
-        count = 0
-        for j in range(0, len_y):
-            y0 = 15 - int(j * dr)
-            for k in range(0, len_z):
-                z0 = 15 - int(k * dr)
-                rp = np.sqrt(y0**2 + z0**2)  # Projection of r into yz-plane
 
-                for index in range(0, 100):
+        p = mp.Pool()
+        
+        input = ((j, k, 't96') for j in range(len_y) for k in range(len_z))
 
-                    theta = index * d_theta
-                    r = ro * (2/(1 + np.cos(theta))) ** alpha
-                    zp = r * np.sin(theta)  # not really in z direction, but a distance in yz plane
-                    x0 = r * np.cos(theta)
+        print("Running the model\n")
+        res = p.map(model_run, input)
+        print("Model run complete")
 
-                    if x0 == 0:
-                        signx = 1.0
-                    else:
-                        signx = np.sign(x0)
+        p.close()
+        p.join()
 
-                    if y0 == 0:
-                        signy = 1.0
-                    else:
-                        signy = np.sign(y0)
+        for r in res:
+            j = r[0]
+            k = r[1]
+            bx[j, k] = r[2]
+            by[j, k] = r[3]
+            bz[j, k] = r[4]
 
-                    if z0 == 0:
-                        signz = 1.0
-                    else:
-                        signz = np.sign(z0)
-
-                    if (rp <= zp):
-                        # print(index, rp, zp)
-                        # print(f'Value of theta = {theta}')
-
-                        y_coord[j, k] = y0
-                        z_coord[j, k] = z0
-                        x_shu[j, k] = (r - mp) * np.cos(theta)
-                        phi = np.arctan2(z0, y0)
-                        # print( j, k, theta, x_shu[j,k])
-
-                        if (abs(y0) == 0 or abs(z0) == 0):
-                            if(abs(y0) == 0):
-                                y_shu[j, k] = 0
-                                z_shu[j, k] = (r - mp) * np.sin(theta)
-                            elif (abs(z0) == 0):
-                                z_shu[j, k] = 0
-                                y_shu[j, k] = (r - mp) * np.sin(theta)
-                        else:
-                            z_shu[j, k] = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
-                            y_shu[j, k] = z_shu[j, k]/np.tan(phi)
-
-                        rho_sh[j, k] = rho * (1.509 * np.exp(x_shu[j, k]/rmp) + .1285)
-                        n_sh[j, k] = rho_sh[j, k]/m_p
-
-                        y_shu[j, k] = abs(y_shu[j, k])*signy
-                        z_shu[j, k] = abs(z_shu[j, k])*signz
-
-                        # Cooling JGR 2001 Model, equation 9 to 12
-                        # the distance from the focus to the magnetopause surface
-                        ll = 3 * rmp/2 - x0
-                        b_msx[j, k] = - A * (- b_imf_x * (1 - rmp / (2 * ll)) + b_imf_y * (y0 / ll)
-                                      + b_imf_z * (z0 / ll))
-                        b_msy[j, k] = A * (- b_imf_x * (y0 / (2 * ll)) + b_imf_y * (2 - y0**2/(
-                                      ll * rmp)) - b_imf_z * (y0 * z0 / (ll * rmp)))
-                        b_msz[j, k] = A * (- b_imf_x * (z0 / (2 * ll)) - b_imf_y * (y0 * z0 / (ll
-                                      * rmp)) + b_imf_z * (2 - z0**2 / (ll * rmp)))
-
-                        # TODO: Implement Geopack T96!!!
-                        # Compute the external magnetic field from the T95 model for a given
-                        # position and time, in GSM coordinate
-                        try:
-                            if(model_type == 't96'):
-                                bx_ext[j, k], by_ext[j, k], bz_ext[j, k] = gp.t96.t96(
-                                                                                      param,
-                                                                                      ps,
-                                                                                      x_shu[j, k],
-                                                                                      y_shu[j, k],
-                                                                                      z_shu[j, k]
-                                                                                      )
-                            elif(model_type == 't01'):
-                                bx_ext[j, k], by_ext[j, k], bz_ext[j, k] = gp.t01.t01(
-                                                                                      param,
-                                                                                      ps,
-                                                                                      x_shu[j, k],
-                                                                                      y_shu[j, k],
-                                                                                      z_shu[j, k]
-                                                                                      )
-                            else:
-                                raise ValueError("Model type must be set to 't96' or 't01'.")
-                        except:
-                            if((y_shu[j,k] < 15 and y_shu[j, k] > -15) or
-                               (z_shu[j,k] < 15 and z_shu[j, k] > -15)):
-                                print(f'Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
-                                count += 1
-                            else:
-                                print(f'~Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
-
-                        # Compute the internal magnetic field from the IGRF model for a given
-                        # position in GSM coordinate
-                        bx_igrf[j, k], by_igrf[j, k], bz_igrf[j, k] = gp.igrf_gsm(x_shu[j, k],
-                                                                                  y_shu[j, k],
-                                                                                  z_shu[j, k])
-
-                        bx[j, k] = bx_ext[j, k] + bx_igrf[j, k]
-                        by[j, k] = by_ext[j, k] + by_igrf[j, k]
-                        bz[j, k] = bz_ext[j, k] + bz_igrf[j, k]
-
-                        if (np.sqrt(y_shu[j, k]**2 + z_shu[j, k]**2) > 31):
-                            shear[j, k] = np.nan
-                        else:
-                            shear[j, k] = get_shear([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
-                                                    b_msy[j, k], b_msz[j, k]], angle_unit="radians")
-
-                        rx_en[j, k] = get_rxben([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
-                                                 b_msy[j, k], b_msz[j, k]])
-                        va_cs[j, k] = get_vcs([bx[j, k], by[j, k], bz[j, k]], [b_msx[j, k],
-                                              b_msy[j, k], b_msz[j, k]], n_sh[j, k], 0.1)
-                        bisec_msp[j, k], bisec_msh[j, k] = get_bis([bx[j, k], by[j, k], bz[j, k]],
-                                                [b_msx[j, k], b_msy[j, k], b_msz[j, k]])
-                        #b_sh_ca[j, k] = get_ca([b_msx[j, k], b_msy[j, k], b_msz[j, k]])
-                        #b_sh_mag[j, k] = np.linalg.norm([b_msx[j, k], b_msy[j, k], b_msz[j, k]])
-                        break
+            shear[j, k] = r[5]
+            rx_en[j, k] = r[6]
+            va_cs[j, k] = r[7]
+            bisec_msp[j, k] = r[8]
+            bisec_msh[j, k] = r[9]
 
     if save_data:
 
-        fn = f'../data/all_data_rx_model_{dr}re_{mp}mp_{model_type}_{today_date}.h5'
+        fn = f'../data/all_data_rx_model_{dr}re_{m_p}mp_{model_type}_{today_date}.h5'
         data_file = hf.File(fn, 'w')
 
         data_file.create_dataset('bx', data=bx)
         data_file.create_dataset('by', data=by)
         data_file.create_dataset('bz', data=bz)
 
-        data_file.create_dataset('bx_ext', data=bx_ext)
-        data_file.create_dataset('by_ext', data=by_ext)
-        data_file.create_dataset('bz_ext', data=bz_ext)
-
-        data_file.create_dataset('bx_igrf', data=bx_igrf)
-        data_file.create_dataset('by_igrf', data=by_igrf)
-        data_file.create_dataset('bz_igrf', data=bz_igrf)
-
-        data_file.create_dataset('b_msx', data=b_msx)
-        data_file.create_dataset('b_msy', data=b_msy)
-        data_file.create_dataset('b_msz', data=b_msz)
-
-        data_file.create_dataset('x_shu', data=x_shu)
-        data_file.create_dataset('y_shu', data=y_shu)
-        data_file.create_dataset('z_shu', data=z_shu)
-
-        data_file.create_dataset('rho_sh', data=rho_sh)
-        #data_file.create_dataset('rp', data=rp)
-
-        #data_file.create_dataset('r', data=r)
-        #data_file.create_dataset('zp', data=zp)
-        #data_file.create_dataset('x0', data=x0)
-
         data_file.create_dataset('shear', data=shear)
         data_file.create_dataset('rx_en', data=rx_en)
         data_file.create_dataset('va_cs', data=va_cs)
         data_file.create_dataset('bisec_msp', data=bisec_msp)
         data_file.create_dataset('bisec_msh', data=bisec_msh)
-        data_file.create_dataset('y_coord', data=y_coord)
-        data_file.create_dataset('z_coord', data=z_coord)
-        data_file.create_dataset('b_sh_ca', data=b_sh_ca)
-        data_file.create_dataset('b_sh_mag', data=b_sh_mag)
-        data_file.create_dataset('n_sh', data=n_sh)
 
         data_file.close()
         print(f'Date saved to file {fn}')
 
-    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear_v2', c_label='Shear', c_unit=r'${}^\circ$')
-    ridge_finder(image=rx_en/np.nanmax(rx_en), sigma=2.8, dr=dr, fig_name='rx-en_nPa_v2', c_label='Reconnection Energy', c_unit='nPa')
-    ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs_v2', c_label='Exhaust Velocity', c_unit='km/s')
-    ridge_finder(image=bisec_msp, sigma=2.2, dr=dr, fig_name='bisec_msp_v2', c_label='Bisection Field', c_unit='nT')
-    #ridge_finder(image=bisec_msh, sigma=2.2, dr=dr, fig_name='bisec_msh_v2', c_label='Bisection Field', c_unit='nT')
-   # _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=40,
-   #                        fig_name="magnetosheath")
-   # _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
-   #                    fig_name="magnetosphere")
-
-
-#ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$')
-#ridge_finder(image=rx_en, sigma=2.2, dr=dr, fig_name='rx-en', c_label='Reconnection Energy', c_unit='nPa')
-#ridge_finder(image=va_cs, sigma=2.2, dr=dr, fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s')
-#ridge_finder(image=bisec, sigma=3, dr=dr, fig_name='bisec_sh', c_label='Bisection Field', c_unit='nT')
-#_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=90,
-#                           fig_name="magnetosheath")
-#_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=270,
-#                           fig_name="magnetosphere")
-
+    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear_vp', c_label='Shear',
+                 c_unit=r'${}^\circ$')
+    ridge_finder(image=rx_en/np.nanmax(rx_en), sigma=2.8, dr=dr, fig_name='rx-en_nPa_vp',
+                 c_label='Reconnection Energy', c_unit='nPa')
+    ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs_vp', c_label='Exhaust Velocity',
+                 c_unit='km/s')
+    ridge_finder(image=bisec_msp, sigma=2.2, dr=dr, fig_name='bisec_msp_vp',
+                 c_label='Bisection Field', c_unit='nT')
+    #ridge_finder(image=bisec_msh, sigma=2.2, dr=dr, fig_name='bisec_msh_vp', c_label='Bisection Field', c_unit='nT')
+    #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True,
+    #                      scale=40, fig_name="magnetosheath_vp")
+    #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
+    #                   fig_name="magnetosphere_vp")
 print(f'Took {round(time.time() - start, 3)} seconds')
