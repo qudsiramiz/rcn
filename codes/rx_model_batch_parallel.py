@@ -12,6 +12,7 @@ import numpy as np
 import pyspedas as spd
 import pytplot as ptt
 from dateutil import parser
+import scipy as sp
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.filters import meijering  # sato, frangi, hessian
 import multiprocessing as mp
@@ -287,12 +288,18 @@ def get_ca(b_vec, angle_unit="radians"):
 
 def ridge_finder(
     image=None,
+    t_range=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
     xrange=[-15.1, 15],
     yrange=[-15.1, 15],
     dr=0.5,
     sigma=2.2,
     mode="nearest",
-    alpha=0.5,
+    alpha=1.,
+    vmin=None,
+    vmax=None,
+    cmap="viridis",
+    draw_patch=False,
+    draw_ridge=False,
     save_fig=True,
     fig_name="new",
     fig_format="pdf",
@@ -319,10 +326,22 @@ def ridge_finder(
             'linear'. Default is 'nearest'.
     alpha : float
             The alpha value for the filter. Default is 0.5.
+    vmin : float, optional
+            The minimum value of the colorbar. Default is None.
+    vmax : float, optional
+            The maximum value of the colorbar. Default is None.
+    cmap : str, optional
+            The colormap to use. Default is 'viridis'.
+    draw_patch : bool, optional
+            Whether to draw the circular patch. Default is False.
+    draw_ridge : bool, optional
+            Whether to draw the ridge line. Default is False.
     save_fig : bool, optional
             Whether to save the figure. Default is True.
     fig_name : str, optional
             The name of the figure. Default is "new".
+    fig_format : str, optional
+            The format of the figure. Default is "pdf".
     c_label : str, optional
             The label for the colorbar. Default is "none".
     c_unit : str, optional
@@ -338,36 +357,58 @@ def ridge_finder(
     """
     if image is None:
         raise ValueError("No image given")
-    image = np.transpose(image)
 
-    cmap = plt.cm.viridis
+    # NOTE: This is a hack to ensure that the output of shear angle, reconnection energy etc. agrees
+    # with what has been reported in literature. Plot for shear angle seems to agree reasonably well
+    # (for "trange = ['2016-12-07 05:11:00', '2016-12-07 05:21:00']") with the one reported by
+    # FuselierJGR2019 (doi:10.1029/2019JA027143, see fig. 4).
+    image_rotated = np.transpose(np.flipud(np.fliplr(image)))
 
-    kwargs = {'sigmas': [sigma], 'black_ridges': False, 'mode': mode, 'alpha': alpha}
+    if cmap is None:
+        cmap = "viridis"
+    if(vmin is not None and vmax is not None):
+        norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    else:
+        norm = plt.Normalize()
 
-    result = meijering(image, **kwargs)
+    #cmap = plt.cm.jet
 
-    x_len = image.shape[0]
-    y_len = image.shape[1]
+    kwargs = {'sigmas': [3], 'black_ridges': False, 'mode': mode, 'alpha': 1}
+
+    # Smoothen the image
+    image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode=mode)
+    result = meijering(image_smooth, **kwargs)
+
+    x_len = image_rotated.shape[0]
+    y_len = image_rotated.shape[1]
+
     y_val = np.full(y_len, np.nan)
     im_max_val = np.full(y_len, np.nan)
     for i in range(y_len):
         y_val[i] = np.argmax(result[:, i]) * dr + yrange[0]
-        im_max_val[i] = np.argmax(image[:, i]) * dr + yrange[0]
+        im_max_val[i] = np.argmax(image_rotated[:, i]) * dr + yrange[0]
 
     # plt.close('all')
     fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
 
-    im1 = axs1.imshow(image, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
-                      origin='lower', cmap=cmap)
+    im1 = axs1.imshow(image_smooth, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
+                      origin='lower', cmap=cmap, norm=norm)
     divider1 = make_axes_locatable(axs1)
 
-    axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val, 'k-', ms=2)
+    if draw_ridge:
+        axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val, 'k-', alpha=0.9)
+        axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
 
-    axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'r*', ms=2)
+    # Plot a horizontal line at x=0 and a vertical line at y=0
+    axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
+    axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
 
-    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none', ec='k', lw=0.1)
-    axs1.add_patch(patch)
-    im1.set_clip_path(patch)
+    if(draw_patch):
+        patch = patches.Circle((0, 0), radius=(xrange[1] - xrange[0])/2., transform=axs1.transData,
+                            fc='none', ec='k', lw=0.1)
+        axs1.add_patch(patch)
+        im1.set_clip_path(patch)
+
     axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
     axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
 
@@ -381,13 +422,22 @@ def ridge_finder(
     cbar1.ax.xaxis.set_label_position('top')
     cbar1.ax.set_xlabel(f'{c_label} ({c_unit})', fontsize=18)
 
+    # Write the timme range on the plot
+    axs1.text(1.0, 0.5, f'Time range: {trange[0]} - {trange[1]}', horizontalalignment='left',
+              verticalalignment='center', transform=axs1.transAxes, rotation=270, color='r')
+
     # fig.show()
 
     if save_fig:
-        fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{m_p}mp.{fig_format}'
-        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
-        print(f'Figure saved as {fig_name}')
-    plt.close()
+        try:
+            fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{m_p}mp_{t_range[0]}_{t_range[1]}.{fig_format}'
+            plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
+            print(f'Figure saved as {fig_name}')
+        except  Exception as e:
+            print(e)
+            print(f'Figure not saved, folder does not exist. Create folder ../figures')
+            #pass
+        plt.close()
     return y_val
 
 
@@ -461,11 +511,13 @@ def model_run(*args):
     """
     j = args[0][0]
     k = args[0][1]
-    model_type = args[0][2]
+    y_max = args[0][2]
+    z_max = args[0][3]
+    model_type = args[0][4]
 
 
-    y0 = 15 - int(j * dr)
-    z0 = 15 - int(k * dr)
+    y0 =y_max - int(j * dr)
+    z0 = z_max - int(k * dr)
     rp = np.sqrt(y0**2 + z0**2)  # Projection of r into yz-plane
 
     for index in range(0, 100):
@@ -541,18 +593,22 @@ def model_run(*args):
             by = by_ext + by_igrf
             bz = bz_ext + bz_igrf
 
-            if (np.sqrt(y_shu**2 + z_shu**2) > 31):
-                shear = np.nan
-            else:
-                shear = get_shear([bx, by, bz], [b_msx, b_msy, b_msz], angle_unit="radians")
+            #if (np.sqrt(y_shu**2 + z_shu**2) > 31):
+            #    shear = np.nan
+            #    rx_en = np.nan
+            #    va_cs = np.nan
+            #    bisec_msp = np.nan
+            #    bisec_msh = np.nan
+            #else:
+            shear = get_shear([bx, by, bz], [b_msx, b_msy, b_msz], angle_unit="degrees")
 
-                rx_en = get_rxben([bx, by, bz], [b_msx, b_msy, b_msz])
-                va_cs = get_vcs([bx, by, bz], [b_msx, b_msy, b_msz], n_sh, 0.1)
-                bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
+            rx_en = get_rxben([bx, by, bz], [b_msx, b_msy, b_msz])
+            va_cs = get_vcs([bx, by, bz], [b_msx, b_msy, b_msz], n_sh, 0.1)
+            bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
             break
 
     return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh
-    
+
 
 #def rx_model_batch(
 #    probe=None,
@@ -562,9 +618,15 @@ def model_run(*args):
 #    movie=None,
 #    trange=None,
 #    model_type='t96',
-#   m_p=0.5,
+#    m_p=0.5,
 #    dr=0.25
+#    y_min= -20,
+#    y_max= 20,
+#    z_min= -20,
+#    z_max= 20,
+#    draw_patch=False,
 #    save_data=False,
+#    plot_type="shear"
 #):
 code_run = '1'
 if(code_run):
@@ -588,11 +650,33 @@ if(code_run):
         Range of times to use. The default is trange.
     model_type : TYPE, optional
         Type of Tsyganenko model. The default is 't96'.
-   m_p : float, optional
+    m_p : float, optional
         Thickness of the magnetopause. The default is 0.5.
     dr : float, optional
         Resolution of the model. The default is 0.25.
+    y_min : float, optional
+        Minimum y value. The default is -20.
+    y_max : float, optional
+        Maximum y value. The default is 20.
+    z_min : float, optional
+        Minimum z value. The default is -20.
+    z_max : float, optional
+        Maximum z value. The default is 20.
+    draw_patch : bool, optional
+        Draw the patch of a given radius around the figure. The default is False. If it is set to
+        true then the radius of the patch is automatically computed as the maximum value of the
+        x-axis.
+    save_data : bool, optional
+        If True, the data will be saved in an HDF file. The default is False.
+    plot_type : String or array of strings, optional
+        Type of the plot one wants to get once the code has finished running. The default is
+        "shear". Other options are "rx_en", "va_cs", "bisec_msp", "bisec_msh" and "all" for all of
+        them.
 
+    Raises
+    ------
+    KeyError:
+        If "plot_type" is not in the list of plot types.
     Returns
     -------
     None.
@@ -602,12 +686,19 @@ if(code_run):
     maximum_shear = True
     mms_probe = None
     movie = None
-    trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+    #trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+    trange = ['2016-12-07 05:11:00', '2016-12-07 05:21:00']
     model_type = 't96'
     m_p = 0.5  # Magnetopause thichkness
     dr = 0.5  # Resolution of model run in R_E units
+    min_max_val = 20
+    y_min = -min_max_val
+    y_max = min_max_val
+    z_min = -min_max_val
+    z_max = min_max_val
     save_data = False
-
+    plot_type = "ttt"
+    draw_patch = True
     # Get time range as a datetime object
     trange_unix = [parser.parse(xx) for xx in trange]
     # For MMS add 5 minutes buffer on either side of the time range and give out 'trange_mms' in a
@@ -655,8 +746,8 @@ if(code_run):
         #    pass
         #else:
         mms_mec_vars = spd.mms.mec(trange=trange_mms, data_rate='srvy', probe='1')
-        mms_time = ptt.get_data('mms1_mec_r_gse')[0]
-        mms_sc_pos = ptt.get_data('mms1_mec_r_gse')[1:3]
+        mms_time = ptt.get_data('mms1_mec_r_gsm')[0]
+        mms_sc_pos = ptt.get_data('mms1_mec_r_gsm')[1:3]
     else:
         pass
 
@@ -723,29 +814,30 @@ if(code_run):
         ps = gp.recalc(time_imf)
         # ps = -0.25666021186831828
 
-        n_arr = int(30 / dr) + 1
+        n_arr_y = int((y_max - y_min) / dr) + 1
+        n_arr_z = int((z_max - z_min) / dr) + 1
 
-        bx = np.full((n_arr, n_arr), np.nan)
-        by = np.full((n_arr, n_arr), np.nan)
-        bz = np.full((n_arr, n_arr), np.nan)
+        bx = np.full((n_arr_y, n_arr_z), np.nan)
+        by = np.full((n_arr_y, n_arr_z), np.nan)
+        bz = np.full((n_arr_y, n_arr_z), np.nan)
 
-        bx_ext = np.full((n_arr, n_arr), np.nan)
-        by_ext = np.full((n_arr, n_arr), np.nan)
-        bz_ext = np.full((n_arr, n_arr), np.nan)
+        bx_ext = np.full((n_arr_y, n_arr_z), np.nan)
+        by_ext = np.full((n_arr_y, n_arr_z), np.nan)
+        bz_ext = np.full((n_arr_y, n_arr_z), np.nan)
 
-        bx_igrf = np.full((n_arr, n_arr), np.nan)
-        by_igrf = np.full((n_arr, n_arr), np.nan)
-        bz_igrf = np.full((n_arr, n_arr), np.nan)
+        bx_igrf = np.full((n_arr_y, n_arr_z), np.nan)
+        by_igrf = np.full((n_arr_y, n_arr_z), np.nan)
+        bz_igrf = np.full((n_arr_y, n_arr_z), np.nan)
 
-        b_msx = np.full((n_arr, n_arr), np.nan)
-        b_msy = np.full((n_arr, n_arr), np.nan)
-        b_msz = np.full((n_arr, n_arr), np.nan)
+        b_msx = np.full((n_arr_y, n_arr_z), np.nan)
+        b_msy = np.full((n_arr_y, n_arr_z), np.nan)
+        b_msz = np.full((n_arr_y, n_arr_z), np.nan)
 
-        x_shu = np.full((n_arr, n_arr), np.nan)
-        y_shu = np.full((n_arr, n_arr), np.nan)
-        z_shu = np.full((n_arr, n_arr), np.nan)
+        x_shu = np.full((n_arr_y, n_arr_z), np.nan)
+        y_shu = np.full((n_arr_y, n_arr_z), np.nan)
+        z_shu = np.full((n_arr_y, n_arr_z), np.nan)
 
-        rho_sh = np.full((n_arr, n_arr), np.nan)
+        rho_sh = np.full((n_arr_y, n_arr_z), np.nan)
 
         # rp = np.full((n_arr, n_arr), np.nan)
 
@@ -753,18 +845,18 @@ if(code_run):
         # zp = np.full((n_arr, n_arr), np.nan)
         # x0 = np.full((n_arr, n_arr), np.nan)
 
-        shear = np.full((n_arr, n_arr), np.nan)
-        rx_en = np.full((n_arr, n_arr), np.nan)
-        gd1 = np.full((n_arr, n_arr), np.nan)
-        gd2 = np.full((n_arr, n_arr), np.nan)
-        va_cs = np.full((n_arr, n_arr), np.nan)
-        bisec_msp = np.full((n_arr, n_arr), np.nan)
-        bisec_msh = np.full((n_arr, n_arr), np.nan)
-        y_coord = np.full((n_arr, n_arr), np.nan)
-        z_coord = np.full((n_arr, n_arr), np.nan)
-        b_sh_ca = np.full((n_arr, n_arr), np.nan)
-        b_sh_mag = np.full((n_arr, n_arr), np.nan)
-        n_sh = np.full((n_arr, n_arr), np.nan)
+        shear = np.full((n_arr_y, n_arr_z), np.nan)
+        rx_en = np.full((n_arr_y, n_arr_z), np.nan)
+        gd1 = np.full((n_arr_y, n_arr_z), np.nan)
+        gd2 = np.full((n_arr_y, n_arr_z), np.nan)
+        va_cs = np.full((n_arr_y, n_arr_z), np.nan)
+        bisec_msp = np.full((n_arr_y, n_arr_z), np.nan)
+        bisec_msh = np.full((n_arr_y, n_arr_z), np.nan)
+        y_coord = np.full((n_arr_y, n_arr_z), np.nan)
+        z_coord = np.full((n_arr_y, n_arr_z), np.nan)
+        b_sh_ca = np.full((n_arr_y, n_arr_z), np.nan)
+        b_sh_mag = np.full((n_arr_y, n_arr_z), np.nan)
+        n_sh = np.full((n_arr_y, n_arr_z), np.nan)
 
         d_theta = np.pi/100
 
@@ -782,12 +874,12 @@ if(code_run):
         rmp = ro * (2/(1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
 
         A = 2
-        len_y = int(30/dr) + 1
-        len_z = int(30/dr) + 1
+        len_y = int((y_max - y_min)/dr) + 1
+        len_z = int((z_max - z_min)/dr) + 1
 
         p = mp.Pool()
-        
-        input = ((j, k, 't96') for j in range(len_y) for k in range(len_z))
+
+        input = ((j, k, y_max, z_max, 't96') for j in range(len_y) for k in range(len_z))
 
         print("Running the model\n")
         res = p.map(model_run, input)
@@ -810,32 +902,111 @@ if(code_run):
             bisec_msh[j, k] = r[9]
 
     if save_data:
+        try:
+            fn = f'../data/all_data_rx_model_{dr}re_{m_p}mp_{model_type}_{today_date}.h5'
+            data_file = hf.File(fn, 'w')
 
-        fn = f'../data/all_data_rx_model_{dr}re_{m_p}mp_{model_type}_{today_date}.h5'
-        data_file = hf.File(fn, 'w')
+            data_file.create_dataset('bx', data=bx)
+            data_file.create_dataset('by', data=by)
+            data_file.create_dataset('bz', data=bz)
 
-        data_file.create_dataset('bx', data=bx)
-        data_file.create_dataset('by', data=by)
-        data_file.create_dataset('bz', data=bz)
+            data_file.create_dataset('shear', data=shear)
+            data_file.create_dataset('rx_en', data=rx_en)
+            data_file.create_dataset('va_cs', data=va_cs)
+            data_file.create_dataset('bisec_msp', data=bisec_msp)
+            data_file.create_dataset('bisec_msh', data=bisec_msh)
 
-        data_file.create_dataset('shear', data=shear)
-        data_file.create_dataset('rx_en', data=rx_en)
-        data_file.create_dataset('va_cs', data=va_cs)
-        data_file.create_dataset('bisec_msp', data=bisec_msp)
-        data_file.create_dataset('bisec_msh', data=bisec_msh)
+            data_file.close()
+            print(f'Date saved to file {fn}')
+        except Exception as e:
+            print(e)
+            print(f'Data not saved to file {fn}. Please make sure that file name is correctly assigned and that the directory exists and you have write permissions')
 
-        data_file.close()
-        print(f'Date saved to file {fn}')
+    # Check if 'plot_type' has length attribute. If it has length attribute then plot the ridge plot
+    # for each of the plot type in the list. If it does not have length attribute then plot the
+    # ridge plot for the specified plot type.
+    plot_type = 'rx_en'
+    types_of_plot = ['shear', 'rx_en', 'va_cs', 'bisec_msp', 'bisec_msh', 'all']
+    if isinstance(plot_type, list):
+        for xx in plot_type:
+            if xx not in types_of_plot:
+                raise ValueError(
+                    f'{xx} is not a valid plot type. Please choose from {types_of_plot}'
+                    )
+        if 'shear' in plot_type:
+            print('Plotting shear')
+            ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+            sigma=2.2, dr=dr, fig_name='shear_vp', c_label='Shear', c_unit=r'${}^\circ$',
+            draw_patch=draw_patch)
+        if 'rx_en' in plot_type:
+            print('Plotting rx_en')
+            ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
+            yrange=[z_min, z_max], sigma=2.2, dr=dr, fig_name='rx_en_vp', c_label='Rx_en',
+            c_unit=r'${}^\circ$', draw_patch=draw_patch)
+        if 'va_cs' in plot_type:
+            print('Plotting va_cs')
+            ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+            sigma=2.2, dr=dr, fig_name='va_cs_vp', c_label='Va_cs', c_unit=r'${}^\circ$',
+            draw_patch=draw_patch)
+        if 'bisec_msp' in plot_type:
+            print('Plotting bisec_msp')
+            ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max],
+            yrange=[z_min, z_max], sigma=2.2, dr=dr, fig_name='bisec_msp_vp', c_label='Bisec_msp',
+            c_unit=r'${}^\circ$', draw_patch=draw_patch)
+        if 'bisec_msh' in plot_type:
+            print('Plotting bisec_msh')
+            ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max],
+            yrange=[z_min, z_max], sigma=2.2, dr=dr, fig_name='bisec_msh_vp', c_label='Bisec_msh',
+            c_unit=r'${}^\circ$', draw_patch=draw_patch)
+    elif plot_type == 'all':
+        print('Plotting for all')
+        ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=2.2, dr=dr, fig_name='shear_vp', c_label='Shear', c_unit=r'${}^\circ$',
+        draw_patch=draw_patch)
 
-    ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear_vp', c_label='Shear',
-                 c_unit=r'${}^\circ$')
-    ridge_finder(image=rx_en/np.nanmax(rx_en), sigma=2.8, dr=dr, fig_name='rx-en_nPa_vp',
-                 c_label='Reconnection Energy', c_unit='nPa')
-    ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs_vp', c_label='Exhaust Velocity',
-                 c_unit='km/s')
-    ridge_finder(image=bisec_msp, sigma=2.2, dr=dr, fig_name='bisec_msp_vp',
-                 c_label='Bisection Field', c_unit='nT')
-    #ridge_finder(image=bisec_msh, sigma=2.2, dr=dr, fig_name='bisec_msh_vp', c_label='Bisection Field', c_unit='nT')
+        ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
+        yrange=[z_min, z_max], sigma=2.8, dr=dr, fig_name='rx-en_nPa_vp',
+        c_label='Reconnection Energy', c_unit='nPa', draw_patch=draw_patch)
+
+        ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=3., dr=dr, fig_name='va-cs_vp', c_label='Exhaust Velocity', c_unit='km/s',
+        draw_patch=draw_patch)
+
+        ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=2.2, dr=dr, fig_name='bisec_msp_vp', c_label='Bisection Field', c_unit='nT',
+        draw_patch=draw_patch)
+
+        ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=2.2, dr=dr, fig_name='bisec_msh_vp', c_label='Bisection Field', c_unit='nT',
+        draw_patch=draw_patch)
+    elif plot_type=='shear':
+        print('Plotting shear')
+        ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=2.2, dr=dr, fig_name='shear_vp', c_label='Shear', c_unit=r'${}^\circ$',
+        draw_patch=draw_patch)
+    elif plot_type=='rx_en':
+        print('Plotting rx_en')
+        ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
+        yrange=[z_min, z_max], sigma=2.8, dr=dr, fig_name='rx-en_nPa_vp',
+        c_label='Reconnection Energy', c_unit='nPa', draw_patch=draw_patch)
+    elif plot_type=='va_cs':
+        print('Plotting va_cs')
+        ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=3., dr=dr, fig_name='va-cs_vp', c_label='Exhaust Velocity', c_unit='km/s',
+        draw_patch=draw_patch)
+    elif plot_type=='bisec_msp':
+        print('Plotting bisec_msp')
+        ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=2.2, dr=dr, fig_name='bisec_msp_vp', c_label='Bisection Field', c_unit='nT',
+        draw_patch=draw_patch)
+    elif plot_type=='bisec_msh':
+        print('Plotting bisec_msh')
+        ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
+        sigma=2.2, dr=dr, fig_name='bisec_msh_vp', c_label='Bisection Field', c_unit='nT',
+        draw_patch=draw_patch)
+    else:
+        raise KeyError('plot_type must be one or a list of: all, shear, rx-en, va-cs, bisec_msp, bisec_msh')
+
     #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True,
     #                      scale=40, fig_name="magnetosheath_vp")
     #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
