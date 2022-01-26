@@ -430,7 +430,7 @@ def ridge_finder(
 
     if save_fig:
         try:
-            fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{m_p}mp_{t_range[0]}_{t_range[1]}.{fig_format}'
+            fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{m_p}mp_{t_range[0][:10]}_{t_range[0][-8:]}_{t_range[1][:10]}_{t_range[1][-8:]}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
             print(f'Figure saved as {fig_name}')
         except  Exception as e:
@@ -925,7 +925,7 @@ if(code_run):
     # Check if 'plot_type' has length attribute. If it has length attribute then plot the ridge plot
     # for each of the plot type in the list. If it does not have length attribute then plot the
     # ridge plot for the specified plot type.
-    plot_type = 'rx_en'
+    plot_type = 'all'
     types_of_plot = ['shear', 'rx_en', 'va_cs', 'bisec_msp', 'bisec_msh', 'all']
     if isinstance(plot_type, list):
         for xx in plot_type:
