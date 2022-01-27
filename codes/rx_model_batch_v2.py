@@ -500,7 +500,10 @@ if(code_run):
     maximum_shear = True
     mms_probe = None
     movie = None
-    trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+    #trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+    #trange = ['2015-09-08 11:05:00', '2015-09-08 11:15:00']
+    #trange = ['2016-12-29 03:53:00', '2016-12-29 04:03:00']
+    trange = ['2015-09-19 07:38:00', '2015-09-19 07:48:00']
     model_type = 't96'
     mp = 0.5  # Magnetopause thichkness
     dr = 0.5  # Resolution of model run in R_E units
@@ -681,9 +684,9 @@ if(code_run):
         len_z = int(30/dr) + 1
         count = 0
         for j in range(0, len_y):
-            y0 = 15 - int(j * dr)
+            y0 = int(j * dr) - 15
             for k in range(0, len_z):
-                z0 = 15 - int(k * dr)
+                z0 = int(k * dr) - 15
                 rp = np.sqrt(y0**2 + z0**2)  # Projection of r into yz-plane
 
                 for index in range(0, 100):
@@ -848,9 +851,9 @@ if(code_run):
         print(f'Date saved to file {fn}')
 
     ridge_finder(image=shear, sigma=2.2, dr=dr, fig_name='shear_v2', c_label='Shear', c_unit=r'${}^\circ$')
-    ridge_finder(image=rx_en/np.nanmax(rx_en), sigma=2.8, dr=dr, fig_name='rx-en_nPa_v2', c_label='Reconnection Energy', c_unit='nPa')
-    ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs_v2', c_label='Exhaust Velocity', c_unit='km/s')
-    ridge_finder(image=bisec_msp, sigma=2.2, dr=dr, fig_name='bisec_msp_v2', c_label='Bisection Field', c_unit='nT')
+    #ridge_finder(image=rx_en/np.nanmax(rx_en), sigma=2.8, dr=dr, fig_name='rx-en_nPa_v2', c_label='Reconnection Energy', c_unit='nPa')
+    #ridge_finder(image=va_cs, sigma=3., dr=dr, fig_name='va-cs_v2', c_label='Exhaust Velocity', c_unit='km/s')
+    #ridge_finder(image=bisec_msp, sigma=2.2, dr=dr, fig_name='bisec_msp_v2', c_label='Bisection Field', c_unit='nT')
     #ridge_finder(image=bisec_msh, sigma=2.2, dr=dr, fig_name='bisec_msh_v2', c_label='Bisection Field', c_unit='nT')
    # _ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True, scale=40,
    #                        fig_name="magnetosheath")

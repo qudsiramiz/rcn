@@ -8,10 +8,11 @@ import warnings
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy as sp
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Set the fontstyle to Times New Roman
-font = {'family': 'sans-serif', 'weight': 'normal', 'size': 10}
+font = {'family': 'serif', 'weight': 'normal', 'size': 10}
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
 
@@ -171,8 +172,19 @@ def shear_angle_calculator(
         if verbose:
             print("Attempting to download real data from the CDSAWEB website using PysSpedas \n")
         if time_observation is None:
-            raise ValueError("Time of observation must be provided in order to use real time data" +
-                             "Please provide time_observation in the format YYYY-MM-DD HH:MM:SS")
+            time_observation = "2020-02-16 17:00:00"
+            time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
+            if verbose:
+                print(f"Time of observation is not given. Defaulting to: {time_observation} UTC \n")
+            if dt is None:
+                print("dt, observation time range, is not defined. Setting dt to 30 minutes \n")
+                dt = 30
+            time_range = [(time_observation - datetime.timedelta(minutes=dt)).strftime(
+                "%Y-%m-%d %H:%M:%S"), (time_observation + datetime.timedelta(minutes=dt)).strftime(
+                "%Y-%m-%d %H:%M:%S")]
+            if verbose:
+                print(f"Downloading data from {time_range[0]} to {time_range[1]} \n")
+
         else:
             time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
             if dt is None:
@@ -184,7 +196,7 @@ def shear_angle_calculator(
             if verbose:
                 print(f"Downloading data from {time_range[0]} to {time_range[1]} \n")
 
-        spd.omni.data(trange=time_range, level="hro", time_clip=True)
+        spd.omni.data(trange=time_range, level="hro", time_clip=False)
 
         omni_time = ptt.get_data('BX_GSE')[0]
         # omni_time_unix = np.vectorize(datetime.utcfromtimestamp)(omni_time[:]) # converting omni_time
@@ -215,15 +227,16 @@ def shear_angle_calculator(
         np_imf = np.nanmedian(omni_np)
         v_imf = np.array([np.nanmedian(omni_vx), np.nanmedian(omni_vy), np.nanmedian(omni_vz)])
         sym_h_imf = np.nanmedian(omni_sym_h)
+        clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
 
         if verbose:
             print("Computed IMF parameters:")
             print(tabulate(
                 [["Time of observation (UTC)", time_observation],
-                 ["IMF Magnetic field (nT)", b_imf],
-                 ["IMF Proton density (1/cm^-3)", np_imf],
-                 ["IMF Plasma velocity (km/sec)", v_imf],
-                 ["IMF Sym H", sym_h_imf]],
+                 ["IMF Magnetic field (nT)", np.round(b_imf, 3)],
+                 ["IMF Proton density (1/cm^-3)", np.round(np_imf, 3)],
+                 ["IMF Plasma velocity (km/sec)", np.round(v_imf, 3)],
+                 ["IMF Sym H", np.round(sym_h_imf, 3)]],
                 headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
                 numalign="center"))
 
@@ -234,6 +247,7 @@ def shear_angle_calculator(
         v_imf = np.array([-500, 0.0, 0.0])
         np_imf = 5.0
         sym_h_imf = -30
+        clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
 
     m_p = 1.672e-27  # Mass of proton in SI unit
 
@@ -252,10 +266,11 @@ def shear_angle_calculator(
     if verbose:
         print("Input parameters for the model:")
         print(tabulate(
-            [["Solar wind dynamic pressure (nPa)", p_dyn],
-             ["IMF Sym H", sym_h_imf],
-             ["B_IMF_Y (nT)", b_imf[1]],
-             ["B_IMF_Z (nT)", b_imf[2]]],
+            [["Solar wind dynamic pressure (nPa)", np.round(p_dyn, 3)],
+             ["IMF Sym H", np.round(sym_h_imf, 3)],
+             ["B_IMF_Y (nT)", np.round(b_imf[1], 3)],
+             ["B_IMF_Z (nT)", np.round(b_imf[2], 3)],
+             ["Clock Angle (degrees)", np.round(clock_angle, 3)]],
             headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
             numalign="center"))
 
@@ -263,8 +278,9 @@ def shear_angle_calculator(
     if use_real_data:
         time_dipole = calendar.timegm(time_observation.utctimetuple())
     else:
-        time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
-        time_dipole = calendar.timegm(time_observation.utctimetuple())
+        time_dipole = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+        #time_observation = datetime.datetime.strptime(time_observation, "%Y-%m-%d %H:%M:%S")
+        #time_dipole = calendar.timegm(time_observation.utctimetuple())
 
     # Compute the dipole tilt angle
     dipole_tilt_angle = gp.recalc(time_dipole)
@@ -272,12 +288,12 @@ def shear_angle_calculator(
     if verbose:
         if angle_units == "radians":
             print(tabulate([["Dipole tilt angle units", angle_units],
-                            ["Dipole tilt angle", dipole_tilt_angle]],
+                            ["Dipole tilt angle", np.round(dipole_tilt_angle, 3)]],
                            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".3f",
                            numalign="center"))
         elif angle_units == "degrees":
             print(tabulate([["Dipole tilt angle units", angle_units],
-                            ["Dipole tilt angle", dipole_tilt_angle * 180 / np.pi]],
+                            ["Dipole tilt angle", np.round(dipole_tilt_angle * 180 / np.pi, 3)]],
                            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".3f",
                            numalign="center"))
 
@@ -484,39 +500,62 @@ def shear_angle_calculator(
             f.close()
         print(f"Data saved to {data_file}_{model_type}_{dr}dr.hdf5")
 
+    fig, axs = plt.subplots(1, 1, figsize=(8, 6))
+
+    # NOTE: This is a hack to ensure that the output of shear angle, reconnection energy etc. agrees
+    # with what has been reported in literature. Plot for shear angle seems to agree reasonably well
+    # (for "trange = ['2016-12-07 05:11:00', '2016-12-07 05:21:00']") with the one reported by
+    # FuselierJGR2019 (doi:10.1029/2019JA027143, see fig. 4).    
+    image_rotated = np.transpose(np.flipud(np.fliplr(shear)))
+    # Smoothen the image
+    image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode='nearest')
+    im = axs.imshow(np.transpose(np.flipud(np.fliplr(image_smooth))), extent=[-15, 15, -15, 15],
+    origin='lower', cmap=plt.cm.viridis)
+    divider = make_axes_locatable(axs)
+
+    patch = patches.Circle((0, 0), radius=15, transform=axs.transData, fc='none', ec='k', lw=0.1)
+    axs.add_patch(patch)
+    im.set_clip_path(patch)
+
+    axs.tick_params(axis="both", direction="in", top=True, labeltop=False, bottom=True,
+                    labelbottom=True, left=True, labelleft=True, right=True, labelright=False, labelsize=14)
+    axs.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
+    axs.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
+
+    cax = divider.append_axes("top", size="5%", pad=0.01)
+    cbar = plt.colorbar(im, cax=cax, orientation='horizontal', ticks=None, fraction=0.05,
+                     pad=0.01)
+    cbar.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=True,
+                        labelbottom=False, pad=0.01, labelsize=14)
+    cbar.ax.xaxis.set_label_position('top')
+    cbar.ax.set_xlabel(f'Shear Angle ({angle_units})', fontsize=18)
+
+    # Write the timme range on the plot
+
+    clock_angle_degrees = np.round(clock_angle, 2)
+    dipole_angle_degrees = np.round(dipole_tilt_angle * 180 / np.pi, 2)
+
+    axs.text(1.0, 0.5, f'Time of observation: {time_observation}', horizontalalignment='left',
+              verticalalignment='center', transform=axs.transAxes, rotation=270, color='r')
+
+    axs.text(0.01, 0.99, f'Clock Angle: {clock_angle_degrees}$^\circ$', horizontalalignment='left',
+              verticalalignment='top', transform=axs.transAxes, rotation=0, color='r')
+
+    axs.text(0.99, 0.99, f'Dipole tilt: {dipole_angle_degrees}$^\circ$',
+    horizontalalignment='right', verticalalignment='top', transform=axs.transAxes, rotation=0,
+    color='r')
+
+    if (plot_figure):
+        plt.show()
+
     if (save_figure):
-        fig, axs = plt.subplots(1, 1, figsize=(8, 6))
-
-        im = axs.imshow(abs(np.transpose(shear)), extent=[-15, 15, -15, 15], origin='lower',
-                        cmap=plt.cm.viridis)
-        divider = make_axes_locatable(axs)
-
-        patch = patches.Circle((0, 0), radius=15, transform=axs.transData, fc='none', ec='k', lw=0.1)
-        axs.add_patch(patch)
-        im.set_clip_path(patch)
-
-        axs.tick_params(axis="both", direction="in", top=True, labeltop=False, bottom=True,
-                        labelbottom=True, left=True, labelleft=True, right=True, labelright=False, labelsize=14)
-        axs.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
-        axs.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
-
-        cax = divider.append_axes("top", size="5%", pad=0.01)
-        cbar = plt.colorbar(im, cax=cax, orientation='horizontal', ticks=None, fraction=0.05,
-                         pad=0.01)
-        cbar.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=True,
-                            labelbottom=False, pad=0.01, labelsize=14)
-        cbar.ax.xaxis.set_label_position('top')
-        cbar.ax.set_xlabel(f'Shear Angle ({angle_units})', fontsize=18)
-        if (plot_figure):
-            plt.show()
-
         fig.savefig(f'{figure_file}_{model_type}_{dr}dr.{figure_format}',
                     bbox_inches='tight', pad_inches=0.05, format=figure_format, dpi=300)
         plt.close()
-        print(f"Figure saved to figures/{figure_file}_{data_file}_{model_type}_{dr}dr.png")
+        print(f"Figure saved to {figure_file}_{data_file}_{model_type}_{dr}dr.png")
 
     return shear
-'''
+
 inputs = {
     "b_imf" : None,
     "np_imf" : None,
@@ -526,11 +565,11 @@ inputs = {
     "model_type" : "t96",
     "angle_units" : "degrees",
     "use_real_data" : True,
-    "time_observation" : "2016-12-24 15:10:00",
-    "dt" : 2,
+    "time_observation" : "2016-12-07 05:16:00",
+    "dt" : 5,
     "save_data" : False,
     "data_file" : None,
-    "plot_figure" : False,
+    "plot_figure" : True,
     "save_figure" : True,
     "figure_file" : "shear_angle_calculator",
     "figure_format" : "pdf",
@@ -538,4 +577,3 @@ inputs = {
 }
 
 shear_angle_calculator(**inputs)
-'''

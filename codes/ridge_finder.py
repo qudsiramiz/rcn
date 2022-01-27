@@ -1,131 +1,153 @@
-import time
-import numpy as np
-import h5py as hf
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from scipy import signal, interpolate
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+def ridge_finder(
+    image=None,
+    t_range=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
+    xrange=[-15.1, 15],
+    yrange=[-15.1, 15],
+    dr=0.5,
+    sigma=2.2,
+    mode="nearest",
+    alpha=1.,
+    vmin=None,
+    vmax=None,
+    cmap="viridis",
+    draw_patch=False,
+    draw_ridge=False,
+    save_fig=True,
+    fig_name="new",
+    fig_format="pdf",
+    c_label="none",
+    c_unit="none",
+    ):
+    r"""
+    Finds ridges in an image and plot the points with maximum ridge value on the given image.
 
-start = time.time()
+    Parameters
+    ----------
+    image : ndarray
+            The image to find ridges in. Default is None.
+    xrange : list of floats, optional
+            The range of x-values for image. Default is [-15.1, 15].
+    yrange : list of floats, optional
+            The range of y-values for image. Default is [-15.1, 15].
+    dr : float, optional
+            The step size for the grid. Default is 0.5.
+    sigma : float
+            The size of the filter. Default is 2.2.
+    mode : str
+            The mode of the filter. Can be 'nearest', 'reflect', 'constant', 'mirror', 'wrap' or
+            'linear'. Default is 'nearest'.
+    alpha : float
+            The alpha value for the filter. Default is 0.5.
+    vmin : float, optional
+            The minimum value of the colorbar. Default is None.
+    vmax : float, optional
+            The maximum value of the colorbar. Default is None.
+    cmap : str, optional
+            The colormap to use. Default is 'viridis'.
+    draw_patch : bool, optional
+            Whether to draw the circular patch. Default is False.
+    draw_ridge : bool, optional
+            Whether to draw the ridge line. Default is False.
+    save_fig : bool, optional
+            Whether to save the figure. Default is True.
+    fig_name : str, optional
+            The name of the figure. Default is "new".
+    fig_format : str, optional
+            The format of the figure. Default is "pdf".
+    c_label : str, optional
+            The label for the colorbar. Default is "none".
+    c_unit : str, optional
+            The units for the colorbar label. Default is "none".
 
-# Load data
-dat = hf.File('../data/all_data_rx_model_0.25re_0.5mp_t96_2021-10-20.h5')
+    Raises
+    ------
+    ValueError: If the image is not a numpy array.
 
-image = dat['shear'][:, :]
+    Returns
+    -------
+    ridge_points : ndarray
+    """
+    if image is None:
+        raise ValueError("No image given")
 
-y_shu = dat['y_shu'][:, :]
-z_shu = dat['z_shu'][:, :]
+    # NOTE: This is a hack to ensure that the output of shear angle, reconnection energy etc. agrees
+    # with what has been reported in literature. Plot for shear angle seems to agree reasonably well
+    # (for "trange = ['2016-12-07 05:11:00', '2016-12-07 05:21:00']") with the one reported by
+    # FuselierJGR2019 (doi:10.1029/2019JA027143, see fig. 4).
+    image_rotated = np.transpose(np.flipud(np.fliplr(image)))
 
-y_shu_min = np.nanmin(y_shu)
-z_shu_min = np.nanmin(z_shu)
+    if cmap is None:
+        cmap = "viridis"
+    if(vmin is not None and vmax is not None):
+        norm = plt.Normalize(vmin=vmin, vmax=vmax)
+    else:
+        norm = plt.Normalize()
 
-y_shu_max = np.nanmax(y_shu)
-z_shu_max = np.nanmax(z_shu)
+    #cmap = plt.cm.jet
 
-y_arr = np.linspace(y_shu_min, y_shu_max, np.shape(y_shu)[0])
-z_arr = np.linspace(z_shu_min, z_shu_max, np.shape(z_shu)[0])
+    kwargs = {'sigmas': [3], 'black_ridges': False, 'mode': mode, 'alpha': 1}
 
-print('Creating interpolation function...\n')
+    # Smoothen the image
+    image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode=mode)
+    result = meijering(image_smooth, **kwargs)
 
-# Create an interpolation function for the dataset
-interp_func = interpolate.RectBivariateSpline(y_arr, z_arr, image)
+    x_len = image_rotated.shape[0]
+    y_len = image_rotated.shape[1]
 
-print('Interpolation done \n')
+    y_val = np.full(y_len, np.nan)
+    im_max_val = np.full(y_len, np.nan)
+    for i in range(y_len):
+        y_val[i] = np.argmax(result[:, i]) * dr + yrange[0]
+        im_max_val[i] = np.argmax(image_rotated[:, i]) * dr + yrange[0]
 
-# interp = input('Carry out interpolation process? (y/n)==>  ')
-interp=''
-print('')
+    # plt.close('all')
+    fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
 
-if(interp):
-    print('Creating interpolation function...\n')
-    interp_func = interpolate.interp2d(y_shu, z_shu, image)
-    print('Interpolation done \n')
+    im1 = axs1.imshow(image_smooth, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
+                      origin='lower', cmap=cmap, norm=norm)
+    divider1 = make_axes_locatable(axs1)
 
-# Define a kernel for smoothing the image
-kernel = np.array([[1, 3, 3, 1], [3, 9, 9, 3], [3, 9, 9, 3], [1, 3, 3, 1]])
-# kernel = np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]])
+    if draw_ridge:
+        axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val, 'k-', alpha=0.9)
+        axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
 
-smooth_image = signal.convolve2d(image, kernel, mode='full', boundary='symm', fillvalue=np.nan)
+    # Plot a horizontal line at x=0 and a vertical line at y=0
+    axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
+    axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
 
-# Compute the Hessian matrix
-x_deriv_kernel = np.atleast_2d([-1, 0, 1])
-y_deriv_kernel = x_deriv_kernel.T
+    if(draw_patch):
+        patch = patches.Circle((0, 0), radius=(xrange[1] - xrange[0])/2., transform=axs1.transData,
+                            fc='none', ec='k', lw=0.1)
+        axs1.add_patch(patch)
+        im1.set_clip_path(patch)
 
-Lx = signal.convolve2d(smooth_image, x_deriv_kernel, mode='same', boundary='symm', fillvalue=np.nan)
-Ly = signal.convolve2d(smooth_image, y_deriv_kernel, mode='same', boundary='symm', fillvalue=np.nan)
+    axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
+    axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
 
-Lxy=signal.convolve2d(Lx, y_deriv_kernel)
-Lxx=signal.convolve2d(Lx, x_deriv_kernel)
-Lyy=signal.convolve2d(Ly, y_deriv_kernel)
+    # Define the location of the colorbar, it's size relative to main figure and the padding
+    # between the colorbar and the figure, the orientation the colorbar
+    cax1 = divider1.append_axes("top", size="5%", pad=0.01)
+    cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
+                         pad=0.01)
+    cbar1.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=False,
+                         labelbottom=False, pad=0.01)
+    cbar1.ax.xaxis.set_label_position('top')
+    cbar1.ax.set_xlabel(f'{c_label} ({c_unit})', fontsize=18)
 
-first_deri = Lxy
-second_deri = Lxy
+    # Write the timme range on the plot
+    axs1.text(1.0, 0.5, f'Time range: {trange[0]} - {trange[1]}', horizontalalignment='left',
+              verticalalignment='center', transform=axs1.transAxes, rotation=270, color='r')
 
-eig_val = np.full((np.shape(image)[0], np.shape(image)[1], 2), np.nan)
-eig_vec =  np.full((np.shape(image)[0], np.shape(image)[1], 2, 2), np.nan)
+    # fig.show()
 
-ridge = np.full(np.shape(image), np.nan)
-x1_val = np.full(np.shape(image), np.nan)
-y1_val = np.full(np.shape(image), np.nan)
-x2_val = np.full(np.shape(image), np.nan)
-y2_val = np.full(np.shape(image), np.nan)
-
-for i in range(np.shape(image)[0]):
-    for j in range(np.shape(image)[1]):
-
-        result = np.linalg.eig([[Lxx[i, j], Lxy[i, j]], [Lxy[i, j], Lyy[i, j]]])
-
-        eig_val[i, j] = result[0]
-        eig_vec[i, j] = result[1]
-        second_deri[i, j] = np.min(result[0])
-        step = 1.00
-        x1_val[i, j] = i + eig_vec[i, j][0, 0] * step
-        y1_val[i, j] = j + eig_vec[i, j][0, 1] * step
-
-        x2_val[i, j] = i - eig_vec[i, j][0, 0] * step
-        y2_val[i, j] = j - eig_vec[i, j][0, 1] * step
-
-        xx1 = interp_func(x1_val[i, j], y1_val[i, j])
-        xx2 = interp_func(x2_val[i, j], y2_val[i, j])
-        diff = (xx1 - image[i, j]) * (image[i, j] - xx2)
-
-        if(diff < 0 and second_deri[i, j] < 0):
-            ridge[i, j] = (second_deri[i, j])**2
-
-idx = np.full(len(y_arr), np.nan)
-for i in range(len(y_arr)):
-    temp = np.where(ridge[:, i] == np.nanmax(ridge[:, i]))[0]
-    idx[i] = temp[0]
-idx = idx.astype(int)
-
-# plt.close('all')
-fig, (axs1, axs2) = plt.subplots(1, 1, figsize=(8, 6))
-im1 = axs1.imshow(image.T, extent=[-15, 15, -15, 15], origin='lower', cmap=plt.cm.Spectral)
-divider1 = make_axes_locatable(axs1)
-
-
-axs1.plot(y_arr, z_arr[idx], 'k-', ms=1, lw=2)
-# Define the location of the colorbar, it's size relative to main figure and the padding
-# between the colorbar and the figure, the orientation the colorbar
-cax1 = divider1.append_axes("top", size="5%", pad=0.01 )
-cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05, pad=0.01)
-
-cbar1.ax.xaxis.set_label_position('top')
-
-im2 = axs2.imshow(ridge.T, origin='lower', cmap=plt.cm.Spectral,
-        norm=mpl.colors.LogNorm(vmin=100, vmax=1e3))
-divider2 = make_axes_locatable(axs2)
-
-# Define the location of the colorbar, it's size relative to main figure and the padding
-# between the colorbar and the figure, the orientation the colorbar
-cax2 = divider2.append_axes("top", size="5%", pad=0.01 )
-cbar2 = plt.colorbar(im2, cax=cax2, orientation='horizontal', ticks=None, fraction=0.05, pad=0.01)
-
-cba
-cbar2.ax.xaxis.set_label_position('top')
-
-
-fig.show()
-
-print(f'Took {round(time.time() - start, 3)} seconds')
-
+    if save_fig:
+        try:
+            fig_name = f'../figures/ridge_plot_vir_{fig_name}_{dr}dr_{m_p}mp_{t_range[0][:10]}_{t_range[0][-8:]}_{t_range[1][:10]}_{t_range[1][-8:]}.{fig_format}'
+            plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
+            print(f'Figure saved as {fig_name}')
+        except  Exception as e:
+            print(e)
+            print(f'Figure not saved, folder does not exist. Create folder ../figures')
+            #pass
+        plt.close()
+    return y_val
