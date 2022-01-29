@@ -38,20 +38,20 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     angle: float
         Angle between the two vectors, in radians by default
     """
-    unit_vec_1 = b_vec_1/np.linalg.norm(b_vec_1)
-    unit_vec_2 = b_vec_2/np.linalg.norm(b_vec_2)
+    unit_vec_1 = b_vec_1 / np.linalg.norm(b_vec_1)
+    unit_vec_2 = b_vec_2 / np.linalg.norm(b_vec_2)
     angle = np.arccos(np.dot(unit_vec_1, unit_vec_2))
 
     #dp = b_vec_1[0] * b_vec_2[0] + b_vec_1[1] * b_vec_2[1] + b_vec_1[2] * b_vec_2[2]
 
-    #mag1 = np.linalg.norm( b_vec_1)
-    #mag2 = np.linalg.norm( b_vec_2)
-    #angle = np.arccos(dp/(mag1*mag2))
+    # mag1 = np.linalg.norm( b_vec_1)
+    # mag2 = np.linalg.norm( b_vec_2)
+    # angle = np.arccos(dp/(mag1*mag2))
 
     if (angle_unit == "radians"):
         return angle
     elif (angle_unit == "degrees"):
-        return angle * 180/np.pi
+        return angle * 180 / np.pi
     else:
         raise KeyError("angle_unit must be radians or degrees")
 
@@ -173,8 +173,8 @@ def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
     rx_mag_1 = np.linalg.norm(rx_b_1)
     rx_mag_2 = np.linalg.norm(rx_b_2)
 
-    vcs = va_p1 * np.sqrt(rx_mag_1 * rx_mag_2 * (rx_mag_1 + rx_mag_2)/(rx_mag_1 * n_2 +
-                                                                       rx_mag_2 * n_1))
+    vcs = va_p1 * np.sqrt(rx_mag_1 * rx_mag_2 * (rx_mag_1 +
+                          rx_mag_2) / (rx_mag_1 * n_2 + rx_mag_2 * n_1))
 
     return vcs
 
@@ -201,7 +201,8 @@ def get_bis(b_vec_1, b_vec_2):
         The magnitude of bisected field line corresponding to the first input magnetic field vector.
 
     bis_field_2 : float
-        The magnitude of bisected field line corresponding to the second input magnetic field vector.
+        The magnitude of bisected field line corresponding to the second input magnetic field
+        vector.
     """
     b_vec_1 = np.array(b_vec_1)
     b_vec_2 = np.array(b_vec_2)
@@ -407,7 +408,8 @@ def ridge_finder(
     horizontalalignment='left', verticalalignment='top', transform=axs1.transAxes, rotation=0,
     color='r')
     axs1.text(0.99, 0.99, f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} $^\circ$',
-    horizontalalignment='right', verticalalignment='top', transform=axs1.transAxes, rotation=0, color='r')
+              horizontalalignment='right', verticalalignment='top', transform=axs1.transAxes,
+              rotation=0, color='r')
     # fig.show()
 
     if save_fig:
@@ -460,10 +462,12 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
         raise ValueError("No coordinates or field components given")
 
     fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
-    im1 = axs1.quiver(x_coord, y_coord, by, bz, scale=scale, scale_units='inches', angles='uv', width=0.002)
+    im1 = axs1.quiver(x_coord, y_coord, by, bz, scale=scale,
+                      scale_units='inches', angles='uv', width=0.002)
     axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_fontsize)
     axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_fontsize)
-    patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none', ec='none', lw=0.1)
+    patch = patches.Circle(
+        (0, 0), radius=15, transform=axs1.transData, fc='none', ec='none', lw=0.1)
     axs1.add_patch(patch)
     axs1.set_clip_path(patch)
     im1.set_clip_path(patch)
@@ -606,7 +610,14 @@ def model_run(*args):
     return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh
 
 
-def get_sw_params(probe=None, omni_level="hro", time_clip=True, trange=None, mms_probe=None, verbose=False):
+def get_sw_params(
+    probe=None,
+    omni_level="hro",
+    time_clip=True,
+    trange=None,
+    mms_probe=None,
+    verbose=False
+    ):
     r"""
     Get the solar wind parameters from the OMNI database.
 
@@ -642,7 +653,8 @@ def get_sw_params(probe=None, omni_level="hro", time_clip=True, trange=None, mms
 
     # Check if trange is either a list or an array of length 2
     if not isinstance(trange, (list, np.ndarray)) or len(trange) != 2:
-        raise ValueError("trange must be specified as a list or array of length 2 in the format 'YYYY-MM-DD HH:MM:SS.")
+        raise ValueError(
+            "trange must be specified as a list or array of length 2 in the format 'YYYY-MM-DD HH:MM:SS.")
 
     # Get time range as a datetime object
     trange_unix = [parser.parse(xx) for xx in trange]
