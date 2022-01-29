@@ -413,7 +413,7 @@ def ridge_finder(
     if save_fig:
         try:
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_name = f'../figures/{fig_name}/ridge_plot_{fig_name}_{fig_time_range}_{t_range[1][:10]}_{t_range[1][-8:]}.{fig_format}'
+            fig_name = f'../figures/{fig_name}/ridge_plot_{fig_name}_{fig_time_range}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
             print(f'Figure saved as {fig_name}')
         except  Exception as e:
