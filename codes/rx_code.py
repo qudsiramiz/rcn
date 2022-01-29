@@ -37,7 +37,7 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 trange_list = [
                 ['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
                 ['2016-12-07 05:05:00', '2016-12-07 05:33:00'],
-                #['2015-09-08 11:05:00', '2015-09-08 11:15:00'],
+#                ['2015-09-08 11:05:00', '2015-09-08 11:15:00'],
                 ['2015-10-16 10:28:00', '2015-10-16 10:38:00'],
                 ['2015-10-16 13:02:00', '2015-10-16 13:12:00'],
                 ['2015-10-22 06:00:00', '2015-10-22 06:10:00'],
@@ -47,11 +47,11 @@ trange_list = [
                 ['2015-12-08 11:15:00', '2015-12-08 11:25:00'],
                 ['2015-12-14 01:12:00', '2015-12-14 01:22:00'],
                 ['2016-01-10 09:08:00', '2016-01-10 09:18:00'],
-                ['2016-02-07 20:18:00', '2016-02-07 20:28:00']
+#                ['2016-02-07 20:18:00', '2016-02-07 20:28:00']
     ]
 code_run = '1'
 #if(code_run):
-for trange in trange_list[:]:
+for trange in trange_list[-1:]:
     print(trange)
     r"""
     RX model from the IDL code.
@@ -252,48 +252,48 @@ for trange in trange_list[:]:
         if 'shear' in plot_type:
             print('Plotting shear')
             ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-            sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='shear_vp', c_label='Shear',
+            sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='shear', c_label='Shear',
             c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
         if 'rx_en' in plot_type:
             print('Plotting rx_en')
             ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
-            yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='rx_en_vp',
+            yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='rx_en',
             c_label='Rx_en', c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
         if 'va_cs' in plot_type:
             print('Plotting va_cs')
             ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-            sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='va_cs_vp', c_label='Va_cs',
+            sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='va_cs', c_label='Va_cs',
             c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
         if 'bisec_msp' in plot_type:
             print('Plotting bisec_msp')
             ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max],
-            yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msp_vp',
+            yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msp',
             c_label='Bisec_msp', c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
         if 'bisec_msh' in plot_type:
             print('Plotting bisec_msh')
             ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max],
-            yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msh_vp',
+            yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msh',
             c_label='Bisec_msh', c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
     elif plot_type == 'all':
         print('Plotting for all')
         ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='shear_vp', c_label='Shear',
+        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='shear', c_label='Shear',
         c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
 
         ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
-        yrange=[z_min, z_max], sigma=2.8, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='rx-en_nPa_vp',
+        yrange=[z_min, z_max], sigma=2.8, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='rx-en_nPa',
         c_label='Reconnection Energy', c_unit='nPa', draw_patch=draw_patch, draw_ridge=True)
 
         ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=3., dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='va-cs_vp', c_label='Exhaust Velocity',
+        sigma=3., dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='va-cs', c_label='Exhaust Velocity',
         c_unit='km/s', draw_patch=draw_patch, draw_ridge=True)
 
         ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msp_vp', c_label='Bisection Field',
+        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msp', c_label='Bisection Field',
         c_unit='nT', draw_patch=draw_patch, draw_ridge=True)
 
         ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msh_vp', c_label='Bisection Field',c_unit='nT', draw_patch=draw_patch, draw_ridge=True)
+        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msh', c_label='Bisection Field',c_unit='nT', draw_patch=draw_patch, draw_ridge=True)
     elif plot_type=='shear':
         print(trange)
         print('Plotting shear')
@@ -303,27 +303,27 @@ for trange in trange_list[:]:
     elif plot_type=='rx_en':
         print('Plotting rx_en')
         ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
-        yrange=[z_min, z_max], sigma=2.8, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='rx-en_nPa_vp',
+        yrange=[z_min, z_max], sigma=2.8, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='rx-en_nPa',
         c_label='Reconnection Energy', c_unit='nPa', draw_patch=draw_patch, draw_ridge=True)
     elif plot_type=='va_cs':
         print('Plotting va_cs')
         y_val =ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=3., dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='va-cs_vp', c_label='Exhaust Velocity',
+        sigma=3., dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='va-cs', c_label='Exhaust Velocity',
         c_unit='km/s', draw_patch=draw_patch, draw_ridge=True)
     elif plot_type=='bisec_msp':
         print('Plotting bisec_msp')
         ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msp_vp', c_label='Bisection Field',c_unit='nT', draw_patch=draw_patch, draw_ridge=True)
+        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msp', c_label='Bisection Field',c_unit='nT', draw_patch=draw_patch, draw_ridge=True)
     elif plot_type=='bisec_msh':
         print('Plotting bisec_msh')
         ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msh_vp', c_label='Bisection Field',
+        sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi, fig_name='bisec_msh', c_label='Bisection Field',
         c_unit='nT', draw_patch=draw_patch, draw_ridge=True)
     else:
         raise KeyError('plot_type must be one or a list of: all, shear, rx-en, va-cs, bisec_msp, bisec_msh')
 
     #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True,
-    #                      scale=40, fig_name="magnetosheath_vp")
+    #                      scale=40, fig_name="magnetosheath")
     #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
-    #                 fig_name="magnetosphere_vp")
+    #                 fig_name="magnetosphere")
 print(f'Took {round(time.time() - start, 3)} seconds')

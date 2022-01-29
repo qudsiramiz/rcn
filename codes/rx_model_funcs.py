@@ -412,7 +412,7 @@ def ridge_finder(
 
     if save_fig:
         try:
-            fig_name = f'../figures/ridge_plot_{fig_name}_{t_range[0][:10]}_{t_range[0][-8:]}_{t_range[1][:10]}_{t_range[1][-8:]}.{fig_format}'
+            fig_name = f'../figures/{fig_name}/ridge_plot_{fig_name}_{t_range[0][:10]}_{t_range[0][-8:]}_{t_range[1][:10]}_{t_range[1][-8:]}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
             print(f'Figure saved as {fig_name}')
         except  Exception as e:
