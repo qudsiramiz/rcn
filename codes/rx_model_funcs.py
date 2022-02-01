@@ -432,6 +432,7 @@ def ridge_finder_multiple(
     fig_size=(10, 10),
     box_style=None,
     title_y_pos=0.95,
+    interpolation='nearest',
     ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -498,6 +499,10 @@ def ridge_finder_multiple(
             The style of the box. Default is None.
     title_y_pos : float, optional
             The y-position of the title. Default is 0.95.
+    interpolation : str, optional
+            The interpolation method for imshow. Default is 'nearest'.
+            Options are 'nearest', 'bilinear', 'bicubic', 'spline16', 'spline36', 'hanning',
+            'hamming', 'hermite', 'kaiser', 'quadric', 'catrom', 'gaussian', 'bessel', 'mitchell'
 
     Raises
     ------
@@ -576,14 +581,14 @@ def ridge_finder_multiple(
 
         axs1 = plt.subplot(gs[j, k])
         im1 = axs1.imshow(image_smooth, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
-                          origin='lower', cmap=cmap_list[i], norm=norm, interpolation='gaussian',
+                          origin='lower', cmap=cmap_list[i], norm=norm, interpolation=interpolation,
                           alpha=1)
         divider1 = make_axes_locatable(axs1)
 
         # Take rolling average of the y_val array
         y_val_avg = np.full(len(y_val), np.nan)
         for xx in range(len(y_val)):
-            y_val_avg[xx] = np.nanmean(y_val[max(0, xx-5):min(len(y_val), xx+5)])
+            y_val_avg[xx] = np.nanmean(y_val[max(0, xx-25):min(len(y_val), xx+25)])
     
         if draw_ridge:
             axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, 'k-', alpha=0.9)
