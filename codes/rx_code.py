@@ -1,10 +1,10 @@
 # This the python version of IDL code named 'RX_model_batch.pro'
 import datetime
 import time
-import h5py as hf
+
 import matplotlib.pyplot as plt
 import numpy as np
-import multiprocessing as mp
+
 from rx_model_funcs import *
 
 # Set the fontstyle to Times New Roman
@@ -16,235 +16,164 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
-#def rx_model_batch(
-#    probe=None,
-#    omni_level='hro',
-#    maximum_shear=True,
-#    mms_probe='mms1',
-#    movie=None,
-#    trange=None,
-#    model_type='t96',
-#    m_p=0.5,
-#    dr=0.25
-#    y_min= -20,
-#    y_max= 20,
-#    z_min= -20,
-#    z_max= 20,
-#    draw_patch=False,
-#    save_data=False,
-#    plot_type="shear"
-#):
 trange_list = [
-                ['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
-                ['2016-12-07 05:05:00', '2016-12-07 05:33:00'],
-#                ['2015-09-08 11:05:00', '2015-09-08 11:15:00'],
-                ['2015-10-16 10:28:00', '2015-10-16 10:38:00'],
-                ['2015-10-16 13:02:00', '2015-10-16 13:12:00'],
-                ['2015-10-22 06:00:00', '2015-10-22 06:10:00'],
-                ['2015-11-01 15:03:00', '2015-11-01 15:13:00'],
-                ['2015-11-12 07:14:00', '2015-11-12 07:24:00'],
-                ['2015-12-06 23:35:00', '2015-12-06 23:45:00'],
-                ['2015-12-08 11:15:00', '2015-12-08 11:25:00'],
-                ['2015-12-14 01:12:00', '2015-12-14 01:22:00'],
-                ['2016-01-10 09:08:00', '2016-01-10 09:18:00'],
-#                ['2016-02-07 20:18:00', '2016-02-07 20:28:00']
-    ]
-code_run = '1'
-#if(code_run):
-for trange in trange_list[-1:]:
-    print(trange)
-    r"""
-    RX model from the IDL code.
+['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
+['2016-12-07 05:05:00', '2016-12-07 05:33:00'],
+#['2015-09-08 11:05:00', '2015-09-08 11:15:00'],
+['2015-09-19 07:43:30'],
+['2015-10-16 10:33:30'],
+['2015-10-16 13:07:02'],
+['2015-10-22 06:05:22'],
+['2015-11-01 15:08:06'],
+['2015-11-12 07:19:21'],
+['2015-12-06 23:38:31'],
+['2015-12-08 11:20:44'],
+['2015-12-09 01:06:11'],
+['2015-12-14 01:17:40'],
+['2016-01-07 09:36:15'],
+['2016-01-10 09:13:37'],
+['2016-10-22 12:58:41'],
+['2016-11-02 14:46:18'],
+['2016-11-06 08:40:58'],
+['2016-11-12 17:48:47'],
+['2016-11-13 09:10:41'],
+['2016-11-18 12:08:11'],
+['2016-11-23 07:49:33'],
+['2016-11-23 07:49:52'],
+['2016-11-23 07:50:30'],
+['2016-11-28 15:47:00'],
+['2016-12-11 04:41:50'],
+['2016-12-19 14:15:02'],
+['2017-01-02 02:58:13'],
+['2017-01-11 04:22:43'],
+['2017-01-20 12:32:07'],
+['2017-01-22 10:15:46'],
+['2017-01-22 10:15:58'],
+['2017-01-22 10:47:33'],
+['2017-01-27 12:05:43'],
+]
+count = 0
+for trange in trange_list[:]:
 
-    Parameters
-    ----------
-    probe : TYPE, optional
-        DESCRIPTION. The default is probe.
-    maximum_shear : TYPE, optional
-        DESCRIPTION. The default is maximum_shear.
-    movie : TYPE, optional.
-        The default is movie.
-    mmsprobe : TYPE, optional
-        DESCRIPTION. The default is mmsprobe.
-    times : TYPE, optional
-        DESCRIPTION. The default is times.
-    trange : TYPE, optional
-        Range of times to use. The default is trange.
-    model_type : TYPE, optional
-        Type of Tsyganenko model. The default is 't96'.
-    m_p : float, optional
-        Thickness of the magnetopause. The default is 0.5.
-    dr : float, optional
-        Resolution of the model. The default is 0.25.
-    y_min : float, optional
-        Minimum y value. The default is -20.
-    y_max : float, optional
-        Maximum y value. The default is 20.
-    z_min : float, optional
-        Minimum z value. The default is -20.
-    z_max : float, optional
-        Maximum z value. The default is 20.
-    draw_patch : bool, optional
-        Draw the patch of a given radius around the figure. The default is False. If it is set to
-        true then the radius of the patch is automatically computed as the maximum value of the
-        x-axis.
-    save_data : bool, optional
-        If True, the data will be saved in an HDF file. The default is False.
-    plot_type : String or array of strings, optional
-        Type of the plot one wants to get once the code has finished running. The default is
-        "shear". Other options are "rx_en", "va_cs", "bisec_msp", "bisec_msh" and "all" for all of
-        them.
-
-    Raises
-    ------
-    KeyError:
-        If "plot_type" is not in the list of plot types.
-    Returns
-    -------
-    None.
-    """
-    probe = None
-    omni_level = 'hro'
-    maximum_shear = True
-    mms_probe = None
-    movie = None
-    #trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
-    #trange = ['2016-12-07 05:11:00', '2016-12-07 05:21:00']
-    #trange = ['2016-12-29 03:53:00', '2016-12-29 04:03:00']
-    #trange = ['2015-09-08 11:05:00', '2015-09-08 11:15:00']
-    model_type = 't96'
-    m_p = 0.5  # Magnetopause thichkness
-    dr = 0.5  # Resolution of model run in R_E units
+    mms_probe_num = '1'
     min_max_val = 15
-    y_min = -min_max_val
+    dr = 0.5
+    y_min = - min_max_val
     y_max = min_max_val
-    z_min = -min_max_val
+    z_min = - min_max_val
     z_max = min_max_val
-    save_data = False
-    plot_type = "ttt"
-    draw_patch = True
 
-    sw_params = get_sw_params(probe=probe, omni_level=omni_level,
-                              trange=trange, mms_probe=mms_probe, verbose=True)
+    model_inputs = {
+        'trange': trange,
+        "probe" : None,
+        "omni_level" : 'hro',
+        "mms_probe_num" : mms_probe_num,
+        "model_type" : 't96',
+        "m_p" : 0.5,
+        "dr" : dr,
+        "min_max_val" : min_max_val,
+        "y_min" : y_min,
+        "y_max" : y_max,
+        "z_min" : z_min,
+        "z_max" : z_max,
+        "save_data" : False,
+        }
+    bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params = rx_model(**model_inputs)
 
-    n_arr_y = int((y_max - y_min) / dr) + 1
-    n_arr_z = int((z_max - z_min) / dr) + 1
 
-    bx = np.full((n_arr_y, n_arr_z), np.nan)
-    by = np.full((n_arr_y, n_arr_z), np.nan)
-    bz = np.full((n_arr_y, n_arr_z), np.nan)
+    figure_inputs = {
+        "image" : [shear, rx_en/np.nanmax(rx_en), va_cs, bisec_msp],
+        "t_range" : trange,
+        "xrange" : [y_min, y_max],
+        "yrange" : [z_min, z_max],
+        "mms_probe_num" : mms_probe_num,
+        "mms_sc_pos" : [np.nanmean(sw_params['mms_sc_pos'][:,1]),
+                        np.nanmean(sw_params['mms_sc_pos'][:,2])],
+        "dr" : dr,
+        "dipole_tilt_angle" : sw_params['ps'],
+        "imf_clock_angle" : sw_params['imf_clock_angle'],
+        "sigma" : [2, 2, 2, 2],
+        "mode" : "nearest",
+        "alpha" : 1,
+        "vmin" : [0, 0, None, None],
+        "vmax" : [180, 1, None, None],
+        "cmap_list" : ["viridis", "cividis", "plasma", "inferno"],
+        "draw_patch" : [True, True, True, True],
+        "draw_ridge" : [True, True, True, True],
+        "save_fig" : True,
+        "fig_name" : f'all_ridge_plots',
+        #"fig_format" : 'png',
+        "c_label" : ['Shear', 'Reconnection Energy', 'Exhaust Velocity', 'Bisection Field'],
+        "c_unit" : [r'${}^\circ$', 'nPa', 'km/s', 'nT'],
+        "wspace" : 0.0,
+        "hspace" : 0.17,
+        "fig_size" : (8.775, 10),
+        "box_style": dict(boxstyle='round', facecolor='black', alpha=0.8),
+        "title_y_pos" : 1.07,
+    }
 
-    bx_ext = np.full((n_arr_y, n_arr_z), np.nan)
-    by_ext = np.full((n_arr_y, n_arr_z), np.nan)
-    bz_ext = np.full((n_arr_y, n_arr_z), np.nan)
-
-    bx_igrf = np.full((n_arr_y, n_arr_z), np.nan)
-    by_igrf = np.full((n_arr_y, n_arr_z), np.nan)
-    bz_igrf = np.full((n_arr_y, n_arr_z), np.nan)
-
-    b_msx = np.full((n_arr_y, n_arr_z), np.nan)
-    b_msy = np.full((n_arr_y, n_arr_z), np.nan)
-    b_msz = np.full((n_arr_y, n_arr_z), np.nan)
-
-    x_shu = np.full((n_arr_y, n_arr_z), np.nan)
-    y_shu = np.full((n_arr_y, n_arr_z), np.nan)
-    z_shu = np.full((n_arr_y, n_arr_z), np.nan)
-
-    rho_sh = np.full((n_arr_y, n_arr_z), np.nan)
-
-    # rp = np.full((n_arr, n_arr), np.nan)
-
-    # r = np.full((n_arr, n_arr), np.nan)
-    # zp = np.full((n_arr, n_arr), np.nan)
-    # x0 = np.full((n_arr, n_arr), np.nan)
-
-    shear = np.full((n_arr_y, n_arr_z), np.nan)
-    rx_en = np.full((n_arr_y, n_arr_z), np.nan)
-    gd1 = np.full((n_arr_y, n_arr_z), np.nan)
-    gd2 = np.full((n_arr_y, n_arr_z), np.nan)
-    va_cs = np.full((n_arr_y, n_arr_z), np.nan)
-    bisec_msp = np.full((n_arr_y, n_arr_z), np.nan)
-    bisec_msh = np.full((n_arr_y, n_arr_z), np.nan)
-    y_coord = np.full((n_arr_y, n_arr_z), np.nan)
-    z_coord = np.full((n_arr_y, n_arr_z), np.nan)
-    b_sh_ca = np.full((n_arr_y, n_arr_z), np.nan)
-    b_sh_mag = np.full((n_arr_y, n_arr_z), np.nan)
-    n_sh = np.full((n_arr_y, n_arr_z), np.nan)
-
-    d_theta = np.pi/100
-
-    # Shue et al.,1998, equation 10
-    # if (b_imf_z >=0):
-    #     ro = (11.44 + 0.013 * b_imf_z) * (p_dyn)**(-1.0/6.6)
-    #     #ro = (10.22 + 1.29 * np.tanh(0.184 * (b_imf_z + 8.14))) * (p_dyn)**(-1.0/6.6)
-    # else:
-    #    ro = (11.44 + 0.14 * b_imf_z) * (p_dyn)**(-1.0/6.6)
-    ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params['b_imf'][2] + 8.14))) * (
-                                          sw_params['p_dyn'])**(-1.0/6.6)
-
-    # Shue et al.,1998, equation 11
-    # alpha = (0.58 - 0.010 * b_imf_z) * (1 + 0.010 * p_dyn)
-    alpha = (0.58 - 0.007 * sw_params['b_imf'][2]) * (1 + 0.024 * np.log(sw_params['p_dyn']))
-    rmp = ro * (2/(1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
-
-    A = 2
-    len_y = int((y_max - y_min)/dr) + 1
-    len_z = int((z_max - z_min)/dr) + 1
-
-    p = mp.Pool()
-
-    input = ((j, k, y_max, z_max, dr, m_p, ro, alpha, rmp, sw_params, 't96')
-             for j in range(len_y) for k in range(len_z))
-
-    print("Running the model\n")
-    res = p.map(model_run, input)
-    print("Model run complete")
-
-    p.close()
-    p.join()
-
-    for r in res:
-        j = r[0]
-        k = r[1]
-        bx[j, k] = r[2]
-        by[j, k] = r[3]
-        bz[j, k] = r[4]
-
-        shear[j, k] = r[5]
-        rx_en[j, k] = r[6]
-        va_cs[j, k] = r[7]
-        bisec_msp[j, k] = r[8]
-        bisec_msh[j, k] = r[9]
-
-    if save_data:
-        try:
-            fn = f'../data/all_data_rx_model_{dr}re_{m_p}mp_{model_type}_{today_date}.h5'
-            data_file = hf.File(fn, 'w')
-
-            data_file.create_dataset('bx', data=bx)
-            data_file.create_dataset('by', data=by)
-            data_file.create_dataset('bz', data=bz)
-
-            data_file.create_dataset('shear', data=shear)
-            data_file.create_dataset('rx_en', data=rx_en)
-            data_file.create_dataset('va_cs', data=va_cs)
-            data_file.create_dataset('bisec_msp', data=bisec_msp)
-            data_file.create_dataset('bisec_msh', data=bisec_msh)
-
-            data_file.close()
-            print(f'Date saved to file {fn}')
-        except Exception as e:
-            print(e)
-            print(
-                f'Data not saved to file {fn}. Please make sure that file name is correctly assigned and that the directory exists and you have write permissions')
-
+    ridge_finder_multiple(**figure_inputs, fig_format='png')
+    ridge_finder_multiple(**figure_inputs, fig_format='pdf')
+    count += 1
+    '''
     # Check if 'plot_type' has length attribute. If it has length attribute then plot the ridge plot
     # for each of the plot type in the list. If it does not have length attribute then plot the
     # ridge plot for the specified plot type.
-    ps = sw_params['ps']
-    imf_phi = sw_params['imf_clock_angle']
     plot_type = 'all'
-    types_of_plot = ['shear', 'rx_en', 'va_cs', 'bisec_msp', 'bisec_msh', 'all']
+    types_of_plot = ['shear', 'rx_en', 'va_cs', 'Bisec-msp', 'Bisec-msh', 'all']
+
+    common_figure_inputs = {
+        "t_range" : trange,
+        "xrange" : [y_min, y_max],
+        "yrange" : [z_min, z_max],
+        "sigma" : 2.2,
+        "dr" : dr,
+        "dipole_tilt_angle" : sw_params['ps'],
+        "imf_clock_angle" : sw_params['imf_clock_angle'],
+        "draw_patch" : True,
+        "draw_ridge" : True,
+        "mms_probe_num" : mms_probe_num,
+        "mms_sc_pos" : [np.nanmean(sw_params['mms_sc_pos'][:,1]),
+                        np.nanmean(sw_params['mms_sc_pos'][:,2])],
+        "fig_format" : 'png',
+    }
+
+    shear_figure_inputs = {
+        "image" : shear,
+        "fig_name" : "shear",
+        "c_label" : "Shear",
+        "c_unit" : r'${}^\circ$',
+        "cmap" : "cividis",
+        }
+
+    rx_en_figure_inputs = {
+        "image" : rx_en/np.nanmax(rx_en),
+        "fig_name" : "rx-en_nPa",
+        "c_label" : "Reconnection Energy",
+        "c_unit" : "nPa",
+        "cmap" : "viridis"
+    }
+    va_cs_figure_inputs = {
+        "image" : va_cs,
+        "fig_name" : "va-cs",
+        "c_label" : "Exhaust Velocity",
+        "c_unit" : "Km/s",
+        "cmap" : "plasma"
+    }
+    bisec_msp_figure_inputs = {
+        "image" : bisec_msp,
+        "fig_name" : "bisec_msp",
+        "c_label" : "Bisection Field",
+        "c_unit" : "nT",
+        "cmap" : "inferno"
+    }
+    bisec_msh_figure_inputs = {
+        "image" : bisec_msh,
+        "fig_name" : "bisec_msh",
+        "c_label" : "Bisection Field",
+        "c_unit" : "nT",
+        "cmap" : "magma"
+    }
     if isinstance(plot_type, list):
         for xx in plot_type:
             if xx not in types_of_plot:
@@ -253,97 +182,54 @@ for trange in trange_list[-1:]:
                     )
         if 'shear' in plot_type:
             print('Plotting shear')
-            ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                         sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                         fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$',
-                         draw_patch=draw_patch, draw_ridge=True)
+            _ = ridge_finder(**shear_figure_inputs, **common_figure_inputs)
         if 'rx_en' in plot_type:
             print('Plotting rx_en')
-            ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
-                         yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps,
-                         imf_clock_angle=imf_phi, fig_name='rx_en', c_label='Rx_en',
-                         c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
+            _ = ridge_finder(**rx_en_figure_inputs, **common_figure_inputs)
         if 'va_cs' in plot_type:
             print('Plotting va_cs')
-            ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                         sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                         fig_name='va_cs', c_label='Va_cs', c_unit=r'${}^\circ$',
-                         draw_patch=draw_patch, draw_ridge=True)
-        if 'bisec_msp' in plot_type:
-            print('Plotting bisec_msp')
-            ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max],
-                         yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps,
-                         imf_clock_angle=imf_phi, fig_name='bisec_msp', c_label='Bisec_msp',
-                         c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
-        if 'bisec_msh' in plot_type:
-            print('Plotting bisec_msh')
-            ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max],
-                         yrange=[z_min, z_max], sigma=2.2, dr=dr, dipole_tilt_angle=ps,
-                         imf_clock_angle=imf_phi, fig_name='bisec_msh', c_label='Bisec_msh',
-                         c_unit=r'${}^\circ$', draw_patch=draw_patch, draw_ridge=True)
+            _ = ridge_finder(**va_cs_figure_inputs, **common_figure_inputs)
+        if 'Bisec-msp' in plot_type:
+            print('Plotting Bisec-msp')
+            _ = ridge_finder(**bisec_msp_figure_inputs, **common_figure_inputs)
+        if 'Bisec-msh' in plot_type:
+            print('Plotting Bisec-msh')
+            _ = ridge_finder(**bisec_msh_figure_inputs, **common_figure_inputs)
     elif plot_type == 'all':
         print('Plotting for all')
-        ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='shear', c_label='Shear', c_unit=r'${}^\circ$', draw_patch=draw_patch,
-                     draw_ridge=True)
+        _ = ridge_finder(**shear_figure_inputs, **common_figure_inputs)
 
-        ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
-                     yrange=[z_min, z_max], sigma=2.8, dr=dr, dipole_tilt_angle=ps,
-                     imf_clock_angle=imf_phi, fig_name='rx-en_nPa', c_label='Reconnection Energy',
-                     c_unit='nPa', draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**rx_en_figure_inputs, **common_figure_inputs)
 
-        ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=3., dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='va-cs', c_label='Exhaust Velocity', c_unit='km/s',
-                     draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**va_cs_figure_inputs, **common_figure_inputs)
 
-        ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='bisec_msp', c_label='Bisection Field', c_unit='nT',
-                     draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**bisec_msp_figure_inputs, **common_figure_inputs)
 
-        ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='bisec_msh', c_label='Bisection Field', c_unit='nT',
-                     draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**bisec_msh_figure_inputs, **common_figure_inputs)
     elif plot_type == 'shear':
         print(trange)
         print('Plotting shear')
-        ridge_finder(image=shear, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=1, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='shear_test', c_label='Shear', c_unit=r'${}^\circ$',
-                     draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**shear_figure_inputs, **common_figure_inputs)
     elif plot_type == 'rx_en':
         print('Plotting rx_en')
-        ridge_finder(image=rx_en/np.nanmax(rx_en), t_range=trange, xrange=[y_min, y_max],
-                     yrange=[z_min, z_max], sigma=2.8, dr=dr, dipole_tilt_angle=ps,
-                     imf_clock_angle=imf_phi, fig_name='rx-en_nPa', c_label='Reconnection Energy',
-                     c_unit='nPa', draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**rx_en_figure_inputs, **common_figure_inputs)
     elif plot_type == 'va_cs':
         print('Plotting va_cs')
-        y_val = ridge_finder(image=va_cs, t_range=trange, xrange=[y_min, y_max],
-                             yrange=[z_min, z_max], sigma=3., dr=dr, dipole_tilt_angle=ps,
-                             imf_clock_angle=imf_phi, fig_name='va-cs', c_label='Exhaust Velocity',
-                             c_unit='km/s', draw_patch=draw_patch, draw_ridge=True)
-    elif plot_type == 'bisec_msp':
-        print('Plotting bisec_msp')
-        ridge_finder(image=bisec_msp, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='bisec_msp', c_label='Bisection Field', c_unit='nT',
-                     draw_patch=draw_patch, draw_ridge=True)
-    elif plot_type == 'bisec_msh':
-        print('Plotting bisec_msh')
-        ridge_finder(image=bisec_msh, t_range=trange, xrange=[y_min, y_max], yrange=[z_min, z_max],
-                     sigma=2.2, dr=dr, dipole_tilt_angle=ps, imf_clock_angle=imf_phi,
-                     fig_name='bisec_msh', c_label='Bisection Field', c_unit='nT',
-                     draw_patch=draw_patch, draw_ridge=True)
+        _ = ridge_finder(**va_cs_figure_inputs, **common_figure_inputs)
+    elif plot_type == 'Bisec-msp':
+        print('Plotting Bisec-msp')
+        _ = ridge_finder(**bisec_msp_figure_inputs, **common_figure_inputs)
+
+    elif plot_type == 'Bisec-msh':
+        print('Plotting Bisec-msh')
+        _ = ridge_finder(**bisec_msh_figure_inputs, **common_figure_inputs)
     else:
         raise KeyError(
-            'plot_type must be one or a list of: all, shear, rx-en, va-cs, bisec_msp, bisec_msh')
+            'plot_type must be one or a list of: all, shear, rx-en, va-cs, Bisec-msp, Bisec-msh')
 
     #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=b_msy, bz=b_msz, save_fig=True,
     #                      scale=40, fig_name="magnetosheath")
     #_ = draping_field_plot(x_coord=y_shu, y_coord=z_shu, by=by, bz=bz, save_fig=True, scale=120,
     #                 fig_name="magnetosphere")
+    '''
 print(f'Took {round(time.time() - start, 3)} seconds')
