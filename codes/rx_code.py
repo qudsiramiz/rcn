@@ -53,7 +53,7 @@ trange_list = [
 ['2017-01-27 12:05:43'],
 ]
 count = 0
-for trange in trange_list[1:]:
+for trange in trange_list[0:]:
 
     mms_probe_num = '1'
     min_max_val = 15
@@ -68,7 +68,7 @@ for trange in trange_list[1:]:
         "probe" : None,
         "omni_level" : 'hro',
         "mms_probe_num" : mms_probe_num,
-        "model_type" : 't01',
+        "model_type" : 't96',
         "m_p" : 0.5,
         "dr" : dr,
         "min_max_val" : min_max_val,
@@ -97,7 +97,7 @@ for trange in trange_list[1:]:
         "alpha" : 1,
         "vmin" : [0, 0, None, None],
         "vmax" : [180, 1, None, None],
-        "cmap_list" : ["viridis", "cividis", "plasma", "inferno"],
+        "cmap_list" : ["viridis", "cividis", "plasma", "magma"],
         "draw_patch" : [True, True, True, True],
         "draw_ridge" : [True, True, True, True],
         "save_fig" : True,
@@ -110,11 +110,12 @@ for trange in trange_list[1:]:
         "fig_size" : (8.775, 10),
         "box_style": dict(boxstyle='round', facecolor='black', alpha=0.8),
         "title_y_pos" : 1.07,
-        "interpolation" : 'nearest'
+        "interpolation" : 'gaussian',
     }
 
     ridge_finder_multiple(**figure_inputs, fig_format='png')
-    ridge_finder_multiple(**figure_inputs, fig_format='pdf')
+    #print(f"Model run for date {trange[0]} to {trange[1]}")
+    #ridge_finder_multiple(**figure_inputs, fig_format='pdf')
     count += 1
     '''
     # Check if 'plot_type' has length attribute. If it has length attribute then plot the ridge plot

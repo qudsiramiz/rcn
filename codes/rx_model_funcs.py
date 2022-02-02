@@ -612,6 +612,16 @@ def ridge_finder_multiple(
             axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size)
             axs1.yaxis.set_label_position("right")
 
+        if i==0:
+            axs1.text(-0.15, 1.16, f'Model: T96', horizontalalignment='left',
+            verticalalignment='bottom', transform=axs1.transAxes, rotation=0, color='white',
+            fontsize=l_label_size, bbox=box_style)
+
+        if i==1:
+            axs1.text(1.15, 1.16, f'MMS - {mms_probe_num}', horizontalalignment='right',
+            verticalalignment='bottom', transform=axs1.transAxes, rotation=0, color='white',
+            fontsize=l_label_size, bbox=box_style)
+
         # Define the location of the colorbar, it's size relative to main figure and the padding
         # between the colorbar and the figure, the orientation the colorbar
         cax1 = divider1.append_axes("top", size="5%", pad=0.01)
@@ -653,6 +663,8 @@ def ridge_finder_multiple(
 
     if save_fig:
         try:
+            # TODO: Add folder name as one of the path and make sure that the code creates the
+            # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
             fig_name = f'../figures/{fig_name}/ridge_plot_{fig_time_range}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
