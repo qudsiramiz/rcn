@@ -53,22 +53,23 @@ trange_list = [
 ['2017-01-27 12:05:43'],
 ]
 count = 0
-for trange in trange_list[0:]:
+for trange in trange_list[:]:
 
     mms_probe_num = '1'
-    min_max_val = 15
+    min_max_val = 20
     dr = 0.25
     y_min = - min_max_val
     y_max = min_max_val
     z_min = - min_max_val
     z_max = min_max_val
+    model_type = 't96'
 
     model_inputs = {
         'trange': trange,
         "probe" : None,
         "omni_level" : 'hro',
         "mms_probe_num" : mms_probe_num,
-        "model_type" : 't96',
+        "model_type" : model_type,
         "m_p" : 0.5,
         "dr" : dr,
         "min_max_val" : min_max_val,
@@ -111,6 +112,7 @@ for trange in trange_list[0:]:
         "box_style": dict(boxstyle='round', facecolor='black', alpha=0.8),
         "title_y_pos" : 1.07,
         "interpolation" : 'gaussian',
+        "tsy_model" : model_type
     }
 
     ridge_finder_multiple(**figure_inputs, fig_format='png')

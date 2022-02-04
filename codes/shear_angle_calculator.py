@@ -57,6 +57,11 @@ def shear_angle_calculator(
     v_imf=None,
     dmp=0.5,
     dr=0.5,
+    min_max_val = 15,
+    y_min = None,
+    y_max = None,
+    z_min = None,
+    z_max = None,
     model_type="t96",
     angle_units="radians",
     use_real_data=False,
@@ -83,60 +88,59 @@ def shear_angle_calculator(
         Interplanetary magnetic field vector. If not given, and "use_real_data" is set to False,
         then the code raises a ValueError. In order to use the real data, set "use_real_data" to
         True.
-
     np_imf : array of shape 1x1
         Interplanetary proton density. If not given, and "use_real_data" is set to False, then the
         code assumes a default value of 5.0 /cm^-3.
-
     v_imf : array of shape 1x3
         Interplanetary plasma bulk velocity vector. If not given, and "use_real_data" is set to
         False, then the code assumes a default value of [-500, 0, 0] km/sec.
-
     dmp : float
         Thickness of the magnetopause in earth radii units. Default is 0.5.
-
     dr : float
         Grid size in earth radii units. Default is 0.5.
-
+    min_max_val : float
+        The minimum and maximum values of the y and z-axis to be used for the computation. Default
+        is 15, meaning the model will be computed for -15 < y < 15 and -15 < z < 15.
+    y_min : float, optional
+        The minimum value of the y-axis to be used for the computation. Default is None, in which
+        case y_min is set to -min_max_val.
+    y_max : float, optional
+        The maximum value of the y-axis to be used for the computation. Default is None, in which
+        case y_max is set to min_max_val.
+    z_min : float, optional
+        The minimum value of the z-axis to be used for the computation. Default is None, in which
+        case z_min is set to -min_max_val.
+    z_max : float, optional
+        The maximum value of the z-axis to be used for the computation. Default is None, in which
+        case z_max is set to min_max_val.
     model_type : str
         Model type to use. Default is "t96". Other option is "t01". Needs "geopack" to be installed.
-
     angle_units : str
         Units of the angle returned by the code. Default is "radians".
-
     use_real_data : bool
         If set to True, then the code will use the real data from the CDAWEB website. If set to
         False, then the code will use the default values for the parameters. For this to work, you
         must have the following modules installed:
         - pyspedas (https://github.com/spedas/pyspedas)
-
     time_observation : str
         Time of observation. If not given, then the code assumes the time of observation is the
         current time. The time of observation must be in the format "YYYY-MM-DDTHH:MM:SS".
-
     dt : float
         Time duration, in minutes, for which the IMF data is to be considered. Default is 30
         mcentered around the time of observation.
-
     save_data : bool
         If set to True, then the data will be saved to a hdf5 file. Default is False. Needs the h5py
         package to be installed.
-
     data_file : str
         Name of the hdf5 file to which data is to be saved. Default is "shear_data".
-
     plot_figure : bool
         If set to True, then the figure will be plotted and shown. Default is False.
-
     save_figure : bool
         If set to True, then the figure will be saved. Default is False.
-
     figure_file : str
         Name of the figure file. Default is "shear_angle_calculator".
-
     figure_format : str
         Format of the figure file. Default is "png". Other option can be "pdf".
-
     verbose : bool If set to True, then the code will print out the progress of the code at several
         points. Default is True. For this to work, you must have the following modules installed:
          - tabulate (https://pypi.org/project/tabulate/)
@@ -196,7 +200,7 @@ def shear_angle_calculator(
             if verbose:
                 print(f"Downloading data from {time_range[0]} to {time_range[1]} \n")
 
-        spd.omni.data(trange=time_range, level="hro", time_clip=False)
+        spd.omni.data(trange=time_range, level="hro", time_clip=True)
 
         omni_time = ptt.get_data('BX_GSE')[0]
         # omni_time_unix = np.vectorize(datetime.utcfromtimestamp)(omni_time[:]) # converting omni_time
@@ -228,6 +232,8 @@ def shear_angle_calculator(
         v_imf = np.array([np.nanmedian(omni_vx), np.nanmedian(omni_vy), np.nanmedian(omni_vz)])
         sym_h_imf = np.nanmedian(omni_sym_h)
         clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
+        if clock_angle < 0:
+            clock_angle = clock_angle + 180
 
         if verbose:
             print("Computed IMF parameters:")
@@ -300,38 +306,50 @@ def shear_angle_calculator(
     if verbose:
         print("Computing Earth's magnetic field \n")
 
+    # Set the min and max values of the x-axis and y-axis
+    if y_min is None:
+        y_min = -min_max_val
+    if y_max is None:
+        y_max = min_max_val
+    if z_min is None:
+        z_min = -min_max_val
+    if z_max is None:
+        z_max = min_max_val
+
     if dr is None:
         dr = 0.5
     if dmp is None:
         dmp = 0.5        
-    n_arr = int(30 / dr) + 1
 
-    bx = np.full((n_arr, n_arr), np.nan)
-    by = np.full((n_arr, n_arr), np.nan)
-    bz = np.full((n_arr, n_arr), np.nan)
+    n_arr_y = int((y_max - y_min) / dr) + 1
+    n_arr_z = int((z_max - z_min) / dr) + 1
 
-    bx_ext = np.full((n_arr, n_arr), np.nan)
-    by_ext = np.full((n_arr, n_arr), np.nan)
-    bz_ext = np.full((n_arr, n_arr), np.nan)
+    bx = np.full((n_arr_y, n_arr_z), np.nan)
+    by = np.full((n_arr_y, n_arr_z), np.nan)
+    bz = np.full((n_arr_y, n_arr_z), np.nan)
 
-    bx_igrf = np.full((n_arr, n_arr), np.nan)
-    by_igrf = np.full((n_arr, n_arr), np.nan)
-    bz_igrf = np.full((n_arr, n_arr), np.nan)
+    bx_ext = np.full((n_arr_y, n_arr_z), np.nan)
+    by_ext = np.full((n_arr_y, n_arr_z), np.nan)
+    bz_ext = np.full((n_arr_y, n_arr_z), np.nan)
 
-    b_msx = np.full((n_arr, n_arr), np.nan)
-    b_msy = np.full((n_arr, n_arr), np.nan)
-    b_msz = np.full((n_arr, n_arr), np.nan)
+    bx_igrf = np.full((n_arr_y, n_arr_z), np.nan)
+    by_igrf = np.full((n_arr_y, n_arr_z), np.nan)
+    bz_igrf = np.full((n_arr_y, n_arr_z), np.nan)
 
-    x_shu = np.full((n_arr, n_arr), np.nan)
-    y_shu = np.full((n_arr, n_arr), np.nan)
-    z_shu = np.full((n_arr, n_arr), np.nan)
+    b_msx = np.full((n_arr_y, n_arr_z), np.nan)
+    b_msy = np.full((n_arr_y, n_arr_z), np.nan)
+    b_msz = np.full((n_arr_y, n_arr_z), np.nan)
 
-    rho_sh = np.full((n_arr, n_arr), np.nan)
+    x_shu = np.full((n_arr_y, n_arr_z), np.nan)
+    y_shu = np.full((n_arr_y, n_arr_z), np.nan)
+    z_shu = np.full((n_arr_y, n_arr_z), np.nan)
 
-    shear = np.full((n_arr, n_arr), np.nan)
-    y_coord = np.full((n_arr, n_arr), np.nan)
-    z_coord = np.full((n_arr, n_arr), np.nan)
-    n_sh = np.full((n_arr, n_arr), np.nan)
+    rho_sh = np.full((n_arr_y, n_arr_z), np.nan)
+
+    shear = np.full((n_arr_y, n_arr_z), np.nan)
+    y_coord = np.full((n_arr_y, n_arr_z), np.nan)
+    z_coord = np.full((n_arr_y, n_arr_z), np.nan)
+    n_sh = np.full((n_arr_y, n_arr_z), np.nan)
 
     d_theta = np.pi / 100
 
@@ -345,14 +363,16 @@ def shear_angle_calculator(
     rmp = ro * (2 / (1 + np.cos(0.0))) ** alpha
 
     A = 2
-    len_y = int(30 / dr) + 1
-    len_z = int(30 / dr) + 1
+
+    len_y = int((y_max - y_min)/dr) + 1
+    len_z = int((z_max - z_min)/dr) + 1
+
     count = 0
 
     for j in range(0, len_y):
-        y0 = 15 - int(j * dr)
+        y0 = int(j * dr) - y_max
         for k in range(0, len_z):
-            z0 = 15 - int(k * dr)
+            z0 = int(k * dr) - z_max
             rp = np.sqrt(y0**2 + z0**2)  # Projection of r into yz-plane
 
             for index in range(0, 100):
@@ -440,14 +460,14 @@ def shear_angle_calculator(
                                 "Model type must be set to 't96' or 't01'.")
                     except Exception:
                         logging.error(traceback.format_exc())
-                        if((y_shu[j, k] < 15 and y_shu[j, k] > -15) or
-                           (z_shu[j, k] < 15 and z_shu[j, k] > -15)):
-                            if verbose:
-                                print(f'Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
-                            count += 1
-                        else:
-                            if verbose:
-                                print(f'~Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
+                        #if((y_shu[j, k] < 15 and y_shu[j, k] > -15) or
+                        #   (z_shu[j, k] < 15 and z_shu[j, k] > -15)):
+                        #    if verbose:
+                        #        print(f'Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
+                        #    count += 1
+                        #else:
+                        #    if verbose:
+                        #        print(f'~Skipped for {x_shu[j, k], y_shu[j, k], z_shu[j, k]}')
 
                     # Compute the internal magnetic field from the IGRF model for a given
                     # position in GSM coordinate
@@ -502,20 +522,16 @@ def shear_angle_calculator(
 
     fig, axs = plt.subplots(1, 1, figsize=(8, 6))
 
-    # NOTE: This is a hack to ensure that the output of shear angle, reconnection energy etc. agrees
-    # with what has been reported in literature. Plot for shear angle seems to agree reasonably well
-    # (for "trange = ['2016-12-07 05:11:00', '2016-12-07 05:21:00']") with the one reported by
-    # FuselierJGR2019 (doi:10.1029/2019JA027143, see fig. 4).    
-    image_rotated = np.transpose(np.flipud(np.fliplr(shear)))
+    image_rotated = np.transpose(shear)
     # Smoothen the image
     image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode='nearest')
-    im = axs.imshow(np.transpose(np.flipud(np.fliplr(image_smooth))), extent=[-15, 15, -15, 15],
-    origin='lower', cmap=plt.cm.viridis)
+    im = axs.imshow(image_smooth, extent=[y_min, y_max, z_min, z_max], origin='lower',
+                    cmap=plt.cm.viridis)
     divider = make_axes_locatable(axs)
 
     patch = patches.Circle((0, 0), radius=15, transform=axs.transData, fc='none', ec='k', lw=0.1)
     axs.add_patch(patch)
-    im.set_clip_path(patch)
+    #im.set_clip_path(patch)
 
     axs.tick_params(axis="both", direction="in", top=True, labeltop=False, bottom=True,
                     labelbottom=True, left=True, labelleft=True, right=True, labelright=False, labelsize=14)
@@ -545,8 +561,8 @@ def shear_angle_calculator(
     horizontalalignment='right', verticalalignment='top', transform=axs.transAxes, rotation=0,
     color='r')
 
-    if (plot_figure):
-        plt.show()
+    #if (plot_figure):
+    #    plt.show()
 
     if (save_figure):
         fig.savefig(f'{figure_file}_{model_type}_{dr}dr.{figure_format}',
@@ -560,12 +576,13 @@ inputs = {
     "b_imf" : None,
     "np_imf" : None,
     "v_imf" : None,
+    "min_max_val" : 20,
     "dmp" : None,
     "dr" : None,
     "model_type" : "t96",
     "angle_units" : "degrees",
     "use_real_data" : True,
-    "time_observation" : "2016-12-07 05:16:00",
+    "time_observation" : '2015-10-16 10:33:30',
     "dt" : 5,
     "save_data" : False,
     "data_file" : None,

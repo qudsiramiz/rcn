@@ -1,6 +1,7 @@
 # functions to be used in rx_model_batch_parallel.py
 import datetime
 import multiprocessing as mp
+import os
 import warnings
 
 import geopack.geopack as gp
@@ -433,6 +434,7 @@ def ridge_finder_multiple(
     box_style=None,
     title_y_pos=0.95,
     interpolation='nearest',
+    tsy_model="t96"
     ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -592,18 +594,17 @@ def ridge_finder_multiple(
     
         if draw_ridge:
             axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, 'k-', alpha=0.9)
-            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
+            #axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
 
         # Plot a horizontal line at x=0 and a vertical line at y=0
         axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
         axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
 
         if(draw_patch):
-            patch = patches.Circle((0, 0), radius=(xrange[1] - xrange[0])/2.,
-                                    transform=axs1.transData, fc='none', ec='k', lw=0.1)
-            axs1.add_patch(patch)
-            im1.set_clip_path(patch)
-
+            patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none',
+                                    ec='k', lw=0.5)
+            #im1.set_clip_path(patch)
+        axs1.add_patch(patch)
         if i==0 or i==2:
             axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size)
         if i==2 or i==3:
@@ -613,7 +614,7 @@ def ridge_finder_multiple(
             axs1.yaxis.set_label_position("right")
 
         if i==0:
-            axs1.text(-0.15, 1.16, f'Model: T96', horizontalalignment='left',
+            axs1.text(-0.15, 1.16, f'Model: {tsy_model}', horizontalalignment='left',
             verticalalignment='bottom', transform=axs1.transAxes, rotation=0, color='white',
             fontsize=l_label_size, bbox=box_style)
 
@@ -633,7 +634,7 @@ def ridge_finder_multiple(
         cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size)
 
         # Draw the spacecraft position
-        axs1.plot(mms_sc_pos[0], mms_sc_pos[1], 'white', marker=mms_probe_num, ms=10, alpha=1)
+        axs1.plot(mms_sc_pos[0], mms_sc_pos[1], 'white', marker='$\\bigoplus$', ms=15, alpha=1)
 
         # Set tick label parameters
         if i==0 or i==2:
@@ -666,7 +667,16 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_name = f'../figures/{fig_name}/ridge_plot_{fig_time_range}.{fig_format}'
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation"
+            check_folder = os.path.isdir(fig_folder)
+            # If folder doesn't exist, then create it.
+            if not check_folder:
+                os.makedirs(fig_folder)
+                print("created folder : ", fig_folder)
+            else:
+                print(f"folder already exists: {fig_folder}\n")
+
+            fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
             print(f'Figure saved as {fig_name}')
         except  Exception as e:
@@ -793,17 +803,17 @@ def model_run(*args):
 
             y_coord = y0
             z_coord = z0
-            x_shu = (r -m_p) * np.cos(theta)
+            x_shu = (r - m_p) * np.cos(theta)
             phi = np.arctan2(z0, y0)
             # print( j, k, theta, x_shu[j,k])
 
             if (abs(y0) == 0 or abs(z0) == 0):
                 if(abs(y0) == 0):
                     y_shu = 0
-                    z_shu = (r -m_p) * np.sin(theta)
+                    z_shu = (r - m_p) * np.sin(theta)
                 elif (abs(z0) == 0):
                     z_shu = 0
-                    y_shu = (r -m_p) * np.sin(theta)
+                    y_shu = (r - m_p) * np.sin(theta)
             else:
                 z_shu = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
                 y_shu = z_shu/np.tan(phi)
@@ -960,6 +970,8 @@ def get_sw_params(
     v_imf = [vx_imf, vy_imf, vz_imf]
     b_imf = [b_imf_x, b_imf_y, b_imf_z]
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
+    if imf_clock_angle < 0:
+        imf_clock_angle += 180
     mean_mms_sc_pos = np.round([np.nanmedian(mms_sc_pos[:,0]), np.nanmedian(mms_sc_pos[:,1]),
                        np.nanmedian(mms_sc_pos[:,2])], 2)
     print("IMF parameters found:")
@@ -1094,8 +1106,8 @@ def rx_model(
         z_min = -min_max_val
     if z_max is None:
         z_max = min_max_val
-    
-    # If trange has only one element, then make it a list of length 2 with 5 min of padding
+
+    # If trange has only one element, then make it a list of length 2 with 'dt' minutes of padding
     if len(trange) == 1:
         trange_date = datetime.datetime.strptime(trange[0], '%Y-%m-%d %H:%M:%S')
         trange_date_min = trange_date - datetime.timedelta(minutes=dt)
