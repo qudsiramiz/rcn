@@ -1,11 +1,14 @@
 # This the python version of IDL code named 'RX_model_batch.pro'
 import datetime
+import importlib
 import time
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from rx_model_funcs import *
+#from rx_model_funcs import rx_model, ridge_finder_multiple
+import rx_model_funcs as rmf
+importlib.reload(rmf)
 
 # Set the fontstyle to Times New Roman
 font = {'family': 'serif', 'weight': 'normal', 'size': 10}
@@ -52,11 +55,15 @@ trange_list = [
 ['2017-01-22 10:47:33'],
 ['2017-01-27 12:05:43'],
 ]
+
+# Sort the trange_list by the start time
+trange_list.sort(key=lambda x: x[0])
+
 count = 0
-for trange in trange_list[:]:
+for trange in trange_list[:1]:
 
     mms_probe_num = '1'
-    min_max_val = 20
+    min_max_val = 15
     dr = 0.25
     y_min = - min_max_val
     y_max = min_max_val
@@ -79,16 +86,19 @@ for trange in trange_list[:]:
         "z_max" : z_max,
         "save_data" : False,
         }
-    bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params = rx_model(**model_inputs)
+    bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params = rmf.rx_model(**model_inputs)
 
 
     figure_inputs = {
         "image" : [shear, rx_en/np.nanmax(rx_en), va_cs, bisec_msp],
+        "convolution_order" : [0, 1, 1, 1],
         "t_range" : trange,
+        "b_imf" : np.round(sw_params['b_imf'],2),
         "xrange" : [y_min, y_max],
         "yrange" : [z_min, z_max],
         "mms_probe_num" : mms_probe_num,
-        "mms_sc_pos" : [np.nanmean(sw_params['mms_sc_pos'][:,1]),
+        "mms_sc_pos" : [np.nanmean(sw_params['mms_sc_pos'][:,0]),
+                        np.nanmean(sw_params['mms_sc_pos'][:,1]),
                         np.nanmean(sw_params['mms_sc_pos'][:,2])],
         "dr" : dr,
         "dipole_tilt_angle" : sw_params['ps'],
@@ -110,15 +120,17 @@ for trange in trange_list[:]:
         "hspace" : 0.17,
         "fig_size" : (8.775, 10),
         "box_style": dict(boxstyle='round', facecolor='black', alpha=0.8),
-        "title_y_pos" : 1.07,
+        "title_y_pos" : 1.09,
         "interpolation" : 'gaussian',
-        "tsy_model" : model_type
+        "tsy_model" : model_type,
+        "dark_mode" : True,
     }
 
-    ridge_finder_multiple(**figure_inputs, fig_format='png')
+    rmf.ridge_finder_multiple(**figure_inputs, fig_format='png')
     #print(f"Model run for date {trange[0]} to {trange[1]}")
     #ridge_finder_multiple(**figure_inputs, fig_format='pdf')
     count += 1
+
     '''
     # Check if 'plot_type' has length attribute. If it has length attribute then plot the ridge plot
     # for each of the plot type in the list. If it does not have length attribute then plot the
