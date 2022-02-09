@@ -21,7 +21,7 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
 trange_list = [
 ['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
-['2016-12-07 05:05:00', '2016-12-07 05:33:00'],
+['2016-12-07 05:11:00', '2016-12-07 05:21:00'],
 #['2015-09-08 11:05:00', '2015-09-08 11:15:00'],
 #['2015-09-19 07:43:30'],
 ['2015-10-16 10:33:30'],
@@ -60,7 +60,7 @@ trange_list = [
 trange_list.sort(key=lambda x: x[0])
 
 count = 0
-for trange in trange_list[:1]:
+for trange in trange_list[:]:
 
     mms_probe_num = '1'
     min_max_val = 15
@@ -86,7 +86,8 @@ for trange in trange_list[:1]:
         "z_max" : z_max,
         "save_data" : False,
         }
-    bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params = rmf.rx_model(**model_inputs)
+    (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu, b_msx,
+    b_msy, b_msz)= rmf.rx_model(**model_inputs)
 
 
     figure_inputs = {
@@ -94,12 +95,11 @@ for trange in trange_list[:1]:
         "convolution_order" : [0, 1, 1, 1],
         "t_range" : trange,
         "b_imf" : np.round(sw_params['b_imf'],2),
+        "b_msh" : np.round(sw_params['mms_b_gsm'],2),
         "xrange" : [y_min, y_max],
         "yrange" : [z_min, z_max],
         "mms_probe_num" : mms_probe_num,
-        "mms_sc_pos" : [np.nanmean(sw_params['mms_sc_pos'][:,0]),
-                        np.nanmean(sw_params['mms_sc_pos'][:,1]),
-                        np.nanmean(sw_params['mms_sc_pos'][:,2])],
+        "mms_sc_pos" : np.round(np.nanmean(sw_params['mms_sc_pos'], axis=0), 2),
         "dr" : dr,
         "dipole_tilt_angle" : sw_params['ps'],
         "imf_clock_angle" : sw_params['imf_clock_angle'],
@@ -124,9 +124,11 @@ for trange in trange_list[:1]:
         "interpolation" : 'gaussian',
         "tsy_model" : model_type,
         "dark_mode" : True,
+        "rc_file_name" : "../data/reconnection_line_data.csv"
     }
 
-    rmf.ridge_finder_multiple(**figure_inputs, fig_format='png')
+    y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
+                                                                           fig_format='pdf')
     #print(f"Model run for date {trange[0]} to {trange[1]}")
     #ridge_finder_multiple(**figure_inputs, fig_format='pdf')
     count += 1

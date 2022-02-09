@@ -414,6 +414,7 @@ def ridge_finder_multiple(
     t_range=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
     dt=5,
     b_imf = [-5, 0, 0],
+    b_msh = [-5, 0, 0],
     xrange=[-15.1, 15],
     yrange=[-15.1, 15],
     mms_probe_num='1',
@@ -441,7 +442,8 @@ def ridge_finder_multiple(
     title_y_pos=0.95,
     interpolation='nearest',
     tsy_model="t96",
-    dark_mode=True
+    dark_mode=True,
+    rc_file_name="../data/rc_file.csv",
     ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -574,6 +576,8 @@ def ridge_finder_multiple(
     #box_style = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     box_style = box_style
     y_vals = []
+    x_intr_vals_list = []
+    y_intr_vals_list = []
     for i in range(len(image)):
         image_rotated = np.transpose(image[i])
 
@@ -631,23 +635,101 @@ def ridge_finder_multiple(
         for xx in range(len(y_val)):
             y_val_avg[xx] = np.nanmean(y_val[max(0, xx-15):min(len(y_val), xx+15)])
 
-
-        r0 = mms_sc_pos
-        print(r0)
-
-        #line_intrp = line_fnc(x=np.linspace(xrange[0], xrange[1], x_len), y=y_val_avg)
-
-        # TODO: Get b_msh
-
-        #r_opt = sp.optimize.minimize(target_fnc, r, b_msh, r0, line_intrp)
-        #r_intsc = line_fnc(r_opt.x)
-
-
-
-
         if draw_ridge:
-            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, 'k-', alpha=0.9)
+            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
+                      alpha=0.9)
             #axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
+
+        # Find the interpolation function corresponding to the x_vals and y_val_avg array
+        line_intrp = line_fnc_der(x=np.linspace(xrange[0], xrange[1], x_len), y=y_val_avg)
+
+        # Spacecraft position
+        r0 = mms_sc_pos[:3]
+
+        # Direction of the magnetosheath magnetic field at the position of the spacecraft
+        # TODO: Check if this is same as direction/magnitude given by the Cooling model
+        b_msh_dir = b_msh[:3] / np.linalg.norm(b_msh[:3])
+
+        # Find the closest point on the reconnection line in the direction of the magnetosheath
+        # magnetic field.
+        # TODO: Check why the optimize function isn't working properly.
+        # TODO: Implement the 3D property of the reconnection line. Find a way to incorporate X_shu
+        xn = np.full(100, np.nan)
+        yn = np.full(100, np.nan)
+        for n in range(-50, 50):
+            xn[50+n] = r0[1] + n * b_msh_dir[1]
+            yn[50+n] = r0[2] + n * b_msh_dir[2]
+        
+        # Find the expected values of y-coordinate based on the x-coordinate, in the direction of
+        # the magnetosheath magnetic field.
+        yn_interp = line_intrp(xn)
+
+        # Compute the distance between the spacecraft position and the coordinates computed in
+        # previous step.
+        dist_rn = np.abs(yn - yn_interp)
+        # Find the index of the minimum distance
+        min_dist_rn_idx = np.argmin(dist_rn)
+
+        # Find the x- and y-coordinates corresponding to the minimum distance
+        xn_rc = xn[min_dist_rn_idx]
+        yn_rc = yn[min_dist_rn_idx]
+
+        # Save the x- and y-coordinates of the reconnection line along with the spacecraft position
+        x_intr_vals = [r0[1], xn_rc]
+        y_intr_vals = [r0[2], yn_rc]
+
+        # TODO: Check
+        #r_opt = sp.optimize.minimize(target_fnc, 0, args=(r0, b_msh[:3], line_fnc, line_intrp))
+        #r_intsc = line_intrp(r_opt)
+        #r_intsc = line_intrp(r_opt.x)
+        #x_intr_vals = [r0[1], r_opt.x[0]]
+        #y_intr_vals = [r0[2], r_intsc[0]]
+
+        # Append the x- and y-coordinates to the list in order to save to a file
+        x_intr_vals_list.append(x_intr_vals)
+        y_intr_vals_list.append(y_intr_vals)
+
+        # Find the distance between the spacecraft position and the reconnection line
+        dist_rc = np.sqrt((r0[1] - xn_rc) ** 2 + (r0[2] - yn_rc) ** 2)
+
+        # 
+        if i==0:
+            method_used = 'shear'
+        elif i==1:
+            method_used = 'rx_en'
+        elif i==2:
+            method_used = 'va_cs'
+        elif i==3:
+            method_used = 'bisection'
+
+        # Save the data to a text file
+        # Check if the file exists, if not then create it
+        
+        # Save data to the csv file using tab delimiter
+        if not os.path.exists(rc_file_name):
+            with open(rc_file_name, 'w') as f:
+                f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +\
+                    ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used\n")
+                f.close()
+        # Open file and append the relevant data
+        with open(rc_file_name, 'a') as f:
+            f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
+                  + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
+                  + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
+                  + method_used+"\n")
+            f.close()
+
+        # plot an arror along the magnetosheath magnetic field direction
+        axs1.arrow(r0[1]-1.5, r0[2] - 1.5, 5*b_msh_dir[1], 5*b_msh_dir[2], head_width=0.4,
+                   head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
+
+        # Plot line connecting the spacecraft position and the reconnection line
+        axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
+        distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
+        axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
+                    color='k', ha='left', va='bottom')
+
+        #print(r_opt)
 
         # Plot a horizontal line at x=0 and a vertical line at y=0
         axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
@@ -756,7 +838,7 @@ def ridge_finder_multiple(
             print(f'Figure not saved, folder does not exist. Create folder ../figures')
             #pass
         plt.close()
-    return y_vals
+    return y_vals, x_intr_vals_list, y_intr_vals_list
 
 
 def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None, save_fig=True,
@@ -940,7 +1022,7 @@ def model_run(*args):
             bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
             break
 
-    return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh
+    return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz
 
 
 def get_sw_params(
@@ -1017,11 +1099,12 @@ def get_sw_params(
         r_e = 6378.137  # Earth radius in km
         mms_sc_pos = ptt.get_data(mms_vars[0])[1:3][0]/r_e
 
+        # TODO: Find out why adding 'mms_fgm_varnames' as a variable causes the code to give out no data.
         mms_fgm_varnames = [f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec']
-        mms_fgm_vars = spd.mms.fgm(trange=trange, varnames=mms_fgm_varnames, probe=mms_probe_num,
-                                   time_clip=time_clip, latest_version=True)
-        mms_fgm_time = ptt.get_data(mms_fgm_vars[0])[0]
-        mms_fgm_b_gsm = ptt.get_data(mms_fgm_vars[0])[1:4][0]
+        mms_fgm_vars = spd.mms.fgm(trange=trange, probe=mms_probe_num, time_clip=time_clip,
+                                   latest_version=True)
+        mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
+        mms_fgm_b_gsm = ptt.get_data(mms_fgm_varnames[0])[1:4][0]
     else:
         mms_time = None
         mms_sc_pos = None
@@ -1052,8 +1135,12 @@ def get_sw_params(
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
     if imf_clock_angle < 0:
         imf_clock_angle += 180
-    mean_mms_sc_pos = np.round(np.nanmean(mms_sc_pos, axis=0), decimals=2)
-    mean_mms_fgm_b_gsm = np.round(np.nanmedian(mms_fgm_b_gsm, axis=0), decimals=2)
+    if mms_probe_num is not None:
+        mean_mms_sc_pos = np.round(np.nanmean(mms_sc_pos, axis=0), decimals=2)
+        mean_mms_fgm_b_gsm = np.round(np.nanmedian(mms_fgm_b_gsm, axis=0), decimals=2)
+    else:
+        mean_mms_sc_pos = None
+        mean_mms_fgm_b_gsm = None
 
     print("IMF parameters found:")
     if (verbose):
@@ -1215,6 +1302,14 @@ def rx_model(
     bisec_msp = np.full((n_arr_y, n_arr_z), np.nan)
     bisec_msh = np.full((n_arr_y, n_arr_z), np.nan)
 
+    x_shu = np.full((n_arr_y, n_arr_z), np.nan)
+    y_shu = np.full((n_arr_y, n_arr_z), np.nan)
+    z_shu = np.full((n_arr_y, n_arr_z), np.nan)
+
+    b_msx = np.full((n_arr_y, n_arr_z), np.nan)
+    b_msy = np.full((n_arr_y, n_arr_z), np.nan)
+    b_msz = np.full((n_arr_y, n_arr_z), np.nan)
+
     # Shue et al.,1998, equation 10
     ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params['b_imf'][2] + 8.14))) * (
                                           sw_params['p_dyn'])**(-1.0/6.6)
@@ -1251,6 +1346,14 @@ def rx_model(
         bisec_msp[j, k] = r[8]
         bisec_msh[j, k] = r[9]
 
+        x_shu[j, k] = r[10]
+        y_shu[j, k] = r[11]
+        z_shu[j, k] = r[12]
+
+        b_msx[j, k] = r[13]
+        b_msy[j, k] = r[14]
+        b_msz[j, k] = r[15]
+
     if save_data:
         try:
             today_date = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -1271,6 +1374,10 @@ def rx_model(
             data_file.create_dataset('bisec_msp', data=bisec_msp)
             data_file.create_dataset('bisec_msh', data=bisec_msh)
 
+            data_file.create_dataset('x_shu', data=x_shu)
+            data_file.create_dataset('y_shu', data=y_shu)
+            data_file.create_dataset('z_shu', data=z_shu)
+
             data_file.close()
             print(f'Date saved to file {fn} \n')
         except Exception as e:
@@ -1278,11 +1385,12 @@ def rx_model(
             print(
                 f'Data not saved to file {fn}. Please make sure that file name is correctly assigned and that the directory exists and you have write permissions')
 
-    return bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params
+    return (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz)
+
 
 def line_fnc(
     r0=np.array([0, 0, 0]),
-    b_msh=np.array([-5, 0, 0]),
+    b_msh=np.array([0, 0, 0]),
     r = 0,
     ):
     """
@@ -1305,15 +1413,13 @@ def line_fnc(
     return r0 + r * b_msh_dir
 
 
-def line_fnc(x, y):
+def line_fnc_der(x, y):
     line_intrp = sp.interpolate.CubicSpline(x, y)
     return line_intrp
 
 
-def target_fnc(r, b_msh, r0, x, y, line_intrp):
-    p_line = line_fnc(r=r, b_msh=b_msh, r0=r0)
-    line_intrp = line_fnc(x, y)
-    z_surface = line_intrp(p_line[2])
-
+def target_fnc(r, r0, b_msh, line_fnc, line_intrp):
+    p_line = line_fnc(r0=r0, b_msh=b_msh, r=r)
+    z_surface = line_intrp(p_line[1])
     return np.sum((p_line[2] - z_surface)**2)
 
