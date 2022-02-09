@@ -96,6 +96,7 @@ if (mms_probe_num is not None):
     mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
     mms_fgm_b_gsm = ptt.get_data(mms_fgm_varnames[0])[1:4][0]
 '''
+'''
 import importlib
 import rx_model_funcs as rmf
 importlib.reload(rmf)
@@ -122,7 +123,7 @@ figure_inputs = {
     "draw_patch" : [True, True, True, True],
     "draw_ridge" : [True, True, True, True],
     "save_fig" : True,
-    "fig_name" : f'all_ridge_plots',
+    "fig_name" : f'all_ridge_plots_v2',
     #"fig_format" : 'png',
     "c_label" : ['Shear', 'Reconnection Energy', 'Exhaust Velocity', 'Bisection Field'],
     "c_unit" : [r'${}^\circ$', 'nPa', 'km/s', 'nT'],
@@ -134,6 +135,10 @@ figure_inputs = {
     "interpolation" : 'gaussian',
     "tsy_model" : model_type,
     "dark_mode" : True,
+    "rc_file_name" : f"reconnection_line_data_mms{mms_probe_num}.csv",
+    "rc_folder" : "../data/rx_d/",
+    "save_rc_file" : False
 }
 
 y, xx, yy = rmf.ridge_finder_multiple(**figure_inputs, fig_format='png')
+'''

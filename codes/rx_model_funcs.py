@@ -444,7 +444,8 @@ def ridge_finder_multiple(
     tsy_model="t96",
     dark_mode=True,
     rc_file_name="rc_file.csv",
-    rc_folder="../data"
+    rc_folder="../data",
+    save_rc_file=False,
     ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -633,16 +634,19 @@ def ridge_finder_multiple(
 
         # Take rolling average of the y_val array
         y_val_avg = np.full(len(y_val), np.nan)
+        im_max_val_avg = np.full(len(y_val), np.nan)
         for xx in range(len(y_val)):
             y_val_avg[xx] = np.nanmean(y_val[max(0, xx-15):min(len(y_val), xx+15)])
+            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx-15):min(len(y_val), xx+15)])
 
         if draw_ridge:
-            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
-                      alpha=0.9)
-            #axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
+            #axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
+            #          alpha=0.9)
+            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val_avg, color='aqua',
+                      ls='-', alpha=0.9)
 
         # Find the interpolation function corresponding to the x_vals and y_val_avg array
-        line_intrp = line_fnc_der(x=np.linspace(xrange[0], xrange[1], x_len), y=y_val_avg)
+        line_intrp = line_fnc_der(x=np.linspace(xrange[0], xrange[1], x_len), y=im_max_val_avg)
 
         # Spacecraft position
         r0 = mms_sc_pos[:3]
@@ -655,12 +659,12 @@ def ridge_finder_multiple(
         # magnetic field.
         # TODO: Check why the optimize function isn't working properly.
         # TODO: Implement the 3D property of the reconnection line. Find a way to incorporate X_shu
-        xn = np.full(100, np.nan)
-        yn = np.full(100, np.nan)
-        for n in range(-50, 50):
-            xn[50+n] = r0[1] + n * b_msh_dir[1]
-            yn[50+n] = r0[2] + n * b_msh_dir[2]
-        
+        xn = np.full(300, np.nan)
+        yn = np.full(300, np.nan)
+        for n in range(-150, 150):
+            xn[50+n] = r0[1] + n/3 * b_msh_dir[1]
+            yn[50+n] = r0[2] + n/3 * b_msh_dir[2]
+        #print(b_msh_dir)
         # Find the expected values of y-coordinate based on the x-coordinate, in the direction of
         # the magnetosheath magnetic field.
         yn_interp = line_intrp(xn)
@@ -692,6 +696,8 @@ def ridge_finder_multiple(
 
         # Find the distance between the spacecraft position and the reconnection line
         dist_rc = np.sqrt((r0[1] - xn_rc) ** 2 + (r0[2] - yn_rc) ** 2)
+        if dist_rc > xrange[1]:
+            dist_rc = np.nan
 
         # 
         if i==0:
@@ -707,34 +713,36 @@ def ridge_finder_multiple(
         # Check if the file exists, if not then create it
         
         # Create the rc-folder if it doesn't exist
-        if not os.path.exists(rc_folder):
-            os.makedirs(rc_folder)
-        # Save data to the csv file using tab delimiter
+        if save_rc_file:
+            if not os.path.exists(rc_folder):
+                os.makedirs(rc_folder)
 
-        if not os.path.exists(rc_folder + rc_file_name):
-            with open(rc_folder + rc_file_name, 'w') as f:
-                f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +\
-                    ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used\n")
+            # Save data to the csv file using tab delimiter
+            if not os.path.exists(rc_folder + rc_file_name):
+                with open(rc_folder + rc_file_name, 'w') as f:
+                    f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +\
+                        ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used\n")
+                    f.close()
+                    print(f"Created {rc_folder + rc_file_name} to store data")
+            # Open file and append the relevant data
+            with open(rc_folder + rc_file_name, 'a') as f:
+                f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
+                      + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
+                      + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
+                      + method_used+"\n")
                 f.close()
-                print(f"Created {rc_folder + rc_file_name} to store data")
-        # Open file and append the relevant data
-        with open(rc_folder + rc_file_name, 'a') as f:
-            f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
-                  + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
-                  + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
-                  + method_used+"\n")
-            f.close()
-            print(f"Saved data to {rc_folder + rc_file_name}")
+                print(f"Saved data to {rc_folder + rc_file_name}")
 
         # plot an arror along the magnetosheath magnetic field direction
         axs1.arrow(r0[1]-1.5, r0[2] - 1.5, 5*b_msh_dir[1], 5*b_msh_dir[2], head_width=0.4,
                    head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
 
         # Plot line connecting the spacecraft position and the reconnection line
-        axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
-        distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
-        axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
-                    color='k', ha='left', va='bottom')
+        if ~np.isnan(dist_rc):
+            axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
+            distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
+            axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
+                        color='k', ha='left', va='bottom')
 
         #print(r_opt)
 
@@ -743,7 +751,7 @@ def ridge_finder_multiple(
         axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
 
         if(draw_patch):
-            patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none',
+            patch = patches.Circle((0, 0), radius=xrange[1], transform=axs1.transData, fc='none',
                                     ec='k', lw=0.5)
             im1.set_clip_path(patch)
         axs1.add_patch(patch)
@@ -828,7 +836,7 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v2"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:

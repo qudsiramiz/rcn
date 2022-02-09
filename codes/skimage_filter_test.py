@@ -21,15 +21,16 @@ def identity(image, **kwargs):
 
 
 #image = color.rgb2gray(shear)
-image_rotated = np.transpose(bisec_msp)
-image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, order=0, sigma=[8, 8], mode="nearest")
+image_rotated = np.transpose(shear)
+image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, order=0, sigma=[1, 1], mode="nearest")
 image = image_smooth
 cmap = plt.cm.plasma
+plt.style.use('default')
 
-kwargs = {'sigmas': [2], 'mode': 'reflect'}
+kwargs = {'sigmas': [4], 'mode': 'reflect'}
 
-fig = plt.figure(num=None, figsize=(25, 25), dpi=200, facecolor='w', edgecolor='gray')
-#fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
+fig = plt.figure(num=None, figsize=(5, 10), dpi=200, facecolor='w', edgecolor='gray')
+fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
 
 fig, axes = plt.subplots(2, 5)
 for i, black_ridges in enumerate([1, 0]):
@@ -46,6 +47,6 @@ for i, black_ridges in enumerate([1, 0]):
         axes[i, j].set_xticks([])
         axes[i, j].set_yticks([])
 
-plt.tight_layout()
-plt.savefig('../figures/skimage_filter_test.pdf', bbox_inches='tight', dpi=300, transparent=True, pad_inches=0.05, bbox_extra_artists=[])
+#plt.tight_layout()
+plt.savefig('../figures/skimage_filter_test.pdf', bbox_inches='tight', dpi=300, transparent=True, pad_inches=0.05)
 plt.close()

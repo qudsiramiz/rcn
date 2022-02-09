@@ -61,8 +61,8 @@ trange_list.sort(key=lambda x: x[0])
 
 count = 0
 mms_probe_num_list = [1, 2, 3, 4]
-for mms_probe_num in mms_probe_num_list[0:]:
-    for trange in trange_list[0:]:
+for mms_probe_num in mms_probe_num_list[0:1]:
+    for trange in trange_list[3:4]:
 
         mms_probe_num = str(mms_probe_num)
         min_max_val = 15
@@ -126,12 +126,13 @@ for mms_probe_num in mms_probe_num_list[0:]:
             "interpolation" : 'gaussian',
             "tsy_model" : model_type,
             "dark_mode" : True,
-            "rc_file_name" : f"reconnection_line_data_mms{mms_probe_num}.csv",
-            "rc_folder" : "../data/rx_d/"
+            "rc_file_name" : f"reconnection_line_data_mms{mms_probe_num}_v2.csv",
+            "rc_folder" : "../data/rx_d/",
+            "save_rc_file" : False
         }
 
-        y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
-                                                                               fig_format='pdf')
+        #y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
+        #                                                                       fig_format='pdf')
 
         y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
                                                                                fig_format='png')
