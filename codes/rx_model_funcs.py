@@ -3,6 +3,7 @@ import datetime
 import multiprocessing as mp
 import os
 import warnings
+from turtle import color, left
 
 import geopack.geopack as gp
 import h5py as hf
@@ -14,6 +15,8 @@ import pyspedas as spd
 import pytplot as ptt
 import scipy as sp
 from dateutil import parser
+from matplotlib import widgets
+from matplotlib.pyplot import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.filters import frangi, hessian, meijering, sato
 from tabulate import tabulate
@@ -126,8 +129,8 @@ def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
     mag_vec_1 = np.linalg.norm(b_vec_1)
     mag_vec_2 = np.linalg.norm(b_vec_2)
 
-    unit_vec_1 = b_vec_1/mag_vec_1
-    unit_vec_2 = b_vec_2/mag_vec_2
+    unit_vec_1 = b_vec_1 / mag_vec_1
+    unit_vec_2 = b_vec_2 / mag_vec_2
 
     # The bisector vector of thwo input vectors
     unit_vec_bisec = (unit_vec_1 + unit_vec_2) / np.linalg.norm(unit_vec_1 + unit_vec_2)
@@ -327,7 +330,8 @@ def ridge_finder(
 
     # Smoothen the image
     image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode=mode)
-    result = meijering(image_smooth, **kwargs)
+    #result = meijering(image_smooth, **kwargs)
+    result = frangi(image_smooth, **kwargs)
 
     x_len = image_rotated.shape[0]
     y_len = image_rotated.shape[1]
@@ -351,7 +355,7 @@ def ridge_finder(
         y_val_avg[i] = np.nanmean(y_val[max(0, i-5):min(len(y_val), i+5)])
     
     if draw_ridge:
-        axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, 'k-', alpha=0.9)
+        axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val, 'k-', alpha=0.9)
         axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
 
     # Plot a horizontal line at x=0 and a vertical line at y=0
@@ -383,10 +387,10 @@ def ridge_finder(
     # Write the timme range on the plot
     axs1.text(1.0, 0.5, f'Time range: {t_range[0]} - {t_range[1]}', horizontalalignment='left',
               verticalalignment='center', transform=axs1.transAxes, rotation=270, color='r')
-    axs1.text(0.01, 0.99, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\circ$',
+    axs1.text(0.01, 0.99, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\\circ$',
     horizontalalignment='left', verticalalignment='top', transform=axs1.transAxes, rotation=0,
     color='r')
-    axs1.text(0.99, 0.99, f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} $^\circ$',
+    axs1.text(0.99, 0.99, f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} $^\\circ$',
               horizontalalignment='right', verticalalignment='top', transform=axs1.transAxes,
               rotation=0, color='r')
 
@@ -406,8 +410,11 @@ def ridge_finder(
 
 def ridge_finder_multiple(
     image=[None, None, None, None],
+    convolution_order=[1, 1, 1, 1],
     t_range=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
     dt=5,
+    b_imf = [-5, 0, 0],
+    b_msh = [-5, 0, 0],
     xrange=[-15.1, 15],
     yrange=[-15.1, 15],
     mms_probe_num='1',
@@ -434,7 +441,11 @@ def ridge_finder_multiple(
     box_style=None,
     title_y_pos=0.95,
     interpolation='nearest',
-    tsy_model="t96"
+    tsy_model="t96",
+    dark_mode=True,
+    rc_file_name="rc_file.csv",
+    rc_folder="../data",
+    save_rc_file=False,
     ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -443,6 +454,9 @@ def ridge_finder_multiple(
     ----------
     image : list of numpy arrays
         List of images to be plotted.
+    convolution_order : list of ints
+        List of the order of the convolution to be used while smoothing each image. Values must be
+        non-negative integers. Default is [1, 1, 1, 1].
     t_range : list of str
             The time range to find the ridge in. Default is ['2016-12-24 15:08:00',
             '2016-12-24 15:12:00'].
@@ -505,6 +519,9 @@ def ridge_finder_multiple(
             The interpolation method for imshow. Default is 'nearest'.
             Options are 'nearest', 'bilinear', 'bicubic', 'spline16', 'spline36', 'hanning',
             'hamming', 'hermite', 'kaiser', 'quadric', 'catrom', 'gaussian', 'bessel', 'mitchell'
+    dark_mode : bool, optional
+        Sets the dark mode for the plot and adjusts the color of labels and tickmarks accordingly.
+        Default is True.
 
     Raises
     ------
@@ -524,7 +541,24 @@ def ridge_finder_multiple(
         t_range = [t_range_date_min.strftime('%Y-%m-%d %H:%M:%S'),
                   t_range_date_max.strftime('%Y-%m-%d %H:%M:%S')]
 
-    fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor='w', edgecolor='gray')
+    if dark_mode:
+        plt.style.use('dark_background')
+        tick_color = 'w' # color of the tick lines
+        mtick_color = 'w' # color of the minor tick lines
+        label_color = 'w' # color of the tick labels
+        clabel_color = 'w' # color of the colorbar label
+    else:
+        plt.style.use('default')
+        tick_color = 'k' # color of the tick lines
+        mtick_color = 'k' # color of the minor tick lines
+        label_color = 'k' # color of the tick labels
+        clabel_color = 'k' # color of the colorbar label
+
+    # Set the fontstyle to Times New Roman
+    font = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    plt.rc('font', **font)
+    plt.rc('text', usetex=True)
+    fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor='w', edgecolor='k')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=wspace, hspace=hspace)
     gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1])
 
@@ -535,9 +569,17 @@ def ridge_finder_multiple(
     ct_tick_size = 14  # fontsize for colorbar tick labels
     l_label_size = 14  # fontsize for legend label
 
+    tick_len = 10  # length of the tick lines
+    mtick_len = 7  # length of the minor tick lines
+    tick_width = 1  # tick width in points
+    mtick_width = 0.7  # minor tick width in points
+
+
     #box_style = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     box_style = box_style
     y_vals = []
+    x_intr_vals_list = []
+    y_intr_vals_list = []
     for i in range(len(image)):
         image_rotated = np.transpose(image[i])
 
@@ -553,8 +595,11 @@ def ridge_finder_multiple(
         kwargs = {'sigmas': [sigma[i]], 'black_ridges': False, 'mode': mode, 'alpha': 1}
 
         # Smoothen the image
-        image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode=mode)
-        result = meijering(image_smooth, **kwargs)  #frangi, hessian, meijering, sato
+        image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, order=convolution_order[i],
+                                                          sigma=[5, 5], mode=mode)
+        image_smooth_p = sp.ndimage.filters.gaussian_filter(image_rotated, order=0, sigma=[5, 5],
+                                                          mode=mode)
+        result = frangi(image_smooth, **kwargs)  #frangi, hessian, meijering, sato
 
         x_len = image_rotated.shape[0]
         y_len = image_rotated.shape[1]
@@ -582,35 +627,140 @@ def ridge_finder_multiple(
             k = 1
 
         axs1 = plt.subplot(gs[j, k])
-        im1 = axs1.imshow(image_smooth, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
+        im1 = axs1.imshow(image_smooth_p, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
                           origin='lower', cmap=cmap_list[i], norm=norm, interpolation=interpolation,
                           alpha=1)
         divider1 = make_axes_locatable(axs1)
 
         # Take rolling average of the y_val array
         y_val_avg = np.full(len(y_val), np.nan)
+        im_max_val_avg = np.full(len(y_val), np.nan)
         for xx in range(len(y_val)):
-            y_val_avg[xx] = np.nanmean(y_val[max(0, xx-25):min(len(y_val), xx+25)])
-    
+            y_val_avg[xx] = np.nanmean(y_val[max(0, xx-15):min(len(y_val), xx+15)])
+            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx-15):min(len(y_val), xx+15)])
+
         if draw_ridge:
-            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, 'k-', alpha=0.9)
-            #axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val, 'k*', ms=1, alpha=0.5)
+            #axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
+            #          alpha=0.9)
+            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val_avg, color='aqua',
+                      ls='-', alpha=0.9)
+
+        # Find the interpolation function corresponding to the x_vals and y_val_avg array
+        line_intrp = line_fnc_der(x=np.linspace(xrange[0], xrange[1], x_len), y=im_max_val_avg)
+
+        # Spacecraft position
+        r0 = mms_sc_pos[:3]
+
+        # Direction of the magnetosheath magnetic field at the position of the spacecraft
+        # TODO: Check if this is same as direction/magnitude given by the Cooling model
+        b_msh_dir = b_msh[:3] / np.linalg.norm(b_msh[:3])
+
+        # Find the closest point on the reconnection line in the direction of the magnetosheath
+        # magnetic field.
+        # TODO: Check why the optimize function isn't working properly.
+        # TODO: Implement the 3D property of the reconnection line. Find a way to incorporate X_shu
+        xn = np.full(300, np.nan)
+        yn = np.full(300, np.nan)
+        for n in range(-150, 150):
+            xn[50+n] = r0[1] + n/3 * b_msh_dir[1]
+            yn[50+n] = r0[2] + n/3 * b_msh_dir[2]
+        #print(b_msh_dir)
+        # Find the expected values of y-coordinate based on the x-coordinate, in the direction of
+        # the magnetosheath magnetic field.
+        yn_interp = line_intrp(xn)
+
+        # Compute the distance between the spacecraft position and the coordinates computed in
+        # previous step.
+        dist_rn = np.abs(yn - yn_interp)
+        # Find the index of the minimum distance
+        min_dist_rn_idx = np.argmin(dist_rn)
+
+        # Find the x- and y-coordinates corresponding to the minimum distance
+        xn_rc = xn[min_dist_rn_idx]
+        yn_rc = yn[min_dist_rn_idx]
+
+        # Save the x- and y-coordinates of the reconnection line along with the spacecraft position
+        x_intr_vals = [r0[1], xn_rc]
+        y_intr_vals = [r0[2], yn_rc]
+
+        # TODO: Check
+        #r_opt = sp.optimize.minimize(target_fnc, 0, args=(r0, b_msh[:3], line_fnc, line_intrp))
+        #r_intsc = line_intrp(r_opt)
+        #r_intsc = line_intrp(r_opt.x)
+        #x_intr_vals = [r0[1], r_opt.x[0]]
+        #y_intr_vals = [r0[2], r_intsc[0]]
+
+        # Append the x- and y-coordinates to the list in order to save to a file
+        x_intr_vals_list.append(x_intr_vals)
+        y_intr_vals_list.append(y_intr_vals)
+
+        # Find the distance between the spacecraft position and the reconnection line
+        dist_rc = np.sqrt((r0[1] - xn_rc) ** 2 + (r0[2] - yn_rc) ** 2)
+        if dist_rc > xrange[1]:
+            dist_rc = np.nan
+
+        # 
+        if i==0:
+            method_used = 'shear'
+        elif i==1:
+            method_used = 'rx_en'
+        elif i==2:
+            method_used = 'va_cs'
+        elif i==3:
+            method_used = 'bisection'
+
+        # Save the data to a text file
+        # Check if the file exists, if not then create it
+        
+        # Create the rc-folder if it doesn't exist
+        if save_rc_file:
+            if not os.path.exists(rc_folder):
+                os.makedirs(rc_folder)
+
+            # Save data to the csv file using tab delimiter
+            if not os.path.exists(rc_folder + rc_file_name):
+                with open(rc_folder + rc_file_name, 'w') as f:
+                    f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +\
+                        ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used\n")
+                    f.close()
+                    print(f"Created {rc_folder + rc_file_name} to store data")
+            # Open file and append the relevant data
+            with open(rc_folder + rc_file_name, 'a') as f:
+                f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
+                      + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
+                      + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
+                      + method_used+"\n")
+                f.close()
+                print(f"Saved data to {rc_folder + rc_file_name}")
+
+        # plot an arror along the magnetosheath magnetic field direction
+        axs1.arrow(r0[1]-1.5, r0[2] - 1.5, 5*b_msh_dir[1], 5*b_msh_dir[2], head_width=0.4,
+                   head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
+
+        # Plot line connecting the spacecraft position and the reconnection line
+        if ~np.isnan(dist_rc):
+            axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
+            distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
+            axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
+                        color='k', ha='left', va='bottom')
+
+        #print(r_opt)
 
         # Plot a horizontal line at x=0 and a vertical line at y=0
         axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
         axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
 
         if(draw_patch):
-            patch = patches.Circle((0, 0), radius=15, transform=axs1.transData, fc='none',
+            patch = patches.Circle((0, 0), radius=xrange[1], transform=axs1.transData, fc='none',
                                     ec='k', lw=0.5)
-            #im1.set_clip_path(patch)
+            im1.set_clip_path(patch)
         axs1.add_patch(patch)
         if i==0 or i==2:
-            axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size)
+            axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size, color=label_color)
         if i==2 or i==3:
-            axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_size)
+            axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_size, color=label_color)
         if i==1 or i==3:
-            axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size)
+            axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size, color=label_color)
             axs1.yaxis.set_label_position("right")
 
         if i==0:
@@ -629,36 +779,55 @@ def ridge_finder_multiple(
         cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
                              pad=0.01)
         cbar1.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=False,
-                             labelbottom=False, pad=0.01, labelsize=ct_tick_size)
+                             labelbottom=False, pad=0.01, labelsize=ct_tick_size,
+                             labelcolor=label_color)
         cbar1.ax.xaxis.set_label_position('top')
-        cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size)
+        cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size, color=clabel_color)
 
         # Draw the spacecraft position
-        axs1.plot(mms_sc_pos[0], mms_sc_pos[1], 'white', marker='$\\bigoplus$', ms=15, alpha=1)
+        axs1.plot(mms_sc_pos[1], mms_sc_pos[2], 'white', marker='$\\bigoplus$', ms=15, alpha=1)
 
         # Set tick label parameters
         if i==0 or i==2:
             axs1.tick_params(axis='both', direction='in', which='major', left=True, right=True,
                              top=True, bottom=True, labelleft=True, labelright=False,
-                             labeltop=False, labelbottom=True, labelsize=t_label_size)
+                             labeltop=False, labelbottom=True, labelsize=t_label_size,
+                             length=tick_len, width=tick_width, labelcolor=label_color)
         else:
             axs1.tick_params(axis='both', direction='in', which='major', left=True, right=True,
                              top=True, bottom=True, labelleft=False, labelright=True,
-                             labeltop=False, labelbottom=True, labelsize=t_label_size)
+                             labeltop=False, labelbottom=True, labelsize=t_label_size,
+                             length=tick_len, width=tick_width, labelcolor=label_color)
         # Write the timme range on the plot
         if i==2:
-            axs1.text(-0.17, -0.1, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\circ$',
+            axs1.text(-0.17, -0.1, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\\circ$',
                   horizontalalignment='left', verticalalignment='top', transform=axs1.transAxes,
                   rotation=0, color='white', fontsize=l_label_size, bbox=box_style)
         elif i==3:
             axs1.text(1.17, -0.1,
-                      f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} $^\circ$',
+                      f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} $^\\circ$',
                       horizontalalignment='right', verticalalignment='top',
                       transform=axs1.transAxes, rotation=0, color='white', fontsize=l_label_size,
                       bbox=box_style)
+        # Show minor ticks
+        axs1.minorticks_on()
+        axs1.tick_params(axis='both', which='minor', direction='in', length=mtick_len, left=True,
+                         right=True, top=True, bottom=True, color=mtick_color, width=mtick_width)
+        # Set the number of ticks on the x-axis
+        axs1.xaxis.set_major_locator(MaxNLocator(nbins=5, prune='lower'))
+        # Set the number of ticks on the y-axis
+        axs1.yaxis.set_major_locator(MaxNLocator(nbins=5, prune='lower'))
+
+        # Setting the tickmarks labels in such a way that they don't overlap
+        plt.setp(axs1.get_xticklabels(), rotation=0, ha='right', va='top', visible=True)
+        plt.setp(axs1.get_yticklabels(), rotation=0, va='center', visible=True)
         # Set the title of the plot
-        fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]}', fontsize=label_size, color='r',
-                     y=title_y_pos)
+        if dark_mode:
+            fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
+                         fontsize=label_size, color='w', y=title_y_pos, alpha=0.65)
+        else:
+            fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
+                         fontsize=label_size, color='crimson', y=title_y_pos, alpha=1)
 
     # fig.show()
 
@@ -667,7 +836,7 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v2"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:
@@ -677,14 +846,14 @@ def ridge_finder_multiple(
                 print(f"folder already exists: {fig_folder}\n")
 
             fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}.{fig_format}'
-            plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
+            plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=200)
             print(f'Figure saved as {fig_name}')
         except  Exception as e:
             print(e)
             print(f'Figure not saved, folder does not exist. Create folder ../figures')
             #pass
         plt.close()
-    return y_vals
+    return y_vals, x_intr_vals_list, y_intr_vals_list
 
 
 def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None, save_fig=True,
@@ -868,7 +1037,7 @@ def model_run(*args):
             bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
             break
 
-    return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh
+    return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz
 
 
 def get_sw_params(
@@ -944,9 +1113,18 @@ def get_sw_params(
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
         mms_sc_pos = ptt.get_data(mms_vars[0])[1:3][0]/r_e
+
+        # TODO: Find out why adding 'mms_fgm_varnames' as a variable causes the code to give out no data.
+        mms_fgm_varnames = [f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec']
+        mms_fgm_vars = spd.mms.fgm(trange=trange, probe=mms_probe_num, time_clip=time_clip,
+                                   latest_version=True)
+        mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
+        mms_fgm_b_gsm = ptt.get_data(mms_fgm_varnames[0])[1:4][0]
     else:
         mms_time = None
         mms_sc_pos = None
+        mms_fgm_time = None
+        mms_fgm_b_gsm = None
         pass
 
     time_imf = np.nanmedian(omni_time)
@@ -972,8 +1150,13 @@ def get_sw_params(
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
     if imf_clock_angle < 0:
         imf_clock_angle += 180
-    mean_mms_sc_pos = np.round([np.nanmedian(mms_sc_pos[:,0]), np.nanmedian(mms_sc_pos[:,1]),
-                       np.nanmedian(mms_sc_pos[:,2])], 2)
+    if mms_probe_num is not None:
+        mean_mms_sc_pos = np.round(np.nanmean(mms_sc_pos, axis=0), decimals=2)
+        mean_mms_fgm_b_gsm = np.round(np.nanmedian(mms_fgm_b_gsm, axis=0), decimals=2)
+    else:
+        mean_mms_sc_pos = None
+        mean_mms_fgm_b_gsm = None
+
     print("IMF parameters found:")
     if (verbose):
         print(tabulate(
@@ -1028,6 +1211,7 @@ def get_sw_params(
     sw_dict['param'] = param
     sw_dict['mms_time'] = mms_time
     sw_dict['mms_sc_pos'] = mms_sc_pos
+    sw_dict['mms_b_gsm'] = mean_mms_fgm_b_gsm
 
     return sw_dict
 
@@ -1133,6 +1317,14 @@ def rx_model(
     bisec_msp = np.full((n_arr_y, n_arr_z), np.nan)
     bisec_msh = np.full((n_arr_y, n_arr_z), np.nan)
 
+    x_shu = np.full((n_arr_y, n_arr_z), np.nan)
+    y_shu = np.full((n_arr_y, n_arr_z), np.nan)
+    z_shu = np.full((n_arr_y, n_arr_z), np.nan)
+
+    b_msx = np.full((n_arr_y, n_arr_z), np.nan)
+    b_msy = np.full((n_arr_y, n_arr_z), np.nan)
+    b_msz = np.full((n_arr_y, n_arr_z), np.nan)
+
     # Shue et al.,1998, equation 10
     ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params['b_imf'][2] + 8.14))) * (
                                           sw_params['p_dyn'])**(-1.0/6.6)
@@ -1169,6 +1361,14 @@ def rx_model(
         bisec_msp[j, k] = r[8]
         bisec_msh[j, k] = r[9]
 
+        x_shu[j, k] = r[10]
+        y_shu[j, k] = r[11]
+        z_shu[j, k] = r[12]
+
+        b_msx[j, k] = r[13]
+        b_msy[j, k] = r[14]
+        b_msz[j, k] = r[15]
+
     if save_data:
         try:
             today_date = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -1189,6 +1389,10 @@ def rx_model(
             data_file.create_dataset('bisec_msp', data=bisec_msp)
             data_file.create_dataset('bisec_msh', data=bisec_msh)
 
+            data_file.create_dataset('x_shu', data=x_shu)
+            data_file.create_dataset('y_shu', data=y_shu)
+            data_file.create_dataset('z_shu', data=z_shu)
+
             data_file.close()
             print(f'Date saved to file {fn} \n')
         except Exception as e:
@@ -1196,4 +1400,41 @@ def rx_model(
             print(
                 f'Data not saved to file {fn}. Please make sure that file name is correctly assigned and that the directory exists and you have write permissions')
 
-    return bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params
+    return (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz)
+
+
+def line_fnc(
+    r0=np.array([0, 0, 0]),
+    b_msh=np.array([0, 0, 0]),
+    r = 0,
+    ):
+    """
+    Function to compute the equation of a line along the direction of the magnetic field.
+
+    Parameters
+    ----------
+    r0 : array
+        Starting position of the line
+    b_msh : array, optional
+        Magnetic field from magnetosheath at the magnetopause
+    r : float, optional
+        Position of the point where the line is computed
+    """
+    # Compute the direction of the magnetic field line
+    b_msh_norm = np.linalg.norm(b_msh)
+    b_msh_dir = b_msh / b_msh_norm
+
+    # return the line function
+    return r0 + r * b_msh_dir
+
+
+def line_fnc_der(x, y):
+    line_intrp = sp.interpolate.CubicSpline(x, y)
+    return line_intrp
+
+
+def target_fnc(r, r0, b_msh, line_fnc, line_intrp):
+    p_line = line_fnc(r0=r0, b_msh=b_msh, r=r)
+    z_surface = line_intrp(p_line[1])
+    return np.sum((p_line[2] - z_surface)**2)
+

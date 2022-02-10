@@ -129,6 +129,13 @@ dmypy.json
 .pyre/
 
 # Ignore .swp, .swo and .vscode files
-.swp
-.swo
-.vscode
+.*.swp
+.*.swo
+*.vscode
+
+# Ignore cdf files
+*.cdf
+
+# Ignore hdf files
+*.hdf
+*.h5

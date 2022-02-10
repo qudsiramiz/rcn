@@ -535,6 +535,7 @@ def shear_angle_calculator(
 
     axs.tick_params(axis="both", direction="in", top=True, labeltop=False, bottom=True,
                     labelbottom=True, left=True, labelleft=True, right=True, labelright=False, labelsize=14)
+
     axs.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=18)
     axs.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=18)
 
