@@ -18,7 +18,7 @@ from skimage.filters import meijering  # sato, frangi, hessian
 # Set the fontstyle to Times New Roman
 font = {'family': 'sans-serif', 'weight': 'normal', 'size': 10}
 plt.rc('font', **font)
-plt.rc('text', usetex=True)
+plt.rc('text', usetex=False)
 
 start = time.time()
 
@@ -500,11 +500,11 @@ if(code_run):
     maximum_shear = True
     mms_probe = None
     movie = None
-    #trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+    trange = ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
     #trange = ['2015-09-08 11:05:00', '2015-09-08 11:15:00']
     #trange = ['2016-12-29 03:53:00', '2016-12-29 04:03:00']
     #trange = ['2015-09-19 07:38:00', '2015-09-19 07:48:00']
-    trange = ['2016-02-07 20:18:00', '2016-02-07 20:28:00']
+    #trange = ['2016-02-07 20:18:00', '2016-02-07 20:28:00']
     model_type = 't96'
     mp = 0.5  # Magnetopause thichkness
     dr = 0.5  # Resolution of model run in R_E units

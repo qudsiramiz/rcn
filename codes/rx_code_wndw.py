@@ -5,12 +5,12 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-from rx_model_funcs import *
+from rx_model_funcs_wndw import *
 
 # Set the fontstyle to Times New Roman
 font = {'family': 'serif', 'weight': 'normal', 'size': 10}
 plt.rc('font', **font)
-plt.rc('text', usetex=True)
+plt.rc('text', usetex=False)
 
 start = time.time()
 
@@ -53,7 +53,7 @@ trange_list = [
 ['2017-01-27 12:05:43'],
 ]
 count = 0
-for trange in trange_list[:1]:
+for trange in trange_list[:]:
 
     mms_probe_num = '1'
     min_max_val = 20
