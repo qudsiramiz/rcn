@@ -8,6 +8,7 @@ import numpy as np
 
 #from rx_model_funcs import rx_model, ridge_finder_multiple
 import rx_model_funcs as rmf
+
 importlib.reload(rmf)
 
 # Set the fontstyle to Times New Roman
