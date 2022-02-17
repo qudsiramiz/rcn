@@ -3,7 +3,6 @@ import datetime
 import multiprocessing as mp
 import os
 import warnings
-from turtle import color, left
 
 import geopack.geopack as gp
 import h5py as hf
