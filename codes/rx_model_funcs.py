@@ -630,6 +630,8 @@ def ridge_finder_multiple(
                           origin='lower', cmap=cmap_list[i], norm=norm, interpolation=interpolation,
                           alpha=1)
         divider1 = make_axes_locatable(axs1)
+        # Draw a circle of radius 10 around the center of the image
+        axs1.add_patch(plt.Circle((0, 0), radius=15, color='gray', fill=False, lw=0.5))
 
         # Take rolling average of the y_val array
         y_val_avg = np.full(len(y_val), np.nan)
@@ -1091,7 +1093,7 @@ def get_sw_params(
                              time_clip=time_clip)
 
     omni_time = ptt.get_data(omni_vars[0])[0]
-
+    print(f'omni_time: {len(omni_time)}')
     omni_bx_gse = ptt.get_data(omni_vars[0])[1]
     omni_by_gsm = ptt.get_data(omni_vars[1])[1]
     omni_bz_gsm = ptt.get_data(omni_vars[2])[1]
@@ -1148,7 +1150,7 @@ def get_sw_params(
     b_imf = [b_imf_x, b_imf_y, b_imf_z]
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
     if imf_clock_angle < 0:
-        imf_clock_angle += 180
+        imf_clock_angle += 360
     if mms_probe_num is not None:
         mean_mms_sc_pos = np.round(np.nanmean(mms_sc_pos, axis=0), decimals=2)
         mean_mms_fgm_b_gsm = np.round(np.nanmedian(mms_fgm_b_gsm, axis=0), decimals=2)
