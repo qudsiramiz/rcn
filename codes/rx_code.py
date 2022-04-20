@@ -62,15 +62,16 @@ trange_list = [
 ['2015-09-18 11:54:02', '2015-09-18 11:55:59']
 ]
 
-trange_list = [['2015-09-11 15:23:00', '2015-09-11 15:23:59']]
+#trange_list = [['2015-09-11 15:18:00', '2015-09-11 15:28:00']]
 
+trange_list = [['2017-01-22 10:47:33']]
 # Sort the trange_list by the start time
 trange_list.sort(key=lambda x: x[0])
 
 count = 0
 mms_probe_num_list = [1, 2, 3, 4]
-for mms_probe_num in mms_probe_num_list[2:3]:
-    for trange in trange_list[:1]:
+for mms_probe_num in mms_probe_num_list[0:1]:
+    for trange in trange_list[:]:
 
         mms_probe_num = str(mms_probe_num)
         min_max_val = 20

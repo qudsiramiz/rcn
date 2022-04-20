@@ -1,0 +1,47 @@
+Ramiz,
+
+
+There should now be a python script that connects to the database
+and plots something (histogram of events). See:
+
+https://www.dropbox.com/s/02fc6ns0r2jiytt/month_histogram.py
+
+
+Other python examples (different database, but same principle) can
+be found e.g., here:
+
+https://www.dropbox.com/sh/0uweewu3g65qvrw/AAAeQeKHL-I1SgRQzSD77YU2a
+
+
+.. and the SQL scripts loaded by the python code can be
+found here:
+
+https://www.dropbox.com/sh/auqnslh11l4fq6p/AAB6IwQGBLMWCPtup3vpoNFga
+
+
+Note that you can create 'template SQLs' and fillariables
+etc, from your Python / Matlab code before executing the queries.
+
+===
+
+Some jetting information is already in the database - probably
+in the table MMS2up_ions. Check contents and description of
+the table content with the following SQL:
+
+        SHOW FULL COLUMNS FROM MMS2up_ions;
+
+..and check whether e.g., the parameters
+
+t_Vmaxbrst = time where max |V| occurs,
+Vmax_tht  = maximum |V| [km/s] within HT interval
+
+
+
+.. are of any use.
+
+===
+
+Good luck. Get in touch if you get stuck., but note
+that we are out of town from 17-25 April
+
+Stein H.

@@ -1,0 +1,57 @@
+
+
+
+> To access the database via a client, e.g., SequelPro from Mac
+> or Mysql Workbench for all systems, you need the
+> following information:
+> 
+> 
+> Set up SSH connection to:
+> 
+> Server = 81.169.221.160
+> Port = 899
+> User/pwd = mmsteam, passwd is mms_issi$2022
+> Database name = MMS
+> 
+> You should have access to all MMS tables.
+> 
+> 
+> Plan b)
+> -------
+> Alternatively, on UNIS systems (Mac, UNIX, DSD, Linux...)
+> you can use a command line to set up a tunnel to this
+> server, and use your, locally installed own client,
+> e.g., mysql:
+> 
+> ssh -p 899 -L3309:127.0.0.1:3306 mmsteam@81.169.221.160 -N
+> 
+> (type in above password)
+> 
+> In another terminal, you can now query the database
+> with e.g., the mysql client:
+> 
+> mysql -h127.0.0.1 -P3309 -e "select * from MMS.MMS2up_misc;"
+
+> 
+> You should get a listing (ASCII like format) on
+> the screen.  You can pipe this to a file:
+> 
+> mysql -h127.0.0.1 -P3309 -e "select * from MMS.MMS2up_misc;" > a.txt
+> mysql -h127.0.0.1 -u mmsteam -P3309 -e "select * from MMS.MMS2up_misc;" > mms_test.text
+> 
+> Run a script
+> mysql -h127.0.0.1 -u mmsteam -P3309 < test.sql
+>
+> In UNIX/Linux, you can create aliases for these, e.g.,
+>
+> alias dbconnect='ssh -p 899 -L3309:127.0.0.1:3306 mmsteam@81.169.221.160 -N &'
+> alias dbquery='mysql -P 3309 -h127.0.0.1'
+>
+> and then type e.g,:
+>
+> dbquery < test.sql
+
+
+
+
+

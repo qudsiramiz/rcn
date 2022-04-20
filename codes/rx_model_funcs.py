@@ -837,7 +837,7 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v2"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v3"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:
