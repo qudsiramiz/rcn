@@ -743,7 +743,7 @@ def ridge_finder_multiple(
             axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
             distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
             axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
-                        color='k', ha='left', va='bottom')
+                        color='darkred', ha='left', va='bottom')
 
         #print(r_opt)
 
@@ -837,7 +837,7 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v3"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/test"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:
@@ -846,7 +846,7 @@ def ridge_finder_multiple(
             else:
                 print(f"folder already exists: {fig_folder}\n")
 
-            fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}.{fig_format}'
+            fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}_{b_imf}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=200)
             print(f'Figure saved as {fig_name}')
         except  Exception as e:
@@ -988,10 +988,8 @@ def model_run(*args):
                 z_shu = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
                 y_shu = z_shu/np.tan(phi)
 
-            rho_sh = sw_params['rho'] * (1.509 * np.exp(x_shu/rmp) + .1285)
-
             m_proton = 1.672e-27  # Mass of proton in SI unit
-            n_sh = rho_sh/m_proton
+            n_sh = sw_params['rho'] * (1.509 * np.exp(x_shu/rmp) + .1285) / m_proton
 
             y_shu = abs(y_shu)*signy
             z_shu = abs(z_shu)*signz
@@ -1148,6 +1146,11 @@ def get_sw_params(
     sym_h_imf = np.nanmedian(omni_sym_h)
     v_imf = [vx_imf, vy_imf, vz_imf]
     b_imf = [b_imf_x, b_imf_y, b_imf_z]
+
+    # TODO: Remove the next three lines after testing is done
+    np_imf = 5
+    v_imf = [-450, 0, 0]
+    b_imf = [0, 0, 5]
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
     if imf_clock_angle < 0:
         imf_clock_angle += 360
@@ -1185,7 +1188,8 @@ def get_sw_params(
 
     m_proton = 1.672e-27  # Mass of proton in SI unit
 
-    rho = np_imf * m_proton * 1.15
+    rho = np_imf * m_proton * 1.15  # NOTE to self: Unit is fine, do not worry about it
+    print(f"Proton density is {np_imf} 1/cm^3")
 
     #  Solar wind ram pressure in nPa, including roughly 4% Helium++ contribution
     p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2)
