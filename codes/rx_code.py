@@ -64,7 +64,12 @@ trange_list = [
 
 #trange_list = [['2015-09-11 15:18:00', '2015-09-11 15:28:00']]
 
-trange_list = [['2017-01-22 10:47:33']]
+#trange_list = [['2017-01-22 10:47:33']]
+#trange_list = [['2016-12-24 15:08:00', '2016-12-24 15:12:00']]
+#trange_list = [['2017-01-22 10:47:33'],
+#               #['2015-12-06 23:38:31'],
+#               ['2016-12-24 15:08:00', '2016-12-24 15:12:00']
+#               ]
 # Sort the trange_list by the start time
 trange_list.sort(key=lambda x: x[0])
 
@@ -135,7 +140,7 @@ for mms_probe_num in mms_probe_num_list[0:1]:
             "title_y_pos" : 1.09,
             "interpolation" : 'gaussian',
             "tsy_model" : model_type,
-            "dark_mode" : False,
+            "dark_mode" : True,
             "rc_file_name" : f"reconnection_line_data_mms{mms_probe_num}_v2.csv",
             "rc_folder" : "../data/rx_d/",
             "save_rc_file" : False

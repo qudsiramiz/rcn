@@ -743,7 +743,7 @@ def ridge_finder_multiple(
             axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
             distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
             axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
-                        color='darkred', ha='left', va='bottom')
+                        color='k', ha='left', va='bottom')
 
         #print(r_opt)
 
@@ -770,7 +770,7 @@ def ridge_finder_multiple(
             fontsize=l_label_size, bbox=box_style)
 
         if i==1:
-            axs1.text(1.15, 1.16, f'MMS - {mms_probe_num}', horizontalalignment='right',
+            axs1.text(1.15, 1.16, f'MMS - {mms_sc_pos}', horizontalalignment='right',
             verticalalignment='bottom', transform=axs1.transAxes, rotation=0, color='white',
             fontsize=l_label_size, bbox=box_style)
 
@@ -787,6 +787,9 @@ def ridge_finder_multiple(
 
         # Draw the spacecraft position
         axs1.plot(mms_sc_pos[1], mms_sc_pos[2], 'white', marker='$\\bigoplus$', ms=15, alpha=1)
+        #axs1.text(mms_sc_pos[1], mms_sc_pos[2], f'MMS: {mms_sc_pos}', horizontalalignment='right',
+        #    verticalalignment='bottom', transform=axs1.transAxes, rotation=0, color='white',
+        #    fontsize=l_label_size, bbox=box_style)
 
         # Set tick label parameters
         if i==0 or i==2:
@@ -1147,10 +1150,10 @@ def get_sw_params(
     v_imf = [vx_imf, vy_imf, vz_imf]
     b_imf = [b_imf_x, b_imf_y, b_imf_z]
 
-    # TODO: Remove the next three lines after testing is done
-    np_imf = 5
-    v_imf = [-450, 0, 0]
-    b_imf = [0, 0, 5]
+    ## TODO: Remove the next three lines after testing is done
+    #np_imf = 5
+    #v_imf = [-450, 0, 0]
+    #b_imf = [0, 0, 5]
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
     if imf_clock_angle < 0:
         imf_clock_angle += 360
@@ -1189,7 +1192,7 @@ def get_sw_params(
     m_proton = 1.672e-27  # Mass of proton in SI unit
 
     rho = np_imf * m_proton * 1.15  # NOTE to self: Unit is fine, do not worry about it
-    print(f"Proton density is {np_imf} 1/cm^3")
+    #print(f"Proton density is {np_imf} 1/cm^3")
 
     #  Solar wind ram pressure in nPa, including roughly 4% Helium++ contribution
     p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2)

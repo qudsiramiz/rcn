@@ -200,7 +200,7 @@ for file_name in fnames:
 
     fig_inputs ={
         'file_name': file_name,
-        'dark_mode': True,
+        'dark_mode': False,
         'fig_name':  f"rx_hist_{mms_probe_num}",
         'fig_format': 'pdf',
         'fig_folder': '../figures/rx_hist',
