@@ -597,7 +597,7 @@ def ridge_finder_multiple(
         image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, order=convolution_order[i],
                                                           sigma=[5, 5], mode=mode)
         image_smooth_p = sp.ndimage.filters.gaussian_filter(image_rotated, order=0, sigma=[5, 5],
-                                                          mode=mode)
+                                                            mode=mode)
         result = frangi(image_smooth, **kwargs)  #frangi, hessian, meijering, sato
 
         x_len = image_rotated.shape[0]
@@ -612,16 +612,16 @@ def ridge_finder_multiple(
 
         # plt.close('all')
         # TODO: Find a better way to do this
-        if i==0:
+        if i == 0:
             j = 0
             k = 0
-        elif i==1:
+        elif i == 1:
             j = 0
             k = 1
-        elif i==2:
+        elif i == 2:
             j = 1
             k = 0
-        elif i==3:
+        elif i == 3:
             j = 1
             k = 1
 
@@ -663,8 +663,8 @@ def ridge_finder_multiple(
         xn = np.full(300, np.nan)
         yn = np.full(300, np.nan)
         for n in range(-150, 150):
-            xn[50+n] = r0[1] + n/3 * b_msh_dir[1]
-            yn[50+n] = r0[2] + n/3 * b_msh_dir[2]
+            xn[50 + n] = r0[1] + n/3 * b_msh_dir[1]
+            yn[50 + n] = r0[2] + n/3 * b_msh_dir[2]
         #print(b_msh_dir)
         # Find the expected values of y-coordinate based on the x-coordinate, in the direction of
         # the magnetosheath magnetic field.
