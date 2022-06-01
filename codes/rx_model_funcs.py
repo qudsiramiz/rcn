@@ -840,7 +840,7 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/test"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v4"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:
@@ -1094,7 +1094,7 @@ def get_sw_params(
                              time_clip=time_clip)
 
     omni_time = ptt.get_data(omni_vars[0])[0]
-    print(f'omni_time: {len(omni_time)}')
+    #print(f'omni_time: {omni_time}')
     omni_bx_gse = ptt.get_data(omni_vars[0])[1]
     omni_by_gsm = ptt.get_data(omni_vars[1])[1]
     omni_bz_gsm = ptt.get_data(omni_vars[2])[1]
@@ -1112,6 +1112,7 @@ def get_sw_params(
                                data_rate='srvy', level='l2', time_clip=time_clip,
                                latest_version=True)
         mms_time = ptt.get_data(mms_vars[0])[0]
+
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
         mms_sc_pos = ptt.get_data(mms_vars[0])[1:3][0]/r_e

@@ -14,7 +14,7 @@ r_e = 6378.137  # Earth radius in km
 mms_varnames = ['mms3_mec_r_gsm']
 dt = 15
 
-with open('../data/mms_magnetopause_crossings_limited.csv', 'w') as f:
+with open('../data/mms_magnetopause_crossings_limited_v2.csv', 'w') as f:
     f.write("time, x, y, z, r_yz, index\n")
     # Go through each date and find the position of MMS at those dates
     for i, time_crossing in enumerate(df.DateStart[:]):
@@ -42,7 +42,7 @@ with open('../data/mms_magnetopause_crossings_limited.csv', 'w') as f:
         # Open a file to save the data to a csv file
 
         # Check if the crossing was close to the sub-solar point
-        if x > 6 and x < 12 and r_yz < 10:
+        if x > -5 and x < 12 and r_yz < 12:
             #print("Crossing at: " + time_crossing)
             #print("Position of MMS in GSM coordinates: " +
             #      str(mms_sc_pos))

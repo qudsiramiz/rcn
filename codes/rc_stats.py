@@ -8,8 +8,6 @@ import matplotlib.gridspec as gridspec
 
 from matplotlib.pyplot import MaxNLocator
 
-file_name = "../data/reconnection_line_data.csv"
-
 # Set the font size for the axes
 label_size = 20  # fontsize for x and y labels
 t_label_size = 18  # fontsize for tick label
@@ -25,8 +23,8 @@ mtick_width = 0.7  # minor tick width in points
 label_pad = 5  # padding between label and axis
 
 
-def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="../figures", fig_name="new",
-              fig_format="pdf"):
+def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="../figures",
+              fig_name="new", fig_format="pdf"):
 
     df = pd.read_csv(file_name)
 
@@ -34,6 +32,12 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     df_rx_en = df[df.method_used=="rx_en"]
     df_va_cs = df[df.method_used=="va_cs"]
     df_bisec = df[df.method_used=="bisection"]
+
+    # Remove all data points where the value of 'r_rc' is greater than 12
+    df_shear = df_shear[df_shear.r_rc<12]
+    df_rx_en = df_rx_en[df_rx_en.r_rc<12]
+    df_va_cs = df_va_cs[df_va_cs.r_rc<12]
+    df_bisec = df_bisec[df_bisec.r_rc<12]
 
     if dark_mode:
         plt.style.use('dark_background')
@@ -194,16 +198,16 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/*.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/*_v3.csv"))
 for file_name in fnames:
     mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
     fig_inputs ={
         'file_name': file_name,
-        'dark_mode': False,
+        'dark_mode': True,
         'fig_name':  f"rx_hist_{mms_probe_num}",
         'fig_format': 'pdf',
-        'fig_folder': '../figures/rx_hist',
+        'fig_folder': '../figures/rx_hist_v3',
         'fig_size': (8, 8),
     }
 

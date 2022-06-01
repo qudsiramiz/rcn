@@ -1,0 +1,22 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "bulkv",
+        "cotrans",
+        "dataframe",
+        "dtype",
+        "figname",
+        "flatnonzero",
+        "numberdensity",
+        "pyspedas",
+        "pytplot",
+        "pytz",
+        "tplot",
+        "varnames"
+    ],
+    "ignoreWords": [],
+    "import": []
+}
