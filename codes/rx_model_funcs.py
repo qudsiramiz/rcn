@@ -652,9 +652,17 @@ def ridge_finder_multiple(
         # Spacecraft position
         r0 = mms_sc_pos[:3]
 
-        print(f"r0: {r0}")
-        print(f"y_val_avg: {y_val_avg}")
-        print(f"x_vals: {np.linspace(xrange[0], xrange[1], x_len)}")
+        x_vals = np.linspace(xrange[0], xrange[1], x_len)
+
+        import trjtrypy as tt
+        curve = np.array([[x_vals[i], im_max_val_avg[i]] for i in range(len(x_vals))])
+        points = np.array([r0[1:]])
+        curves=np.array([curve], dtype=object)
+
+        # compute unsigned distance
+        dist_u = tt.basedists.distance(points, curves, argPnts=True)
+
+
         # Direction of the magnetosheath magnetic field at the position of the spacecraft
         # TODO: Check if this is same as direction/magnitude given by the Cooling model
         b_msh_dir = b_msh[:3] / np.linalg.norm(b_msh[:3])
@@ -699,7 +707,10 @@ def ridge_finder_multiple(
         y_intr_vals_list.append(y_intr_vals)
 
         # Find the distance between the spacecraft position and the reconnection line
-        dist_rc = np.sqrt((r0[1] - xn_rc) ** 2 + (r0[2] - yn_rc) ** 2)
+        #dist_rc = np.sqrt((r0[1] - xn_rc) ** 2 + (r0[2] - yn_rc) ** 2)
+        dist_rc = dist_u[0]["UnsignedDistance"][0]
+        x_y_point = dist_u[0]["ArgminPoints"][0]
+
         if dist_rc > xrange[1]:
             dist_rc = np.nan
 
@@ -741,9 +752,11 @@ def ridge_finder_multiple(
         axs1.arrow(r0[1]-1.5, r0[2] - 1.5, 5*b_msh_dir[1], 5*b_msh_dir[2], head_width=0.4,
                    head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
 
+        print([r0[1], x_y_point[0]], [r0[2], x_y_point[1]])
         # Plot line connecting the spacecraft position and the reconnection line
         if ~np.isnan(dist_rc):
-            axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
+            #axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
+            axs1.plot([r0[1], x_y_point[0]], [r0[2], x_y_point[1]], '--', color='w', linewidth=2)
             distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
             axs1.text(x_intr_vals[0]-2, y_intr_vals[0]+2, distance, fontsize=l_label_size*1.2,
                         color='k', ha='left', va='bottom')
