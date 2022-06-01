@@ -652,6 +652,9 @@ def ridge_finder_multiple(
         # Spacecraft position
         r0 = mms_sc_pos[:3]
 
+        print(f"r0: {r0}")
+        print(f"y_val_avg: {y_val_avg}")
+        print(f"x_vals: {np.linspace(xrange[0], xrange[1], x_len)}")
         # Direction of the magnetosheath magnetic field at the position of the spacecraft
         # TODO: Check if this is same as direction/magnitude given by the Cooling model
         b_msh_dir = b_msh[:3] / np.linalg.norm(b_msh[:3])
@@ -840,7 +843,7 @@ def ridge_finder_multiple(
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
             fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v4"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/v5"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:

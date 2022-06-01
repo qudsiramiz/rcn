@@ -69,7 +69,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs1.hist(df_shear.r_rc, bins=nbins, range=(0, 15),color='#1f77b4', alpha=0.5)
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(df_shear.r_rc.median(), color='#1f77b4', linestyle='--', linewidth=2)
-    axs1.text(df_shear.r_rc.median()+0.5, axs1.get_ylim()[1]*0.9,
+    axs1.text(df_shear.r_rc.median()+0.2, axs1.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_shear.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
     axs1.set_xlim(0, 15)
@@ -81,7 +81,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs2.hist(df_rx_en.r_rc, bins=nbins, range=(0, 15), color='#ff7f0e', alpha=0.5)
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(df_rx_en.r_rc.median(), color='#ff7f0e', linestyle='--', linewidth=2)
-    axs2.text(df_rx_en.r_rc.median()+0.5, axs2.get_ylim()[1]*0.9,
+    axs2.text(df_rx_en.r_rc.median()+0.2, axs2.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_rx_en.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
     axs2.set_xlim(0, 15)
@@ -94,7 +94,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs3.hist(df_va_cs.r_rc, bins=nbins, range=(0, 15), color='#2ca02c', alpha=0.5)
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(df_va_cs.r_rc.median(), color='#2ca02c', linestyle='--', linewidth=2)
-    axs3.text(df_va_cs.r_rc.median()+0.5, axs3.get_ylim()[1]*0.9,
+    axs3.text(df_va_cs.r_rc.median()+0.2, axs3.get_ylim()[1]*0.2,
              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_va_cs.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
     axs3.set_xlim(0, 15)
@@ -107,7 +107,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs4.hist(df_bisec.r_rc, bins=nbins, range=(0, 15), color='#d62728', alpha=0.5)
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(df_bisec.r_rc.median(), color='#d62728', linestyle='--', linewidth=2)
-    axs4.text(df_bisec.r_rc.median()+0.5, axs4.get_ylim()[1]*0.9,
+    axs4.text(df_bisec.r_rc.median()+0.2, axs4.get_ylim()[1]*0.2,
              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_bisec.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
     axs4.set_xlim(0, 15)
