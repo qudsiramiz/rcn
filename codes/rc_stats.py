@@ -202,7 +202,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/*_v5.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/*_v3.csv"))
 for file_name in fnames:
     mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
@@ -212,7 +212,7 @@ for file_name in fnames:
         'dark_mode': False,
         'fig_name':  f"rx_hist_{mms_probe_num}",
         'fig_format': 'pdf',
-        'fig_folder': '../figures/rx_hist_v5',
+        'fig_folder': '../figures/rx_hist_v3',
         'fig_size': (8, 8),
         'histtype': 'step',
         'linewidth': 3,
