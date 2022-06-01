@@ -24,7 +24,7 @@ label_pad = 5  # padding between label and axis
 
 
 def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="../figures",
-              fig_name="new", fig_format="pdf"):
+              fig_name="new", fig_format="pdf", histtype="step", linewidth=1,):
 
     df = pd.read_csv(file_name)
 
@@ -66,7 +66,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     # Plot the histogram of the shear data
     axs1 = plt.subplot(gs[0, 0])
-    axs1.hist(df_shear.r_rc, bins=nbins, range=(0, 15),color='#1f77b4', alpha=0.5)
+    axs1.hist(df_shear.r_rc, bins=nbins, range=(0, 15),color='#1f77b4', alpha=0.5,
+             histtype=histtype, linewidth=linewidth)
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(df_shear.r_rc.median(), color='#1f77b4', linestyle='--', linewidth=2)
     axs1.text(df_shear.r_rc.median()+0.2, axs1.get_ylim()[1]*0.2,
@@ -78,7 +79,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     # Plot the histogram of the rx_en data
     axs2 = plt.subplot(gs[0, 1])
-    axs2.hist(df_rx_en.r_rc, bins=nbins, range=(0, 15), color='#ff7f0e', alpha=0.5)
+    axs2.hist(df_rx_en.r_rc, bins=nbins, range=(0, 15), color='#ff7f0e', alpha=0.5,
+             histtype=histtype, linewidth=linewidth)
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(df_rx_en.r_rc.median(), color='#ff7f0e', linestyle='--', linewidth=2)
     axs2.text(df_rx_en.r_rc.median()+0.2, axs2.get_ylim()[1]*0.2,
@@ -91,7 +93,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     # Plot the histogram of the va_cs data
     axs3 = plt.subplot(gs[1, 0])
-    axs3.hist(df_va_cs.r_rc, bins=nbins, range=(0, 15), color='#2ca02c', alpha=0.5)
+    axs3.hist(df_va_cs.r_rc, bins=nbins, range=(0, 15), color='#2ca02c', alpha=0.5,
+             histtype=histtype, linewidth=linewidth)
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(df_va_cs.r_rc.median(), color='#2ca02c', linestyle='--', linewidth=2)
     axs3.text(df_va_cs.r_rc.median()+0.2, axs3.get_ylim()[1]*0.2,
@@ -104,7 +107,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     # Plot the histogram of the bisection data
     axs4 = plt.subplot(gs[1, 1])
-    axs4.hist(df_bisec.r_rc, bins=nbins, range=(0, 15), color='#d62728', alpha=0.5)
+    axs4.hist(df_bisec.r_rc, bins=nbins, range=(0, 15), color='#d62728', alpha=0.5,
+             histtype=histtype, linewidth=linewidth)
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(df_bisec.r_rc.median(), color='#d62728', linestyle='--', linewidth=2)
     axs4.text(df_bisec.r_rc.median()+0.2, axs4.get_ylim()[1]*0.2,
@@ -198,17 +202,20 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/*_v3.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/*_v5.csv"))
 for file_name in fnames:
     mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
     fig_inputs ={
+        'nbins': 15,
         'file_name': file_name,
-        'dark_mode': True,
+        'dark_mode': False,
         'fig_name':  f"rx_hist_{mms_probe_num}",
         'fig_format': 'pdf',
-        'fig_folder': '../figures/rx_hist_v3',
+        'fig_folder': '../figures/rx_hist_v5',
         'fig_size': (8, 8),
+        'histtype': 'step',
+        'linewidth': 3,
     }
 
     plot_hist(**fig_inputs)
