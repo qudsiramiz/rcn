@@ -76,6 +76,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                         'vp_gsm_y': mms_fpi_bulkv_gsm[:,1],
                                                         'vp_gsm_z': mms_fpi_bulkv_gsm[:,2]})
 
+    # 
     # Compute the difference in velocity between the two points separated by 2 minutes
     periods = int(dt / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
     df_mms_fpi['vp_diff'] = abs(df_mms_fpi['vp_gsm_z'] -
