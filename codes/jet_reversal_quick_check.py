@@ -1,93 +1,21 @@
 import datetime
-import os
-import time
 import pytz
+import importlib
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pyspedas as spd
-import pytplot as ptt
 
-import matplotlib.gridspec as gridspec
-
-from matplotlib.pyplot import MaxNLocator
-
-start_time = time.time()
-
-
-def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', level='l2',
-                       data_type='dis-moms', time_clip=True, latest_version=True,
-                       figname='mms_jet_reversal_check'):
-    """
-    """
-    crossing_time_min = crossing_time - datetime.timedelta(seconds=dt)
-    crossing_time_max = crossing_time + datetime.timedelta(seconds=dt)
-    trange = [crossing_time_min, crossing_time_max]
-    print(trange)
-    mms_fpi_varnames = [f'mms{probe}_dis_numberdensity_{data_rate}',
-                        f'mms{probe}_dis_bulkv_gse_{data_rate}']
-    mms_fpi_vars = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level=level,
-                               datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
-                               latest_version=latest_version)
-    # Convert from GSE to GSM data
-
-    mms_fpi_time = ptt.get_data(mms_fpi_varnames[0])[0]
-    mms_fpi_numberdensity = ptt.get_data(mms_fpi_varnames[0])[1]
-    mms_fpi_bulkv_gse = ptt.get_data(mms_fpi_varnames[1])[1:4][0]
-    # Covert gse to gsm
-    _ = spd.cotrans(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}', name_out='v_gsm',
-                            coord_in='gse', coord_out='gsm')
-    
-    mms_fpi_bulkv_gsm = ptt.get_data('v_gsm')[1:4][0]
-
-    # Convert the time to a datetime object
-    mms_fpi_time = pd.to_datetime(mms_fpi_time, unit='s')
-
-    _ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True)
-
-    # Create a dataframe with the data
-    df_mms_fpi = pd.DataFrame(index=mms_fpi_time, data={'np': mms_fpi_numberdensity,
-                                                        'vp_gsm_x': mms_fpi_bulkv_gsm[:,0],
-                                                        'vp_gsm_y': mms_fpi_bulkv_gsm[:,1],
-                                                        'vp_gsm_z': mms_fpi_bulkv_gsm[:,2]})
-
-    # Compute the difference in velocity between the two points separated by 2 minutes
-    periods = int(dt / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
-    df_mms_fpi['vp_diff'] = abs(df_mms_fpi['vp_gsm_z'] -
-                                df_mms_fpi['vp_gsm_z'].shift(periods=periods))
-
-    # Check if at least three consecutive points have a difference greater than 70
-    # km/s
-    v_thresh = 70
-    N = 3
-    ind_vals = np.flatnonzero(np.convolve(df_mms_fpi['vp_diff'] > v_thresh,
-                              np.ones(N, dtype=int), 'valid')>=N)
-
-    # Set the fontstyle to Times New Roman
-    font = {'family': 'serif', 'weight': 'normal', 'size': 10}
-    plt.rc('font', **font)
-    plt.rc('text', usetex=False)
-
-    plt.close("all")
-    # Add time to the figname
-    figname = f"../figures/jet_reversal_checks/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
-    print(figname)
-    ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
-              f'mms{probe}_dis_numberdensity_{data_rate}', 
-              'v_gsm'],
-              combine_axes=True, save_png=figname, display=False)
-  
-    return df_mms_fpi
+import jet_reversal_quick_check_function as jrcf
+importlib.reload(jrcf)
 
 # Read the list of dates from the csv file
-df = pd.read_csv("../data/mms_jet_reversal_times.csv")
+df = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 
 # Convert the dates to datetime objects
-#df["Date"] = pd.to_datetime(df["Date"])
+#df["DateStart"] = pd.to_datetime(df["DateStart"])
 
 # Set the index to the date column
-df.set_index("Date", inplace=True)
+df.set_index("DateStart", inplace=True)
 
 # Set the timezone to UTC
 #df.index = df.index.tz_localize(pytz.utc)
@@ -96,18 +24,69 @@ r_e = 6378.137  # Earth radius in km
 
 dt = 120
 probe = 3
-data_rate = 'fast'
+data_rate = 'brst'
 level = 'l2'
 data_type = 'dis-moms'
 time_clip = True
 latest_version = True
 
-for crossing_time in df.index[0:]:
+trange_list = [
+'2016-12-24 15:10:00.00',
+'2016-12-07 05:15:00.00',
+'2015-10-16 10:33:30.00',
+'2015-10-16 13:07:02.00',
+'2015-10-22 06:05:22.00',
+'2015-11-01 15:08:06.00',
+'2015-11-12 07:19:21.00',
+'2015-12-06 23:38:31.00',
+'2015-12-08 11:20:44.00',
+'2015-12-09 01:06:11.00',
+'2015-12-14 01:17:40.00',
+'2016-01-07 09:36:15.00',
+'2016-01-10 09:13:37.00',
+'2016-10-22 12:58:41.00',
+'2016-11-02 14:46:18.00',
+'2016-11-06 08:40:58.00',
+'2016-11-12 17:48:47.00',
+'2016-11-13 09:10:41.00',
+'2016-11-18 12:08:11.00',
+'2016-11-23 07:50:30.00',
+'2016-11-28 15:47:00.00',
+'2016-12-11 04:41:50.00',
+'2016-12-19 14:15:02.00',
+'2017-01-02 02:58:13.00',
+'2017-01-11 04:22:43.00',
+'2017-01-20 12:32:07.00',
+'2017-01-22 10:15:46.00',
+'2017-01-22 10:47:33.00',
+'2017-01-27 12:05:43.00',
+'2015-09-25 12:09:00.00',
+'2015-09-11 15:23:00.00',
+'2016-01-17 06:29:40.00',
+'2015-09-19 07:41:38.00',
+'2015-09-18 11:52:02.00'
+]
+
+trange_list = np.sort(trange_list)
+
+for crossing_time in trange_list[:]:
     # Convert the crossing time to a datetime object
+    #crossing_time = '2016-12-28 05:38:00.00'
     crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0], "%Y-%m-%d %H:%M:%S.%f")
     # Set the timezone to UTC
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
-    df = jet_reversal_check(crossing_time=crossing_time, dt=dt, probe=probe,
+    # Try with 'brst' data rate, if that fails then try with 'fast'
+    try:
+        data_rate = 'brst'
+        df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(
+                            crossing_time=crossing_time, dt=dt, probe=probe,
                             data_rate=data_rate, level=level, data_type=data_type,
                             time_clip=time_clip, latest_version=latest_version,
-                            figname='mms_jet_reversal_check')
+                            figname='mms_jet_reversal_check', fname='../data/mms_jet_reversal_times.csv')
+    except:
+        data_rate = 'fast'
+        df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(
+                            crossing_time=crossing_time, dt=dt, probe=probe,
+                            data_rate=data_rate, level=level, data_type=data_type,
+                            time_clip=time_clip, latest_version=latest_version,
+                            figname='mms_jet_reversal_check', fname='../data/mms_jet_reversal_times.csv')

@@ -63,4 +63,4 @@ plt.plot(omni_time, omni_bz_gsm, 'b.', label='OMNI_X', ms=5, alpha=0.5)
 plt.legend()
 #plt.show()
 # save figure as pdf
-plt.savefig('mms_bz_gsm.png', format='png', dpi=250)
+plt.savefig('../figures/mms_bz_gsm.png', format='png', dpi=250)
