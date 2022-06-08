@@ -75,8 +75,9 @@ df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 # Set the index to the date column
 df_crossings.set_index("DateStart", inplace=True)
 
+indx_number = 1934
 #for crossing_time in trange_list[28:29]:
-for crossing_time in df_crossings.index[100:]:
+for xx, crossing_time in enumerate(df_crossings.index[indx_number:], start=indx_number):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
