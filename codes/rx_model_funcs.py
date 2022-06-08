@@ -736,7 +736,7 @@ def ridge_finder_multiple(
             if not os.path.exists(rc_folder + rc_file_name):
                 with open(rc_folder + rc_file_name, 'w') as f:
                     f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +\
-                        ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used\n")
+                        ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen,jet_detection\n")
                     f.close()
                     print(f"Created {rc_folder + rc_file_name} to store data")
             # Open file and append the relevant data
@@ -744,7 +744,7 @@ def ridge_finder_multiple(
                 f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
                       + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
                       + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
-                      + method_used+"\n")
+                      + method_used + "\n")
                 f.close()
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
