@@ -35,24 +35,24 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     if cut_type == "jet":
         # Remove all data points where the value of 'r_rc' is greater than 12
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection=='True')]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection=='True')]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection=='True')]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection=='True')]
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)]
     elif cut_type == "walen":
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen=='True')]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen=='True')]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen=='True')]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen=='True')]
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen)]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen)]
     elif cut_type == "walen_jet":
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection=='True')
-                            & (df_shear.walen=='True')]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection=='True')
-                            & (df_rx_en.walen=='True')]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection=='True')
-                            & (df_va_cs.walen=='True')]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection=='True')
-                            & (df_bisec.walen=='True')]
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)
+                            & (df_shear.walen)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)
+                            & (df_rx_en.walen)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)
+                            & (df_va_cs.walen)]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)
+                            & (df_bisec.walen)]
     if dark_mode:
         plt.style.use('dark_background')
         tick_color = 'w' # color of the tick lines
@@ -228,7 +228,7 @@ for file_name in fnames:
             'dark_mode': False,
             'fig_name':  f"rx_hist_{mms_probe_num}",
             'fig_format': 'pdf',
-            'fig_folder': '../figures/rx_hist_v5',
+            'fig_folder': '../figures/rx_hist_v6',
             'fig_size': (8, 8),
             'histtype': 'step',
             'linewidth': 3,

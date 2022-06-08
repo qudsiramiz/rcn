@@ -80,9 +80,9 @@ mms_probe_num_list = [1, 2, 3, 4]
 ind = 0
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind:], start=ind):
-        trange = [trange.split('.')[0]]
-        try:
-        # for something in range(1):
+        trange = [trange.split('+')[0]]
+        #try:
+        for something in range(1):
             mms_probe_num = str(mms_probe_num)
             min_max_val = 20
             dr = 0.25
@@ -156,10 +156,10 @@ for mms_probe_num in mms_probe_num_list[2:3]:
             y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
                                                                                    fig_format='png')
 
-        except Exception as e:
-            # Print the error in green
-            print('\033[92m', f'Figure not plotted for {trange} and index value of {ind_range}\n',
-                  '\033[0m')
-            continue
+        #except Exception as e:
+        #    # Print the error in green
+        #    print('\033[92m', f'Figure not plotted for {trange} and index value of {ind_range}\n',
+        #          '\033[0m')
+        #    continue
 
 print(f'Took {round(time.time() - start, 3)} seconds')
