@@ -74,14 +74,15 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 #  Sort the trange_list by the start time
 # trange_list.sort(key=lambda x: x[0])
 
-df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times.csv")
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_v2.csv")
 trange_list = df_jet_reversal.Date.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
-ind = 0
+ind = 20
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind:], start=ind):
         trange = [trange.split('.')[0]]
         try:
+        # for something in range(1):
             mms_probe_num = str(mms_probe_num)
             min_max_val = 20
             dr = 0.25
@@ -144,11 +145,12 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 "interpolation": 'gaussian',
                 "tsy_model": model_type,
                 "dark_mode": True,
-                "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220607.csv",
+                "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220608.csv",
                 "rc_folder": "../data/rx_d/",
                 "save_rc_file": True,
-                "walen": df_jet_reversal[' walen'][ind_range],
-                "jet_detection": df_jet_reversal[' jet_detection'][ind_range],
+                "walen": df_jet_reversal['walen'][ind_range],
+                "jet_detection": df_jet_reversal['jet_detection'][ind_range],
+                "fig_version": 'v6',
             }
 
             y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,

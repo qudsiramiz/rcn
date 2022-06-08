@@ -24,7 +24,7 @@ label_pad = 5  # padding between label and axis
 
 
 def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="../figures",
-              fig_name="new", fig_format="pdf", histtype="step", linewidth=1,):
+              fig_name="new", fig_format="pdf", histtype="step", linewidth=1, cut_type="jet"):
 
     df = pd.read_csv(file_name)
 
@@ -33,17 +33,26 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     df_va_cs = df[df.method_used=="va_cs"]
     df_bisec = df[df.method_used=="bisection"]
 
-    # Remove all data points where the value of 'r_rc' is greater than 12
-    df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection==' True                              ')]
-    df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection==' True                              ')]
-    df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection==' True                              ')]
-    df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection==' True                              ')]
-
-    df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen==' True')]
-    df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen==' True')]
-    df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen==' True')]
-    df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen==' True')]
-
+    if cut_type == "jet":
+        # Remove all data points where the value of 'r_rc' is greater than 12
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection=='True')]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection=='True')]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection=='True')]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection=='True')]
+    elif cut_type == "walen":
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen=='True')]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen=='True')]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen=='True')]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen=='True')]
+    elif cut_type == "walen_jet":
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection=='True')
+                            & (df_shear.walen=='True')]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection=='True')
+                            & (df_rx_en.walen=='True')]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection=='True')
+                            & (df_va_cs.walen=='True')]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection=='True')
+                            & (df_bisec.walen=='True')]
     if dark_mode:
         plt.style.use('dark_background')
         tick_color = 'w' # color of the tick lines
@@ -200,27 +209,30 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     # Save the figure
     if not os.path.exists(fig_folder):
         os.makedirs(fig_folder)
-    fig_name = f"{fig_folder}/{fig_name}_wal_jet.{fig_format}"
+    fig_name = f"{fig_folder}/{fig_name}_{cut_type}.{fig_format}"
     plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05,
                 dpi=200, transparent=transparent, format=fig_format)
     plt.close()
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/*_20220607.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/*_20220608.csv"))
+cut_type_list = ["jet", "walen", "walen_jet"]
 for file_name in fnames:
-    mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
+    for cut_type in cut_type_list:
+        mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
-    fig_inputs ={
-        'nbins': 15,
-        'file_name': file_name,
-        'dark_mode': False,
-        'fig_name':  f"rx_hist_{mms_probe_num}",
-        'fig_format': 'pdf',
-        'fig_folder': '../figures/rx_hist_v5',
-        'fig_size': (8, 8),
-        'histtype': 'step',
-        'linewidth': 3,
-    }
+        fig_inputs ={
+            'nbins': 15,
+            'file_name': file_name,
+            'dark_mode': False,
+            'fig_name':  f"rx_hist_{mms_probe_num}",
+            'fig_format': 'pdf',
+            'fig_folder': '../figures/rx_hist_v5',
+            'fig_size': (8, 8),
+            'histtype': 'step',
+            'linewidth': 3,
+            'cut_type': cut_type,
+        }
 
-    plot_hist(**fig_inputs)
+        plot_hist(**fig_inputs)
