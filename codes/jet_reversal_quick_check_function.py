@@ -111,10 +111,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                         'tp_para': mms_fpi_temppara,
                                                         'tp_perp': mms_fpi_tempperp})
 
-    diff = df_mms_fpi.index[1:] - df_mms_fpi.index[:-1]
-    iid = np.where(diff.total_seconds()<=0)[0]
-    print(iid)
-    """
     # Add rolling mean to the dataframe
     df_mms_fpi['np_rolling_mean'] = df_mms_fpi['np'].rolling('60s', center=True).mean()
     df_mms_fpi['vp_gsm_x_rolling_mean'] = df_mms_fpi['vp_gsm_x'].rolling('60s', center=True).mean()
@@ -355,4 +351,3 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             print(f"{fig_name}")
 
     return df_mms_fpi, df_mms_fgm, df_mms, df_mms_before, df_mms_after
-    """
