@@ -111,6 +111,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                         'tp_para': mms_fpi_temppara,
                                                         'tp_perp': mms_fpi_tempperp})
 
+    # Make sure that the time indices are in increasing order
+    df_mms_fpi = df_mms_fpi.sort_index()
+
     # Add rolling mean to the dataframe
     df_mms_fpi['np_rolling_mean'] = df_mms_fpi['np'].rolling('60s', center=True).mean()
     df_mms_fpi['vp_gsm_x_rolling_mean'] = df_mms_fpi['vp_gsm_x'].rolling('60s', center=True).mean()
@@ -169,6 +172,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_gsm_x': mms_fgm_b_gsm[:,0],
                                                         'b_gsm_y': mms_fgm_b_gsm[:,1],
                                                         'b_gsm_z': mms_fgm_b_gsm[:,2]})
+
+    # Make sure all time indices are in increasing order 
+    df_mms_fgm = df_mms_fgm.sort_index()
 
     # Merge the two dataframes
     df_mms = pd.merge_asof(df_mms_fpi, df_mms_fgm, left_index=True, right_index=True)
