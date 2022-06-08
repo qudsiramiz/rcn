@@ -29,6 +29,7 @@ level = 'l2'
 data_type = 'dis-moms'
 time_clip = True
 latest_version = True
+jet_len = 3
 
 trange_list = [
 '2016-12-24 15:10:00.00',
@@ -69,24 +70,36 @@ trange_list = [
 
 trange_list = np.sort(trange_list)
 
-for crossing_time in trange_list[:]:
+# Read the data from csv files
+df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
+# Set the index to the date column
+df_crossings.set_index("DateStart", inplace=True)
+
+#for crossing_time in trange_list[28:29]:
+for crossing_time in df_crossings.index[100:]:
     # Convert the crossing time to a datetime object
-    #crossing_time = '2016-12-28 05:38:00.00'
+    # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
+    # '2017-01-02 02:58:13.0+00:00'
+    #crossing_time = '2017-01-02 02:58:13.0+00:00'
     crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0], "%Y-%m-%d %H:%M:%S.%f")
     # Set the timezone to UTC
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
+    inputs = {'crossing_time': crossing_time,
+              'dt': dt,
+              'probe': probe,
+              'jet_len': jet_len,
+              'data_rate': data_rate,
+              'level': level,
+              'data_type': data_type,
+              'time_clip': time_clip,
+              'latest_version': latest_version,
+              'figname': 'mms_jet_reversal_check',
+              'fname': '../data/mms_jet_reversal_times.csv'
+                }
     try:
         data_rate = 'brst'
-        df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(
-                            crossing_time=crossing_time, dt=dt, probe=probe,
-                            data_rate=data_rate, level=level, data_type=data_type,
-                            time_clip=time_clip, latest_version=latest_version,
-                            figname='mms_jet_reversal_check', fname='../data/mms_jet_reversal_times.csv')
+        df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
     except:
         data_rate = 'fast'
-        df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(
-                            crossing_time=crossing_time, dt=dt, probe=probe,
-                            data_rate=data_rate, level=level, data_type=data_type,
-                            time_clip=time_clip, latest_version=latest_version,
-                            figname='mms_jet_reversal_check', fname='../data/mms_jet_reversal_times.csv')
+        df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)

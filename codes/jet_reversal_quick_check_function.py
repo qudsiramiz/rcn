@@ -1,7 +1,6 @@
 import datetime
 import os
 import pytz
-import tabulate
 import importlib
 
 import matplotlib.pyplot as plt
@@ -13,11 +12,9 @@ import pytplot as ptt
 
 import matplotlib.gridspec as gridspec
 
-from matplotlib.pyplot import MaxNLocator
-
 
 def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', level='l2',
-                       data_type='dis-moms', time_clip=True, latest_version=True,
+                       data_type='dis-moms', time_clip=True, latest_version=True, jet_len=5,
                        figname='mms_jet_reversal_check',
                        fname='../data/mms_jet_reversal_times.csv'
 ):
@@ -69,6 +66,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                         f'mms{probe}_dis_bulkv_gse_{data_rate}',
                         f'mms{probe}_dis_temppara_{data_rate}',
                         f'mms{probe}_dis_tempperp_{data_rate}']
+
     _ = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level=level,
                                datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
                                latest_version=latest_version)
@@ -104,7 +102,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     mms_fgm_b_gsm = ptt.get_data(f'mms{probe}_fgm_b_gsm_srvy_{level}')[1:4][0]
     mms_fgm_r_gsm = ptt.get_data(f'mms{probe}_fgm_r_gsm_srvy_{level}')[1:4][0]
-    #print(f'\033[92m The length of the b_gsm is {len(mms_fgm_b_gsm)} \033[0m')
 
     # Create a dataframe with the FPI data
     df_mms_fpi = pd.DataFrame(index=mms_fpi_time, data={'np': mms_fpi_numberdensity,
@@ -129,15 +126,49 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     df_mms_fpi['vp_gsm_y_diff'] = df_mms_fpi['vp_gsm_y'] - df_mms_fpi['vp_gsm_y_rolling_mean']
     df_mms_fpi['vp_gsm_z_diff'] = df_mms_fpi['vp_gsm_z'] - df_mms_fpi['vp_gsm_z_rolling_mean']
 
+    # If the absolute of maximum or minimum value of 'vp_gsm_z_diff' is greater than the threshold,
+    # then check if we observed a jet
+    v_thresh = 70  # Defined based on values in literature (Trattner et al. 2017)
+    jet_detection = False
+    if np.abs(df_mms_fpi['vp_gsm_z_diff']).max() > v_thresh:
+
+        # Find the index where the maximum value is
+        ind_max_z_diff = df_mms_fpi.index[df_mms_fpi['vp_gsm_z_diff'] == df_mms_fpi['vp_gsm_z_diff'].max()]
+
+        # Set a time window of +/- 60 seconds around the maximum value
+        time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=1),
+                            ind_max_z_diff[0] + pd.Timedelta(minutes=1)]
+        
+        # Define a velocity which might refer to a jet
+        vp_jet = df_mms_fpi['vp_gsm_z_diff'].loc[time_check_range[0]:time_check_range[1]]
+
+        # If there is a jet, then it must have sustained velocity above the threshold for at least
+        # 12 seconds. If not, then it is not a jet.
+        # Based on the data rate, find out the number of data points in the time window which must
+        # be checked for a jet
+        # NOTE: 12 seconds comes from Trenchi et al. (2008) based on their study using Double Star
+        # observation. Though they used it to confirm the Walen relation, I believe that similar
+        # principal can be used for jet detection as well.
+        n_points = int(jet_len / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+
+        # Find out the indices of all such points
+        ind_pos_vals = np.flatnonzero(np.convolve(vp_jet > v_thresh,
+                                        np.ones(n_points, dtype=int), 'valid') >= n_points)
+        ind_neg_vals = np.flatnonzero(np.convolve(vp_jet < -v_thresh,
+                                        np.ones(n_points, dtype=int), 'valid') >= n_points)
+
+        # 
+        if (len(ind_pos_vals) and len(ind_neg_vals)) > 0:
+            jet_detection = True
+            # Set the jet location to union of the positive and negative indices
+            ind_jet = np.union1d(ind_pos_vals, ind_neg_vals)
+        else:
+            ind_jet = np.array([])
+
     # Create a dataframe with the FGM data
     df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_gsm_x': mms_fgm_b_gsm[:,0],
                                                         'b_gsm_y': mms_fgm_b_gsm[:,1],
                                                         'b_gsm_z': mms_fgm_b_gsm[:,2]})
-
-    # Compute the difference in velocity between the two points separated by 2 minutes
-    periods = int(dt / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
-    df_mms_fpi['vp_diff'] = abs(df_mms_fpi['vp_gsm_z_diff'] -
-                                df_mms_fpi['vp_gsm_z_diff'].shift(periods=periods))
 
     # Merge the two dataframes
     df_mms = pd.merge_asof(df_mms_fpi, df_mms_fgm, left_index=True, right_index=True)
@@ -179,28 +210,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     b_gsm_z_after = df_mms_after['b_gsm_z'].mean() * 1e-9 # in T
     b_gsm_vec_after = np.array([b_gsm_x_after, b_gsm_y_after, b_gsm_z_after])
 
-    # # Print all the after and before values
-    # print('Before crossing time:')
-    # print('np:', np_before)
-    # print('vp_gsm_x:', vp_gsm_x_before)
-    # print('vp_gsm_y:', vp_gsm_y_before)
-    # print('vp_gsm_z:', vp_gsm_z_before)
-    # print('tp_para:', tp_para_before)
-    # print('tp_perp:', tp_perp_before)
-    # print('b_gsm_x:', b_gsm_x_before)
-    # print('b_gsm_y:', b_gsm_y_before)
-    # print('b_gsm_z:', b_gsm_z_before)
-    # print('After crossing time:')
-    # print('np:', np_after)
-    # print('vp_gsm_x:', vp_gsm_x_after)
-    # print('vp_gsm_y:', vp_gsm_y_after)
-    # print('vp_gsm_z:', vp_gsm_z_after)
-    # print('tp_para:', tp_para_after)
-    # print('tp_perp:', tp_perp_after)
-    # print('b_gsm_x:', b_gsm_x_after)
-    # print('b_gsm_y:', b_gsm_y_after)
-    # print('b_gsm_z:', b_gsm_z_after)
-
     # Define the mass of proton in kg
     m_p = 1.6726219e-27
 
@@ -215,6 +224,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     alpha_after = (mu_0 * np_after * k_B) * (tp_para_after - tp_perp_after) / (
                    np.linalg.norm(b_gsm_vec_after)**2)
+
 
     v_th_before = b_gsm_vec_before * ( 1 - alpha_before) / (
                   mu_0 * np_before * m_p * (1 - alpha_before)
@@ -243,35 +253,31 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
     # 180) in green color
 
-    if 0.4 < R_w < 3 and (0 < theta_w < 30 or 150 < theta_w < 180):
-        print('\033[92m Walen relation satisfied \033[0m \n\n\n')
-        print('R_w = ', R_w)
-        print('theta_w = ', theta_w_deg)
-        print('delta_v_th = ', delta_v_th_mag)
-        print('delta_v_obs = ', delta_v_obs_mag)
+    if 0.4 < R_w < 3 and (0 < theta_w_deg < 30 or 150 < theta_w_deg < 180):
+        print('\033[92m Walen relation satisfied \033[0m \n')
+        print(f'\033[92m R_w: {R_w} \033[0m')
+        print(f'\033[92m theta_w: {theta_w_deg} \033[0m')
+        print(f'\033[92m delta_v_th: {delta_v_th_mag / 1e3} km/s \033[0m')
+        print(f'\033[92m delta_v_obs: {delta_v_obs_mag / 1e3} km/s \033[0m')
+        print(f'\033[92m Jet detection: {jet_detection} \033[0m')
         print('\n')
         walen_relation_satisfied = True
     else:
-        print('\033[91m Walen relation not satisfied \033[0m \n\n\n')
-        print('R_w = ', R_w)
-        print('theta_w = ', theta_w_deg)
-        print('delta_v_th = ', delta_v_th_mag)
-        print('delta_v_obs = ', delta_v_obs_mag)
+        print('\033[91m Walen relation not satisfied \033[0m \n')
+        print(f'\033[91m R_w: {R_w} \033[0m')
+        print(f'\033[91m theta_w: {theta_w_deg} \033[0m')
+        print(f'\033[91m delta_v_th: {delta_v_th_mag / 1e3} km/s \033[0m')
+        print(f'\033[91m delta_v_obs: {delta_v_obs_mag / 1e3} km/s \033[0m')
+        print(f'\033[91m Jet detection: {jet_detection} \033[0m')
         print('\n')
         walen_relation_satisfied = False
 
     # Check if within 2 minutes of crossing time the values went above and below the threshold
-    
-    # Compute the angle between the observed and the
-    # Check if at least three consecutive points have a difference greater than 70
-    # km/s
-    v_thresh = 70
-    N = 3
-    ind_vals = np.flatnonzero(np.convolve(df_mms_fpi['vp_diff'] > v_thresh,
-                              np.ones(N, dtype=int), 'valid')>=N)
 
     # If ind_vals is not empty, then append the crossing time to the csv file
-    if len(ind_vals) > 0:
+    #if len(ind_vals) > 0:
+    if walen_relation_satisfied or jet_detection:
+    #for xxx in range(1):
 
         # Check if at the time of crossing, the probe is actually on the dayside of the
         # magnetopause.
@@ -296,41 +302,52 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date, Probe, walen, R_w, theta_w, x_gsm, y_gsm, z_gsm, r_spc\n')
+                    f.write('Date, Probe, walen, jet_detection, R_w, theta_w, x_gsm, y_gsm, z_gsm, r_spc\n')
             # Append the crossing time to the csv file if it does not exist already
             df_temp = pd.read_csv(fname)
             old_crossing_times = np.array([xx[:19] for xx in df_temp['Date'].values])
             ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
             if ttt not in old_crossing_times:
                 with open(fname, 'a') as f:
-                    f.write(f'{crossing_time}, {probe}, {walen_relation_satisfied}, {R_w},\
-                              {theta_w}, {x}, {y}, {z}, {r_yz}\n')
+                    f.write(f'{crossing_time}, {probe}, {walen_relation_satisfied}, {jet_detection}\
+                              , {R_w:.3f}, {theta_w_deg:.3f}, {x:.3f}, {y:.3f}, {z:.3f}, {r_yz:.3f}\
+                              \n')
                 f.close()
 
-        # Set the fontstyle to Times New Roman
-        font = {'family': 'serif', 'weight': 'normal', 'size': 10}
-        plt.rc('font', **font)
-        plt.rc('text', usetex=False)
+            # Set the fontstyle to Times New Roman
+            font = {'family': 'serif', 'weight': 'normal', 'size': 10}
+            plt.rc('font', **font)
+            plt.rc('text', usetex=False)
 
-        plt.close("all")
-        # Add time to the figname
-        figname = f"../figures/jet_reversal_checks/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
-        print(figname)
-        ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
-                  f'mms{probe}_dis_numberdensity_{data_rate}', 
-                  f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
-                  combine_axes=True, save_png=figname, display=False)
+            plt.close("all")
+            # Add time to the figname
+            figname = f"../figures/jet_reversal_checks/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
+            print(figname)
+            ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
+                    f'mms{probe}_dis_numberdensity_{data_rate}', 
+                    f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
+                    combine_axes=True, save_png=figname, display=False)
 
-        plt.close("all")
-        plt.figure(figsize=(10,6))
-        plt.plot(df_mms.index, df_mms.vp_gsm_z_diff, 'b-', lw=1, label="diff")
-        plt.ylim(-100, 100)
-        plt.xlabel("Time (UTC)")
-        plt.ylabel("Vp (km/s)")
-        plt.title(f"MMS {probe} Jet Reversal Check at {crossing_time.strftime('%Y-%m-%d %H:%M:%S')}")
-        plt.legend()
-        fig_name= f"../figures/jet_reversal_checks/jet/mms{probe}_jet_reversal_check_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}.png"
-        plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
-        print(f"{fig_name}")
+            plt.close("all")
+
+            plt.figure(figsize=(6,3))
+            plt.plot(df_mms.index, df_mms.vp_gsm_z_diff, 'b-', lw=1)
+            if jet_detection:
+                plt.plot(vp_jet[ind_jet], 'rd', ms=2, lw=1, label="jet location")
+            #plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
+            # Draw a dashed line at +/- v_thres
+            plt.axhline(y=v_thresh, color='k', linestyle='--', lw=1)
+            plt.axhline(y=-v_thresh, color='k', linestyle='--', lw=1)
+            plt.ylim(-200, 200)
+            plt.xlabel("Time (UTC)")
+            plt.ylabel("$v_p - <v_p>$ \n $(km/s, GSM, Z)$")
+            plt.title(f"MMS {probe} Jet Reversal Check at {crossing_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            plt.legend(loc=1)
+
+            # Add text to the plot
+            plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ = {walen_relation_satisfied}, \n $j_v$ = {jet_detection}", transform=plt.gca().transAxes, ha='left', va='top')
+            fig_name= f"../figures/jet_reversal_checks/jet/mms{probe}_jet_reversal_check_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}.png"
+            plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
+            print(f"{fig_name}")
 
     return df_mms_fpi, df_mms_fgm, df_mms, df_mms_before, df_mms_after
