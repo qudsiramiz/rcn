@@ -412,8 +412,8 @@ def ridge_finder_multiple(
     convolution_order=[1, 1, 1, 1],
     t_range=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
     dt=5,
-    b_imf = [-5, 0, 0],
-    b_msh = [-5, 0, 0],
+    b_imf=[-5, 0, 0],
+    b_msh=[-5, 0, 0],
     xrange=[-15.1, 15],
     yrange=[-15.1, 15],
     mms_probe_num='1',
@@ -445,7 +445,9 @@ def ridge_finder_multiple(
     rc_file_name="rc_file.csv",
     rc_folder="../data",
     save_rc_file=False,
-    ):
+    walen=False,
+    jet_detection=False,
+):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
 
@@ -726,7 +728,7 @@ def ridge_finder_multiple(
 
         # Save the data to a text file
         # Check if the file exists, if not then create it
-        
+
         # Create the rc-folder if it doesn't exist
         if save_rc_file:
             if not os.path.exists(rc_folder):
@@ -741,10 +743,12 @@ def ridge_finder_multiple(
                     print(f"Created {rc_folder + rc_file_name} to store data")
             # Open file and append the relevant data
             with open(rc_folder + rc_file_name, 'a') as f:
-                f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
-                      + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
-                      + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
-                      + method_used + "\n")
+                f.write(f"{mms_probe_num}, {t_range[0]}, {t_range[1]}, {r0[0]}, {r0[1]}, {r0[2]}",
+                        f"{b_msh[0]}, {b_msh[1]}, {b_msh[2]}, {dist_rc:.3f}, {method_used}, {walen}, {jet_detection}\n")
+                # f.write(str(mms_probe_num) + "," + str(t_range[0]) + "," + str(t_range[1]) + "," 
+                #       + str(r0[0]) + "," + str(r0[1]) + "," + str(r0[2]) + "," + str(b_msh[0]) + ","
+                #       + str(b_msh[1]) + "," + str(b_msh[2]) + "," + str(np.round(dist_rc, 2)) + ","
+                #       + method_used + "\n")
                 f.close()
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
