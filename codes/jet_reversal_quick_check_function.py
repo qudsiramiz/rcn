@@ -351,13 +351,18 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
             plt.close("all")
             # Add time to the figname
-            figname = f"../figures/jet_reversal_checks/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
+            if walen_relation_satisfied & jet_detection:
+                folder_name = "../figures/jet_reversal_checks/jet_walen/b_n_v"
+            elif walen_relation_satisfied & (not jet_detection):
+                folder_name = "../figures/jet_reversal_checks/walen/b_n_v"
+            elif (not walen_relation_satisfied) & jet_detection:
+                folder_name = "../figures/jet_reversal_checks/jet/b_n_v"
+            figname = f"{folder_name}/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
             print(figname)
             ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
                        f'mms{probe}_dis_numberdensity_{data_rate}',
                        f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
                       combine_axes=True, save_png=figname, display=False)
-
             plt.close("all")
 
             plt.figure(figsize=(6, 3))
@@ -383,13 +388,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ = {walen_relation_satisfied} \n $j_v$ = {jet_detection}",
                      transform=plt.gca().transAxes, ha='left', va='top')
             if walen_relation_satisfied & jet_detection:
-                folder_name = "../figures/jet_reversal_checks/jet/jet_walen"
+                folder_name = "../figures/jet_reversal_checks/jet_walen"
             elif walen_relation_satisfied & (not jet_detection):
-                folder_name = "../figures/jet_reversal_checks/jet/walen"
+                folder_name = "../figures/jet_reversal_checks/walen"
             elif (not walen_relation_satisfied) & jet_detection:
-                folder_name = "../figures/jet_reversal_checks/jet/jet"
+                folder_name = "../figures/jet_reversal_checks/jet"
             fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}.png"
             plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
             print(f"{fig_name}")
+            plt.close("all")
 
     return df_mms_fpi, df_mms_fgm, df_mms, df_mms_before, df_mms_after
