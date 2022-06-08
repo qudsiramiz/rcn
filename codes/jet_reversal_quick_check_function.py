@@ -1,23 +1,19 @@
 import datetime
 import os
-import pytz
-import importlib
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 import pyspedas as spd
 import pytplot as ptt
-
-import matplotlib.gridspec as gridspec
+import pytz
 
 
 def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', level='l2',
                        data_type='dis-moms', time_clip=True, latest_version=True, jet_len=5,
                        figname='mms_jet_reversal_check',
                        fname='../data/mms_jet_reversal_times.csv'
-):
+                       ):
     """
     For a given crossing time and a given probe, the function finds out if MMS observed a jet during
     magnetopause crossing. If there was indeed a jet reversal, then the function saves that time to
@@ -68,8 +64,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                         f'mms{probe}_dis_tempperp_{data_rate}']
 
     _ = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level=level,
-                               datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
-                               latest_version=latest_version)
+                    datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
+                    latest_version=latest_version)
 
     mms_fpi_time = ptt.get_data(mms_fpi_varnames[0])[0]
 
@@ -89,11 +85,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     mms_fpi_bulkv_gsm = ptt.get_data(f'mms{probe}_dis_bulkv_gsm_{data_rate}')[1:4][0]
 
     # Get the data from the FGM
-    mms_fgm_varnames = [f'mms{probe}_fgm_b_gsm_srvy_l2_bvec']
+    # mms_fgm_varnames = [f'mms{probe}_fgm_b_gsm_srvy_l2_bvec']
     _ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
-                               varnames=[f"mms{probe}_fgm_b_gsm_srvy_{level}",
-                                        f"mms{probe}_fgm_r_gsm_srvy_{level}"],
-                                        get_fgm_ephemeris=True)
+                    varnames=[f"mms{probe}_fgm_b_gsm_srvy_{level}",
+                              f"mms{probe}_fgm_r_gsm_srvy_{level}"], get_fgm_ephemeris=True)
 
     # Get the time corresponding to the FGM data
     mms_fgm_time = ptt.get_data(f"mms{probe}_fgm_b_gsm_srvy_{level}")[0]
@@ -105,9 +100,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Create a dataframe with the FPI data
     df_mms_fpi = pd.DataFrame(index=mms_fpi_time, data={'np': mms_fpi_numberdensity,
-                                                        'vp_gsm_x': mms_fpi_bulkv_gsm[:,0],
-                                                        'vp_gsm_y': mms_fpi_bulkv_gsm[:,1],
-                                                        'vp_gsm_z': mms_fpi_bulkv_gsm[:,2],
+                                                        'vp_gsm_x': mms_fpi_bulkv_gsm[:, 0],
+                                                        'vp_gsm_y': mms_fpi_bulkv_gsm[:, 1],
+                                                        'vp_gsm_z': mms_fpi_bulkv_gsm[:, 2],
                                                         'tp_para': mms_fpi_temppara,
                                                         'tp_perp': mms_fpi_tempperp})
 
@@ -122,7 +117,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     df_mms_fpi['tp_para_rolling_mean'] = df_mms_fpi['tp_para'].rolling('60s', center=True).mean()
     df_mms_fpi['tp_perp_rolling_mean'] = df_mms_fpi['tp_perp'].rolling('60s', center=True).mean()
 
-
     # Find the difference wrt the rolling mean
     df_mms_fpi['np_diff'] = df_mms_fpi['np'] - df_mms_fpi['np_rolling_mean']
     df_mms_fpi['vp_gsm_x_diff'] = df_mms_fpi['vp_gsm_x'] - df_mms_fpi['vp_gsm_x_rolling_mean']
@@ -136,12 +130,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     if np.abs(df_mms_fpi['vp_gsm_z_diff']).max() > v_thresh:
 
         # Find the index where the maximum value is
-        ind_max_z_diff = df_mms_fpi.index[df_mms_fpi['vp_gsm_z_diff'] == df_mms_fpi['vp_gsm_z_diff'].max()]
+        ind_max_z_diff = df_mms_fpi.index[
+            df_mms_fpi['vp_gsm_z_diff'] == df_mms_fpi['vp_gsm_z_diff'].max()]
 
         # Set a time window of +/- 60 seconds around the maximum value
         time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=1),
                             ind_max_z_diff[0] + pd.Timedelta(minutes=1)]
-        
+
         # Define a velocity which might refer to a jet
         vp_jet = df_mms_fpi['vp_gsm_z_diff'].loc[time_check_range[0]:time_check_range[1]]
 
@@ -156,11 +151,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
         # Find out the indices of all such points
         ind_pos_vals = np.flatnonzero(np.convolve(vp_jet > v_thresh,
-                                        np.ones(n_points, dtype=int), 'valid') >= n_points)
+                                      np.ones(n_points, dtype=int), 'valid') >= n_points)
         ind_neg_vals = np.flatnonzero(np.convolve(vp_jet < -v_thresh,
-                                        np.ones(n_points, dtype=int), 'valid') >= n_points)
+                                      np.ones(n_points, dtype=int), 'valid') >= n_points)
 
-        # 
         if (len(ind_pos_vals) and len(ind_neg_vals)) > 0:
             jet_detection = True
             # Set the jet location to union of the positive and negative indices
@@ -169,11 +163,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ind_jet = np.array([])
 
     # Create a dataframe with the FGM data
-    df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_gsm_x': mms_fgm_b_gsm[:,0],
-                                                        'b_gsm_y': mms_fgm_b_gsm[:,1],
-                                                        'b_gsm_z': mms_fgm_b_gsm[:,2]})
+    df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_gsm_x': mms_fgm_b_gsm[:, 0],
+                                                        'b_gsm_y': mms_fgm_b_gsm[:, 1],
+                                                        'b_gsm_z': mms_fgm_b_gsm[:, 2]})
 
-    # Make sure all time indices are in increasing order 
+    # Make sure all time indices are in increasing order
     df_mms_fgm = df_mms_fgm.sort_index()
 
     # Merge the two dataframes
@@ -190,15 +184,15 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Compute the average values for density, velocity and magnetic fields
     # before the crossing time
     np_before = df_mms_before['np'].mean() * 1e6  # in m^-3
-    vp_gsm_x_before = df_mms_before['vp_gsm_x'].mean() * 1e3  # in m/s
-    vp_gsm_y_before = df_mms_before['vp_gsm_y'].mean() * 1e3  # in m/s
-    vp_gsm_z_before = df_mms_before['vp_gsm_z'].mean() * 1e3  # in m/s
+    vp_gsm_x_before = df_mms_before['vp_gsm_x'].mean() * 1e3   # in m/s
+    vp_gsm_y_before = df_mms_before['vp_gsm_y'].mean() * 1e3   # in m/s
+    vp_gsm_z_before = df_mms_before['vp_gsm_z'].mean() * 1e3   # in m/s
     vp_gsm_vec_before = np.array([vp_gsm_x_before, vp_gsm_y_before, vp_gsm_z_before])
-    tp_para_before = df_mms_before['tp_para'].mean() * 11600 # in K
-    tp_perp_before = df_mms_before['tp_perp'].mean() * 11600 # in K
-    b_gsm_x_before = df_mms_before['b_gsm_x'].mean() * 1e-9 # in T
-    b_gsm_y_before = df_mms_before['b_gsm_y'].mean() * 1e-9 # in T
-    b_gsm_z_before = df_mms_before['b_gsm_z'].mean() * 1e-9 # in T
+    tp_para_before = df_mms_before['tp_para'].mean() * 11600  # in K
+    tp_perp_before = df_mms_before['tp_perp'].mean() * 11600  # in K
+    b_gsm_x_before = df_mms_before['b_gsm_x'].mean() * 1e-9  # in T
+    b_gsm_y_before = df_mms_before['b_gsm_y'].mean() * 1e-9  # in T
+    b_gsm_z_before = df_mms_before['b_gsm_z'].mean() * 1e-9  # in T
     b_gsm_vec_before = np.array([b_gsm_x_before, b_gsm_y_before, b_gsm_z_before])
 
     # Compute the average values for density, velocity, magnetic fields and parallel and
@@ -209,11 +203,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     vp_gsm_y_after = df_mms_after['vp_gsm_y'].mean() * 1e3  # in m/s
     vp_gsm_z_after = df_mms_after['vp_gsm_z'].mean() * 1e3  # in m/s
     vp_gsm_vec_after = np.array([vp_gsm_x_after, vp_gsm_y_after, vp_gsm_z_after])
-    tp_para_after = df_mms_after['tp_para'].mean() * 11600 # in K
-    tp_perp_after = df_mms_after['tp_perp'].mean() * 11600 # in K
-    b_gsm_x_after = df_mms_after['b_gsm_x'].mean() * 1e-9 # in T
-    b_gsm_y_after = df_mms_after['b_gsm_y'].mean() * 1e-9 # in T
-    b_gsm_z_after = df_mms_after['b_gsm_z'].mean() * 1e-9 # in T
+    tp_para_after = df_mms_after['tp_para'].mean() * 11600  # in K
+    tp_perp_after = df_mms_after['tp_perp'].mean() * 11600  # in K
+    b_gsm_x_after = df_mms_after['b_gsm_x'].mean() * 1e-9  # in T
+    b_gsm_y_after = df_mms_after['b_gsm_y'].mean() * 1e-9  # in T
+    b_gsm_z_after = df_mms_after['b_gsm_z'].mean() * 1e-9  # in T
     b_gsm_vec_after = np.array([b_gsm_x_after, b_gsm_y_after, b_gsm_z_after])
 
     # Define the mass of proton in kg
@@ -226,18 +220,17 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     k_B = 1.38064852e-23
 
     alpha_before = (mu_0 * np_before * k_B) * (tp_para_before - tp_perp_before) / (
-                    np.linalg.norm(b_gsm_vec_before)**2)
+        np.linalg.norm(b_gsm_vec_before)**2)
 
     alpha_after = (mu_0 * np_after * k_B) * (tp_para_after - tp_perp_after) / (
-                   np.linalg.norm(b_gsm_vec_after)**2)
+        np.linalg.norm(b_gsm_vec_after)**2)
 
-
-    v_th_before = b_gsm_vec_before * ( 1 - alpha_before) / (
-                  mu_0 * np_before * m_p * (1 - alpha_before)
+    v_th_before = b_gsm_vec_before * (1 - alpha_before) / (
+        mu_0 * np_before * m_p * (1 - alpha_before)
     )**0.5
 
-    v_th_after = b_gsm_vec_after * ( 1 - alpha_after) / (
-                 mu_0 * np_after * m_p * (1 - alpha_after)
+    v_th_after = b_gsm_vec_after * (1 - alpha_after) / (
+        mu_0 * np_after * m_p * (1 - alpha_after)
     )**0.5
 
     delta_v_th = v_th_after - v_th_before
@@ -281,21 +274,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Check if within 2 minutes of crossing time the values went above and below the threshold
 
     # If ind_vals is not empty, then append the crossing time to the csv file
-    #if len(ind_vals) > 0:
+    # if len(ind_vals) > 0:
     if walen_relation_satisfied or jet_detection:
-    #for xxx in range(1):
-
-        # Check if at the time of crossing, the probe is actually on the dayside of the
-        # magnetopause.
-        # NOTE: This is a very rough check, and should be improved. Also, the way I describe the
-        # "dayside" of the magnetopause is not based on a scientific understanding of the
-        # magnetopause.
-
-        # Get the position of mms spacecraft in gsm coordinates
-        #mms_mec_varnames = [f'mms{probe}_mec_r_gsm']
-        #mms_mec_vars = spd.mms.mec(trange=trange, varnames=mms_mec_varnames, probe=probe,
-        #                       data_rate='srvy', level='l2', time_clip=time_clip,
-        #                       latest_version=latest_version)
+        # for xxx in range(1):
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
         # mms_sc_pos = ptt.get_data(mms_mec_varnames[0])[1:3][0][0] / r_e
@@ -308,7 +289,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date, Probe, walen, jet_detection, R_w, theta_w, x_gsm, y_gsm, z_gsm, r_spc\n')
+                    f.write('Date, Probe, walen, jet_detection, R_w, theta_w, x_gsm, y_gsm, z_gsm,\
+                            r_spc\n')
             # Append the crossing time to the csv file if it does not exist already
             df_temp = pd.read_csv(fname)
             old_crossing_times = np.array([xx[:19] for xx in df_temp['Date'].values])
@@ -330,17 +312,17 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             figname = f"../figures/jet_reversal_checks/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
             print(figname)
             ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
-                    f'mms{probe}_dis_numberdensity_{data_rate}', 
-                    f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
-                    combine_axes=True, save_png=figname, display=False)
+                       f'mms{probe}_dis_numberdensity_{data_rate}',
+                       f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
+                      combine_axes=True, save_png=figname, display=False)
 
             plt.close("all")
 
-            plt.figure(figsize=(6,3))
+            plt.figure(figsize=(6, 3))
             plt.plot(df_mms.index, df_mms.vp_gsm_z_diff, 'b-', lw=1)
             if jet_detection:
                 plt.plot(vp_jet[ind_jet], 'rd', ms=2, lw=1, label="jet location")
-            #plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
+            # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
             # Draw a dashed line at +/- v_thres
             plt.axhline(y=v_thresh, color='k', linestyle='--', lw=1)
             plt.axhline(y=-v_thresh, color='k', linestyle='--', lw=1)
@@ -351,8 +333,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             plt.legend(loc=1)
 
             # Add text to the plot
-            plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ = {walen_relation_satisfied}, \n $j_v$ = {jet_detection}", transform=plt.gca().transAxes, ha='left', va='top')
-            fig_name= f"../figures/jet_reversal_checks/jet/mms{probe}_jet_reversal_check_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}.png"
+            plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ = \
+                {walen_relation_satisfied}, \n $j_v$ = {jet_detection}",
+                     transform=plt.gca().transAxes, ha='left', va='top')
+            fig_name = f"../figures/jet_reversal_checks/jet/mms{probe}_jet_reversal_check_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}.png"
             plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
             print(f"{fig_name}")
 

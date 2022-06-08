@@ -20,7 +20,8 @@ with open('../data/mms_magnetopause_crossings_limited_v2.csv', 'w') as f:
     for i, time_crossing in enumerate(df.DateStart[:]):
 
         trange = [time_crossing]
-        # If trange has only one element, then make it a list of length 2 with 'dt' minutes of padding
+        # If trange has only one element, then make it a list of length 2 with 'dt' minutes of 
+        # padding
         if len(trange) == 1:
             trange_date = datetime.datetime.strptime(
                 trange[0], '%Y-%m-%d %H:%M:%S.%f')
@@ -43,16 +44,16 @@ with open('../data/mms_magnetopause_crossings_limited_v2.csv', 'w') as f:
 
         # Check if the crossing was close to the sub-solar point
         if x > -5 and x < 12 and r_yz < 12:
-            #print("Crossing at: " + time_crossing)
-            #print("Position of MMS in GSM coordinates: " +
-            #      str(mms_sc_pos))
-            #print("Distance from sub-solar point: " + str(r_yz))
-            #print("\n")
+            # print("Crossing at: " + time_crossing)
+            # print("Position of MMS in GSM coordinates: " +
+            #       str(mms_sc_pos))
+            # print("Distance from sub-solar point: " + str(r_yz))
+            # print("\n")
             # Write the time of crossing and the position of MMS in GSM coordinates to the csv file
             f.write(time_crossing + "," + str(x) + "," + str(y) +
                     "," + str(z) + "," + str(r_yz) + "," + str(i) + "\n")
     f.close()
-#print(mms_sc_pos)
+# print(mms_sc_pos)
 
 # Steps
 # 1. Get the time of the crossing
