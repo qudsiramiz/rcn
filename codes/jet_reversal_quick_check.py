@@ -18,7 +18,7 @@ df = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 df.set_index("DateStart", inplace=True)
 
 # Set the timezone to UTC
-#df.index = df.index.tz_localize(pytz.utc)
+# df.index = df.index.tz_localize(pytz.utc)
 
 r_e = 6378.137  # Earth radius in km
 
@@ -81,7 +81,7 @@ for xx, crossing_time in enumerate(df_crossings.index[indx_number:], start=indx_
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
-    #crossing_time = '2017-01-02 02:58:13.0+00:00'
+    # crossing_time = '2017-01-02 02:58:13.0+00:00'
     crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0], "%Y-%m-%d %H:%M:%S.%f")
     # Set the timezone to UTC
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
@@ -97,7 +97,7 @@ for xx, crossing_time in enumerate(df_crossings.index[indx_number:], start=indx_
               'latest_version': latest_version,
               'figname': 'mms_jet_reversal_check',
               'fname': '../data/mms_jet_reversal_times.csv'
-                }
+        }
     try:
         data_rate = 'brst'
         df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
