@@ -76,9 +76,9 @@ df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 df_crossings.set_index("DateStart", inplace=True)
 
 indx_number = 0
-indx_max = 100
-# for crossing_time in trange_list[28:29]:
-for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
+indx_max = -1
+for crossing_time in trange_list[indx_number:indx_max]:
+#for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
@@ -91,23 +91,20 @@ for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], sta
               'dt': dt,
               'probe': probe,
               'jet_len': jet_len,
-              'data_rate': data_rate,
               'level': level,
               'data_type': data_type,
               'time_clip': time_clip,
               'latest_version': latest_version,
               'figname': 'mms_jet_reversal_check',
-              'fname': '../data/mms_jet_reversal_times_v2.csv'
+              'fname': '../data/mms_jet_reversal_times_list.csv'
         }
     try:
         try:
-            data_rate = 'brst'
+            inputs["data_rate"] = 'brst'
             df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
         except:
-            pass
+            inputs["data_rate"] = 'fast'
+            df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
     except Exception as e:
-        try:
-            data_rate = 'fast'
-            df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
-        except:
-            pass
+        print(f"\033[91;31m\n{e}\n\033[0m")
+        pass

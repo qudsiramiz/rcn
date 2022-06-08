@@ -69,7 +69,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     latest_version=latest_version)
 
     mms_fpi_time = ptt.get_data(mms_fpi_varnames[0])[0]
-
     # Convert the time to a datetime object
     mms_fpi_time = pd.to_datetime(mms_fpi_time, unit='s')
 
@@ -88,10 +87,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Get the data from the FGM
     # mms_fgm_varnames = [f'mms{probe}_fgm_b_gsm_srvy_l2_bvec']
+    #_ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
+    #                varnames=[f"mms{probe}_fgm_b_gsm_srvy_{level}",
+    #                          f"mms{probe}_fgm_r_gsm_srvy_{level}"], get_fgm_ephemeris=True)
     _ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
-                    varnames=[f"mms{probe}_fgm_b_gsm_srvy_{level}",
-                              f"mms{probe}_fgm_r_gsm_srvy_{level}"], get_fgm_ephemeris=True)
-
+                    get_fgm_ephemeris=True)
     # Get the time corresponding to the FGM data
     mms_fgm_time = ptt.get_data(f"mms{probe}_fgm_b_gsm_srvy_{level}")[0]
     mms_fgm_time = pd.to_datetime(mms_fgm_time, unit='s')
@@ -334,7 +334,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date, Probe,walen,jet_detection,R_w,theta_w,x_gsm,y_gsm,z_gsm,r_spc\n')
+                    f.write('Date,Probe,walen,jet_detection,R_w,theta_w,x_gsm,y_gsm,z_gsm,r_spc\n')
             # Append the crossing time to the csv file if it does not exist already
             df_temp = pd.read_csv(fname)
             old_crossing_times = np.array([xx[:19] for xx in df_temp['Date'].values])
@@ -357,12 +357,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                 folder_name = "../figures/jet_reversal_checks/walen/b_n_v"
             elif (not walen_relation_satisfied) & jet_detection:
                 folder_name = "../figures/jet_reversal_checks/jet/b_n_v"
-            figname = f"{folder_name}/{figname}_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
-            print(figname)
+            bnv_figname = f"{folder_name}/b_n_v_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
+            print(f"{bnv_figname}.png")
+            #ptt.xlim(datetime.datetime.strftime(df_mms.index[0], "%Y-%m-%d %H:%M:%S.%f"),
+            #         datetime.datetime.strftime(df_mms.index[-1], "%Y-%m-%d %H:%M:%S.%f"))
             ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
                        f'mms{probe}_dis_numberdensity_{data_rate}',
                        f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
-                      combine_axes=True, save_png=figname, display=False)
+                      combine_axes=True, save_png=bnv_figname, display=False)
             plt.close("all")
 
             plt.figure(figsize=(6, 3))
@@ -380,6 +382,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             plt.axhline(y=v_thresh, color='k', linestyle='--', lw=1)
             plt.axhline(y=-v_thresh, color='k', linestyle='--', lw=1)
             plt.ylim(-200, 200)
+            plt.xlim(df_mms.index[0], df_mms.index[-1])
             plt.xlabel("Time (UTC)")
             plt.ylabel("$v_p - <v_p>$ \n $(km/s, GSM, Z)$")
             plt.title(f"MMS {probe} Jet Reversal Check at {crossing_time.strftime('%Y-%m-%d %H:%M:%S')}")
