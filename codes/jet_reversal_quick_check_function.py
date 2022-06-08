@@ -289,7 +289,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date, Probe, walen, jet_detection, R_w, theta_w, x_gsm, y_gsm, z_gsm,\
+                    f.write('Date, Probe,walen,jet_detection,R_w,theta_w,x_gsm,y_gsm,z_gsm,\
                             r_spc\n')
             # Append the crossing time to the csv file if it does not exist already
             df_temp = pd.read_csv(fname)
@@ -297,8 +297,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
             if ttt not in old_crossing_times:
                 with open(fname, 'a') as f:
-                    f.write(f'{crossing_time}, {probe}, {walen_relation_satisfied}, {jet_detection}\
-                              , {R_w:.3f}, {theta_w_deg:.3f}, {x:.3f}, {y:.3f}, {z:.3f}, {r_yz:.3f}\
+                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{jet_detection}\
+                              ,{R_w:.3f},{theta_w_deg:.3f},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f}\
                               \n')
                 f.close()
 

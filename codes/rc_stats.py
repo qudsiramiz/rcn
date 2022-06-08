@@ -34,10 +34,15 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     df_bisec = df[df.method_used=="bisection"]
 
     # Remove all data points where the value of 'r_rc' is greater than 12
-    df_shear = df_shear[df_shear.r_rc<12]
-    df_rx_en = df_rx_en[df_rx_en.r_rc<12]
-    df_va_cs = df_va_cs[df_va_cs.r_rc<12]
-    df_bisec = df_bisec[df_bisec.r_rc<12]
+    df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection==' True                              ')]
+    df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection==' True                              ')]
+    df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection==' True                              ')]
+    df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection==' True                              ')]
+
+    df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen==' True')]
+    df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen==' True')]
+    df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen==' True')]
+    df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen==' True')]
 
     if dark_mode:
         plt.style.use('dark_background')
@@ -195,14 +200,14 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     # Save the figure
     if not os.path.exists(fig_folder):
         os.makedirs(fig_folder)
-    fig_name = f"{fig_folder}/{fig_name}.{fig_format}"
+    fig_name = f"{fig_folder}/{fig_name}_wal_jet.{fig_format}"
     plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05,
                 dpi=200, transparent=transparent, format=fig_format)
     plt.close()
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/*_v3.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/*_20220607.csv"))
 for file_name in fnames:
     mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
@@ -212,7 +217,7 @@ for file_name in fnames:
         'dark_mode': False,
         'fig_name':  f"rx_hist_{mms_probe_num}",
         'fig_format': 'pdf',
-        'fig_folder': '../figures/rx_hist_v3',
+        'fig_folder': '../figures/rx_hist_v5',
         'fig_size': (8, 8),
         'histtype': 'step',
         'linewidth': 3,

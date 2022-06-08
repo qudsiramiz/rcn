@@ -79,7 +79,7 @@ trange_list = df_jet_reversal.Date.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
 ind = 0
 for mms_probe_num in mms_probe_num_list[2:3]:
-    for ind_range, trange in enumerate(trange_list[ind:1], start=ind):
+    for ind_range, trange in enumerate(trange_list[ind:], start=ind):
         trange = [trange.split('.')[0]]
         try:
             mms_probe_num = str(mms_probe_num)
@@ -147,8 +147,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220607.csv",
                 "rc_folder": "../data/rx_d/",
                 "save_rc_file": True,
-                "walen": df_jet_reversal.walen[ind_range],
-                "jet_detection": df_jet_reversal.jet_detection[ind_range],
+                "walen": df_jet_reversal[' walen'][ind_range],
+                "jet_detection": df_jet_reversal[' jet_detection'][ind_range],
             }
 
             y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
