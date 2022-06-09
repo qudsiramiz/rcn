@@ -77,7 +77,7 @@ def get_rxben(b_vec_1, b_vec_2):
         Reconnection field energy density in nPa
     """
 
-    #alpha = - 14.87 * np.pi / 180  # radians (From Hesse2013)
+    # alpha = - 14.87 * np.pi / 180  # radians (From Hesse2013)
     b_vec_1 = np.array(b_vec_1)
     b_vec_2 = np.array(b_vec_2)
     mag_vec_1 = np.linalg.norm(b_vec_1)
