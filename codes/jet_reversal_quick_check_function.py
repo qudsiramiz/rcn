@@ -1,4 +1,3 @@
-from cProfile import label
 import datetime
 import os
 
@@ -50,7 +49,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     df_mms_fgm : pandas.DataFrame
         The dataframe containing the data from the FGM.
-    
+
     df_mms : pandas.DataFrame
         The merged dataframe containing the data from the FPI and FGM.
     """
@@ -81,15 +80,15 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     _ = spd.cotrans(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}',
                     name_out=f'mms{probe}_dis_bulkv_gsm_{data_rate}', coord_in='gse',
                     coord_out='gsm')
-    
+
     mms_fpi_bulkv_gsm = ptt.get_data(f'mms{probe}_dis_bulkv_gsm_{data_rate}')[1:4][0]
     mms_fpi_bulkv_gse = ptt.get_data(f'mms{probe}_dis_bulkv_gse_{data_rate}')[1:4][0]
 
     # Get the data from the FGM
     # mms_fgm_varnames = [f'mms{probe}_fgm_b_gsm_srvy_l2_bvec']
-    #_ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
-    #                varnames=[f"mms{probe}_fgm_b_gsm_srvy_{level}",
-    #                          f"mms{probe}_fgm_r_gsm_srvy_{level}"], get_fgm_ephemeris=True)
+    # _ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
+    #                 varnames=[f"mms{probe}_fgm_b_gsm_srvy_{level}",
+    #                           f"mms{probe}_fgm_r_gsm_srvy_{level}"], get_fgm_ephemeris=True)
     _ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
                     get_fgm_ephemeris=True)
     # Get the time corresponding to the FGM data
@@ -193,10 +192,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Compute the average values for density, velocity and magnetic fields
     # before the crossing time
     np_before = df_mms_before['np'].mean() * 1e6  # in m^-3
-    vp_gsm_x_before = df_mms_before['vp_gsm_x'].mean() * 1e3   # in m/s
-    vp_gsm_y_before = df_mms_before['vp_gsm_y'].mean() * 1e3   # in m/s
-    vp_gsm_z_before = df_mms_before['vp_gsm_z'].mean() * 1e3   # in m/s
-    vp_gsm_vec_before = np.array([vp_gsm_x_before, vp_gsm_y_before, vp_gsm_z_before])
+    # vp_gsm_x_before = df_mms_before['vp_gsm_x'].mean() * 1e3   # in m/s
+    # vp_gsm_y_before = df_mms_before['vp_gsm_y'].mean() * 1e3   # in m/s
+    # vp_gsm_z_before = df_mms_before['vp_gsm_z'].mean() * 1e3   # in m/s
+    # vp_gsm_vec_before = np.array([vp_gsm_x_before, vp_gsm_y_before, vp_gsm_z_before])
     vp_gse_x_before = df_mms_before['vp_gse_x'].mean() * 1e3   # in m/s
     vp_gse_y_before = df_mms_before['vp_gse_y'].mean() * 1e3   # in m/s
     vp_gse_z_before = df_mms_before['vp_gse_z'].mean() * 1e3   # in m/s
@@ -216,10 +215,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # perpendicular temperature
     # after the crossing time
     np_after = df_mms_after['np'].mean() * 1e6  # in m^-3
-    vp_gsm_x_after = df_mms_after['vp_gsm_x'].mean() * 1e3  # in m/s
-    vp_gsm_y_after = df_mms_after['vp_gsm_y'].mean() * 1e3  # in m/s
-    vp_gsm_z_after = df_mms_after['vp_gsm_z'].mean() * 1e3  # in m/s
-    vp_gsm_vec_after = np.array([vp_gsm_x_after, vp_gsm_y_after, vp_gsm_z_after])
+    # vp_gsm_x_after = df_mms_after['vp_gsm_x'].mean() * 1e3  # in m/s
+    # vp_gsm_y_after = df_mms_after['vp_gsm_y'].mean() * 1e3  # in m/s
+    # vp_gsm_z_after = df_mms_after['vp_gsm_z'].mean() * 1e3  # in m/s
+    # vp_gsm_vec_after = np.array([vp_gsm_x_after, vp_gsm_y_after, vp_gsm_z_after])
     vp_gse_x_after = df_mms_after['vp_gse_x'].mean() * 1e3  # in m/s
     vp_gse_y_after = df_mms_after['vp_gse_y'].mean() * 1e3  # in m/s
     vp_gse_z_after = df_mms_after['vp_gse_z'].mean() * 1e3  # in m/s
@@ -359,8 +358,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                 folder_name = "../figures/jet_reversal_checks/jet/b_n_v"
             bnv_figname = f"{folder_name}/b_n_v_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
             print(f"{bnv_figname}.png")
-            #ptt.xlim(datetime.datetime.strftime(df_mms.index[0], "%Y-%m-%d %H:%M:%S.%f"),
-            #         datetime.datetime.strftime(df_mms.index[-1], "%Y-%m-%d %H:%M:%S.%f"))
+            # ptt.xlim(datetime.datetime.strftime(df_mms.index[0], "%Y-%m-%d %H:%M:%S.%f"),
+            #          datetime.datetime.strftime(df_mms.index[-1], "%Y-%m-%d %H:%M:%S.%f"))
             ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
                        f'mms{probe}_dis_numberdensity_{data_rate}',
                        f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
@@ -375,7 +374,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             if jet_detection:
                 # Make a box around the jet
                 plt.axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='r',
-                alpha=0.2, label='Jet Location')
+                            alpha=0.2, label='Jet Location')
                 plt.legend(loc=1)
             # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
             # Draw a dashed line at +/- v_thres
@@ -385,10 +384,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             plt.xlim(df_mms.index[0], df_mms.index[-1])
             plt.xlabel("Time (UTC)")
             plt.ylabel("$v_p - <v_p>$ \n $(km/s, GSM, Z)$")
-            plt.title(f"MMS {probe} Jet Reversal Check at {crossing_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
+            plt.title(f"MMS {probe} Jet Reversal Check at {temp3}")
 
             # Add text to the plot
-            plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ = {walen_relation_satisfied} \n $j_v$ = {jet_detection}",
+            plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ = {walen_relation_satisfied} \n $j_v$ = {jet_detection}",
                      transform=plt.gca().transAxes, ha='left', va='top')
             if walen_relation_satisfied & jet_detection:
                 folder_name = "../figures/jet_reversal_checks/jet_walen"
@@ -396,7 +396,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                 folder_name = "../figures/jet_reversal_checks/walen"
             elif (not walen_relation_satisfied) & jet_detection:
                 folder_name = "../figures/jet_reversal_checks/jet"
-            fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}.png"
+            ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
+            fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}.png"
             plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
             print(f"{fig_name}")
             plt.close("all")

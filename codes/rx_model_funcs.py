@@ -394,7 +394,8 @@ def ridge_finder(
 
     if save_fig:
         try:
-            fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
+            temp2 = parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')
+            fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{temp2}"
             fig_name = f'../figures/{fig_name}/ridge_plot_{fig_name}_{fig_time_range}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=300)
             print(f'Figure saved as {fig_name}')
@@ -851,8 +852,10 @@ def ridge_finder_multiple(
         try:
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
-            fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')}"
-            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}_interpolation_mms{mms_probe_num}/{fig_version}"
+            temp1 = parser.parse(t_range[1]).strftime('%Y-%m-%d_%H-%M-%S')
+            fig_time_range = f"{parser.parse(t_range[0]).strftime('%Y-%m-%d_%H-%M-%S')}_{temp1}"
+            fig_folder = f"../figures/all_ridge_plots/{tsy_model}/{interpolation}" +\
+                         f"_interpolation_mms{mms_probe_num}/{fig_version}"
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:
@@ -986,8 +989,8 @@ def model_run(*args):
             # print(index, rp, zp)
             # print(f'Value of theta = {theta}')
 
-            y_coord = y0
-            z_coord = z0
+            # y_coord = y0
+            # z_coord = z0
             x_shu = (r - m_p) * np.cos(theta)
             phi = np.arctan2(z0, y0)
             # print( j, k, theta, x_shu[j,k])
@@ -1000,50 +1003,52 @@ def model_run(*args):
                     z_shu = 0
                     y_shu = (r - m_p) * np.sin(theta)
             else:
-                z_shu = np.sqrt((rp - 1.0)**2/(1 + np.tan(phi)**(-2)))
-                y_shu = z_shu/np.tan(phi)
+                z_shu = np.sqrt((rp - 1.0)**2 / (1 + np.tan(phi)**(-2)))
+                y_shu = z_shu / np.tan(phi)
 
             m_proton = 1.672e-27  # Mass of proton in SI unit
-            n_sh = sw_params['rho'] * (1.509 * np.exp(x_shu/rmp) + .1285) / m_proton
+            n_sh = sw_params['rho'] * (1.509 * np.exp(x_shu / rmp) + .1285) / m_proton
 
-            y_shu = abs(y_shu)*signy
-            z_shu = abs(z_shu)*signz
+            y_shu = abs(y_shu) * signy
+            z_shu = abs(z_shu) * signz
 
             # Cooling JGR 2001 Model, equation 9 to 12
             # the distance from the focus to the magnetopause surface
             A = 2
-            ll = 3 * rmp/2 - x0
+            ll = 3 * rmp / 2 - x0
             b_msx = - A * (- sw_params['b_imf'][0] * (1 - rmp / (2 * ll)) + sw_params['b_imf'][1]
-                        * (y0 / ll) + sw_params['b_imf'][2] * (z0 / ll))
+                           * (y0 / ll) + sw_params['b_imf'][2] * (z0 / ll))
             b_msy = A * (- sw_params['b_imf'][0] * (y0 / (2 * ll)) + sw_params['b_imf'][1]
-                      * (2 - y0**2/( ll * rmp)) - sw_params['b_imf'][2] * (y0 * z0 / (ll * rmp)))
+                         * (2 - y0**2 / (ll * rmp)) - sw_params['b_imf'][2] * (y0 * z0 / (ll *
+                                                                                          rmp)))
             b_msz = A * (- sw_params['b_imf'][0] * (z0 / (2 * ll)) - sw_params['b_imf'][1]
-                      * (y0 * z0 / (ll * rmp)) + sw_params['b_imf'][2] * (2 - z0**2 / (ll * rmp)))
+                         * (y0 * z0 / (ll * rmp)) + sw_params['b_imf'][2] * (2 - z0**2 / (ll *
+                                                                                          rmp)))
             try:
                 if model_type == 't96':
                     bx_ext, by_ext, bz_ext = gp.t96.t96(sw_params['param'], sw_params['ps'], x_shu,
-                                                                                       y_shu, z_shu)
+                                                        y_shu, z_shu)
                 elif model_type == 't01':
                     bx_ext, by_ext, bz_ext = gp.t01.t01(sw_params['param'], sw_params['ps'], x_shu,
-                                                                                       y_shu, z_shu)
-            except:
-                    print(f'Skipped for {x_shu, y_shu, z_shu}')
-                    pass
+                                                        y_shu, z_shu)
+            except Exception:
+                print(f'Skipped for {x_shu, y_shu, z_shu}')
+                pass
 
             bx_igrf, by_igrf, bz_igrf = gp.igrf_gsm(x_shu, y_shu, z_shu)
 
-            #print(j, k, bx_ext, bx_igrf)
+            # print(j, k, bx_ext, bx_igrf)
             bx = bx_ext + bx_igrf
             by = by_ext + by_igrf
             bz = bz_ext + bz_igrf
 
-            #if (np.sqrt(y_shu**2 + z_shu**2) > 31):
-            #    shear = np.nan
-            #    rx_en = np.nan
-            #    va_cs = np.nan
-            #    bisec_msp = np.nan
-            #    bisec_msh = np.nan
-            #else:
+            # if (np.sqrt(y_shu**2 + z_shu**2) > 31):
+            #     shear = np.nan
+            #     rx_en = np.nan
+            #     va_cs = np.nan
+            #     bisec_msp = np.nan
+            #     bisec_msh = np.nan
+            # else:
             shear = get_shear([bx, by, bz], [b_msx, b_msy, b_msz], angle_unit="degrees")
 
             rx_en = get_rxben([bx, by, bz], [b_msx, b_msy, b_msz])
@@ -1061,7 +1066,7 @@ def get_sw_params(
     trange=None,
     mms_probe_num=None,
     verbose=False
-    ):
+):
     r"""
     Get the solar wind parameters from the OMNI database.
 
@@ -1093,20 +1098,22 @@ def get_sw_params(
     """
 
     if trange is None:
-        raise ValueError("trange must be specified as a list of start and end times in the format 'YYYY-MM-DD HH:MM:SS'.")
+        raise ValueError("trange must be specified as a list of start and end times in the format" +
+                         "'YYYY-MM-DD HH:MM:SS'.")
 
     # Check if trange is either a list or an array of length 2
     if not isinstance(trange, (list, np.ndarray)) or len(trange) != 2:
         raise ValueError(
-            "trange must be specified as a list or array of length 2 in the format 'YYYY-MM-DD HH:MM:SS.")
+            "trange must be specified as a list or array of length 2 in the format" +
+            "'YYYY-MM-DD HH:MM:SS.")
 
     # Download the OMNI data (default level of 'hro_1min') for the specified timerange.
     omni_varnames = ['BX_GSE', 'BY_GSM', 'BZ_GSM', 'proton_density', 'Vx', 'Vy', 'Vz', 'SYM_H']
     omni_vars = spd.omni.data(trange=trange, varnames=omni_varnames, level=omni_level,
-                             time_clip=time_clip)
+                              time_clip=time_clip)
 
     omni_time = ptt.get_data(omni_vars[0])[0]
-    #print(f'omni_time: {omni_time}')
+    # print(f'omni_time: {omni_time}')
     omni_bx_gse = ptt.get_data(omni_vars[0])[1]
     omni_by_gsm = ptt.get_data(omni_vars[1])[1]
     omni_bz_gsm = ptt.get_data(omni_vars[2])[1]
@@ -1127,31 +1134,32 @@ def get_sw_params(
 
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
-        mms_sc_pos = ptt.get_data(mms_vars[0])[1:3][0]/r_e
+        mms_sc_pos = ptt.get_data(mms_vars[0])[1:3][0] / r_e
 
-        # TODO: Find out why adding 'mms_fgm_varnames' as a variable causes the code to give out no data.
+        # TODO: Find out why adding 'mms_fgm_varnames' as a variable causes the code to give out no
+        # data.
         mms_fgm_varnames = [f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec']
-        mms_fgm_vars = spd.mms.fgm(trange=trange, probe=mms_probe_num, time_clip=time_clip,
-                                   latest_version=True)
-        mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
+        _ = spd.mms.fgm(trange=trange, probe=mms_probe_num, time_clip=time_clip,
+                        latest_version=True)
+        # mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
         mms_fgm_b_gsm = ptt.get_data(mms_fgm_varnames[0])[1:4][0]
     else:
         mms_time = None
         mms_sc_pos = None
-        mms_fgm_time = None
+        # mms_fgm_time = None
         mms_fgm_b_gsm = None
         pass
 
     time_imf = np.nanmedian(omni_time)
-    #print(time_imf, type(time_imf))
+    # print(time_imf, type(time_imf))
     b_imf_x = np.nanmedian(omni_bx_gse)
     b_imf_y = np.nanmedian(omni_by_gsm)
     b_imf_z = np.nanmedian(omni_bz_gsm)
 
     if (b_imf_z > 15 or b_imf_z < -18):
         warnings.warn(
-        f"The given parameters produced the z-component of IMF field (b_imf_z) {b_imf_z} nT,"
-        f"which is out of range in which model is valid (-18 nT < b_imf_z < 15 nT)"
+            f"The given parameters produced the z-component of IMF field (b_imf_z) {b_imf_z} nT,"
+            f"which is out of range in which model is valid (-18 nT < b_imf_z < 15 nT)"
         )
 
     time_imf_hrf = datetime.datetime.utcfromtimestamp(time_imf)
@@ -1163,10 +1171,6 @@ def get_sw_params(
     v_imf = [vx_imf, vy_imf, vz_imf]
     b_imf = [b_imf_x, b_imf_y, b_imf_z]
 
-    ## TODO: Remove the next three lines after testing is done
-    #np_imf = 5
-    #v_imf = [-450, 0, 0]
-    #b_imf = [0, 0, 5]
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
     if imf_clock_angle < 0:
         imf_clock_angle += 360
@@ -1205,7 +1209,7 @@ def get_sw_params(
     m_proton = 1.672e-27  # Mass of proton in SI unit
 
     rho = np_imf * m_proton * 1.15  # NOTE to self: Unit is fine, do not worry about it
-    #print(f"Proton density is {np_imf} 1/cm^3")
+    # print(f"Proton density is {np_imf} 1/cm^3")
 
     #  Solar wind ram pressure in nPa, including roughly 4% Helium++ contribution
     p_dyn = 1.6726e-6 * 1.15 * np_imf * (vx_imf**2 + vy_imf**2 + vz_imf**2)
@@ -1241,17 +1245,17 @@ def rx_model(
     probe=None,
     trange=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
     dt=5,
-    omni_level = 'hro',
-    mms_probe_num = '3',
-    model_type = 't96',
-    m_p = 0.5,
-    dr = 0.5,
-    min_max_val = 15,
-    y_min = None,
-    y_max = None,
-    z_min = None,
-    z_max = None,
-    save_data = False
+    omni_level='hro',
+    mms_probe_num='3',
+    model_type='t96',
+    m_p=0.5,
+    dr=0.5,
+    min_max_val=15,
+    y_min=None,
+    y_max=None,
+    z_min=None,
+    z_max=None,
+    save_data=False
 ):
     """
     This function computes the magnetosheath and magnetospheric magnetic fields using the T96 model
@@ -1348,14 +1352,14 @@ def rx_model(
 
     # Shue et al.,1998, equation 10
     ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params['b_imf'][2] + 8.14))) * (
-                                          sw_params['p_dyn'])**(-1.0/6.6)
+        sw_params['p_dyn'])**(-1.0 / 6.6)
 
     # Shue et al.,1998, equation 11
     alpha = (0.58 - 0.007 * sw_params['b_imf'][2]) * (1 + 0.024 * np.log(sw_params['p_dyn']))
-    rmp = ro * (2/(1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
+    rmp = ro * (2 / (1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
 
-    len_y = int((y_max - y_min)/dr) + 1
-    len_z = int((z_max - z_min)/dr) + 1
+    len_y = int((y_max - y_min) / dr) + 1
+    len_z = int((z_max - z_min) / dr) + 1
 
     p = mp.Pool()
 
@@ -1418,8 +1422,8 @@ def rx_model(
             print(f'Date saved to file {fn} \n')
         except Exception as e:
             print(e)
-            print(
-                f'Data not saved to file {fn}. Please make sure that file name is correctly assigned and that the directory exists and you have write permissions')
+            print(f'Data not saved to file {fn}. Please make sure that file name is correctly' +
+                  ' assigned and that the directory exists and you have write permissions')
 
     return (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz)
 
@@ -1427,8 +1431,8 @@ def rx_model(
 def line_fnc(
     r0=np.array([0, 0, 0]),
     b_msh=np.array([0, 0, 0]),
-    r = 0,
-    ):
+    r=0,
+):
     """
     Function to compute the equation of a line along the direction of the magnetic field.
 
@@ -1458,4 +1462,3 @@ def target_fnc(r, r0, b_msh, line_fnc, line_intrp):
     p_line = line_fnc(r0=r0, b_msh=b_msh, r=r)
     z_surface = line_intrp(p_line[1])
     return np.sum((p_line[2] - z_surface)**2)
-
