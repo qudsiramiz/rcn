@@ -1,4 +1,5 @@
 import datetime
+from tabnanny import verbose
 import pytz
 import importlib
 
@@ -75,10 +76,10 @@ df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 # Set the index to the date column
 df_crossings.set_index("DateStart", inplace=True)
 
-indx_number = 0
-indx_max = -1
-for crossing_time in trange_list[indx_number:indx_max]:
-#for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
+indx_number = 5000
+indx_max = 6000
+#for crossing_time in trange_list[indx_number:indx_max]:
+for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
@@ -96,15 +97,39 @@ for crossing_time in trange_list[indx_number:indx_max]:
               'time_clip': time_clip,
               'latest_version': latest_version,
               'figname': 'mms_jet_reversal_check',
-              'fname': '../data/mms_jet_reversal_times_list.csv'
+              'fname': '../data/mms_jet_reversal_times_list.csv',
+              "verbose": False
         }
+    #inputs["data_rate"] = 'fast'
+    #df_fpi, df_fgm, df_mmsh = jrcf.jet_reversal_check(**inputs)
     try:
         try:
             inputs["data_rate"] = 'brst'
-            df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
+            df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
         except:
             inputs["data_rate"] = 'fast'
-            df_fpi, df_fgm, df_mms, df_mms_before, df_mms_after = jrcf.jet_reversal_check(**inputs)
+            df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
     except Exception as e:
-        print(f"\033[91;31m\n{e}\n\033[0m")
+        print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
         pass
+
+    # try:
+    #     inputs["data_rate"] = 'brst'
+    #     df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    # except:
+    #     inputs["data_rate"] = 'fast'
+    #     df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+
+# np_std = (df_mms.np - df_mms.np.mean())/df_mms.np.std()
+# vp_std = (df_mms.vp_gsm_z - df_mms.vp_gsm_z.mean())/df_mms.vp_gsm_z.std()
+# plt.figure()
+# plt.plot(np_std, 'r.', ms=1)
+# plt.axvline(df_mms.index[ind_pos], color='k', linestyle='--', label='Positive')
+# plt.axvline(df_mms.index[ind_neg], color='r', linestyle='--', label='Negative')
+# plt.axvline(df_mms.index[ind_msp], color='c', linestyle='--', label='MSP')
+# plt.axvline(df_mms.index[ind_msh], color='g', linestyle='-', lw=5, alpha=0.5, label='MSH')
+# plt.legend()
+# #plt.plot(vp_std, 'b.', ms=1)
+# 
+# plt.yscale('linear')
+# plt.show()
