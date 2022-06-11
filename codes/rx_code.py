@@ -77,11 +77,11 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list.csv")
 trange_list = df_jet_reversal.Date.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 0
-ind_max = 1
+ind_min = 20
+ind_max = 21
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
-        trange = [trange.split('+')[0]]
+        trange = [trange.split("+")[0].split(".")[0]]
         #try:
         for something in range(1):
             mms_probe_num = str(mms_probe_num)
