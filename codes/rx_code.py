@@ -77,9 +77,10 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list.csv")
 trange_list = df_jet_reversal.Date.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
-ind = 0
+ind_min = 0
+ind_max = 1
 for mms_probe_num in mms_probe_num_list[2:3]:
-    for ind_range, trange in enumerate(trange_list[ind:], start=ind):
+    for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         trange = [trange.split('+')[0]]
         #try:
         for something in range(1):
@@ -148,7 +149,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220608.csv",
                 "rc_folder": "../data/rx_d/",
                 "save_rc_file": True,
-                "walen": df_jet_reversal['walen'][ind_range],
+                "walen": df_jet_reversal['walen1'][ind_range],
                 "jet_detection": df_jet_reversal['jet_detection'][ind_range],
                 "fig_version": 'v6',
             }
