@@ -611,9 +611,9 @@ def ridge_finder_multiple(
         kwargs = {'sigmas': [sigma[i]], 'black_ridges': False, 'mode': mode, 'alpha': 1}
 
         # Smoothen the image
-        image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, order=convolution_order[i],
+        image_smooth = sp.ndimage.gaussian_filter(image_rotated, order=convolution_order[i],
                                                           sigma=[5, 5], mode=mode)
-        image_smooth_p = sp.ndimage.filters.gaussian_filter(image_rotated, order=0, sigma=[5, 5],
+        image_smooth_p = sp.ndimage.gaussian_filter(image_rotated, order=0, sigma=[5, 5],
                                                             mode=mode)
         result = frangi(image_smooth, **kwargs)  # frangi, hessian, meijering, sato
 
@@ -1223,15 +1223,13 @@ def get_sw_params(
     if (verbose):
         print(tabulate(
             [["Time of observation (UTC)", f"{time_imf_hrf}"],
-             ["IMF Magnetic field [GSM] (nT)", f"[{b_imf[0]:.2f}, {b_imf[1]:.2f}, f{b_imf[2]:.2f}]"],
+             ["IMF Magnetic field [GSM] (nT)", f"[{b_imf[0]:.2f}, {b_imf[1]:.2f}, {b_imf[2]:.2f}]"],
              ["IMF Proton density (1/cm^-3)", f"{np_imf:.2f}"],
-             ["IMF Plasma velocity (km/sec)", f"{v_imf[0]:.2f}, {v_imf[1]:.2f}, {v_imf[2]:.2f}"],
+             ["IMF Plasma velocity (km/sec)", f"[{v_imf[0]:.2f}, {v_imf[1]:.2f}, {v_imf[2]:.2f}]"],
              ["IMF clock angle (degrees)", f"{imf_clock_angle:.2f}"],
              ["IMF Sym H", f"{sym_h_imf:.2f}"],
-             ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f},
-             {mean_mms_sc_pos[2]:.2f}]"],
-            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
-            numalign="center"))
+             ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f}, {mean_mms_sc_pos[2]:.2f}]"]],
+            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f", numalign="center"))
 
     # Check if the values are finite, if not then assign a default value to each of them
     if ~(np.isfinite(np_imf)):
