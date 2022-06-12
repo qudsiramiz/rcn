@@ -1222,13 +1222,14 @@ def get_sw_params(
     print("IMF parameters found:")
     if (verbose):
         print(tabulate(
-            [["Time of observation (UTC)", time_imf_hrf],
-             ["IMF Magnetic field [GSM] (nT)", b_imf],
-             ["IMF Proton density (1/cm^-3)", np_imf],
-             ["IMF Plasma velocity (km/sec)", v_imf],
-             ["IMF clock angle (degrees)", imf_clock_angle],
-             ["IMF Sym H", sym_h_imf],
-             ["MMS position (GSM) (R_E)", mean_mms_sc_pos]],
+            [["Time of observation (UTC)", f"{time_imf_hrf}"],
+             ["IMF Magnetic field [GSM] (nT)", f"[{b_imf[0]:.2f}, {b_imf[1]:.2f}, f{b_imf[2]:.2f}]"],
+             ["IMF Proton density (1/cm^-3)", f"{np_imf:.2f}"],
+             ["IMF Plasma velocity (km/sec)", f"{v_imf[0]:.2f}, {v_imf[1]:.2f}, {v_imf[2]:.2f}"],
+             ["IMF clock angle (degrees)", f"{imf_clock_angle:.2f}"],
+             ["IMF Sym H", f"{sym_h_imf:.2f}"],
+             ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f},
+             {mean_mms_sc_pos[2]:.2f}]"],
             headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
             numalign="center"))
 
