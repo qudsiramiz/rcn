@@ -899,7 +899,7 @@ def ridge_finder_multiple(
             else:
                 print(f"folder already exists: {fig_folder}\n")
 
-            bbb = f"{b_imf[0]}_{b_imf[1]}_{b_imf[2]}"
+            bbb = f"{b_imf[0]:.0f}_{b_imf[1]:.0f}_{b_imf[2]:.0f}"
             fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}_{bbb}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=200)
             print(f'Figure saved as {fig_name}')
