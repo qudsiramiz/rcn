@@ -646,8 +646,16 @@ def ridge_finder_multiple(
         if draw_ridge:
             # axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
             #          alpha=0.9)
-            axs1.plot(np.linspace(xrange[0], xrange[1], x_len), im_max_val_avg, color='aqua',
-                      ls='-', alpha=0.9)
+            x_intr_vals = np.linspace(xrange[0], xrange[1], x_len)
+            y_intr_vals = im_max_val_avg
+            # If the square root of the sum of squares of x_intr_vals and y_intr_vals is greater
+            # than 15, then mask those values
+            r_intr_vals = np.sqrt(x_intr_vals ** 2 + y_intr_vals ** 2)
+            mask = r_intr_vals > 15
+            # Mask the values of x_intr_vals and y_intr_vals
+            x_intr_vals[mask] = np.nan
+            y_intr_vals[mask] = np.nan
+            axs1.plot(x_intr_vals, y_intr_vals, color='aqua', ls='-', alpha=0.9)
 
         # Find the interpolation function corresponding to the x_vals and y_val_avg array
         line_intrp = line_fnc_der(x=np.linspace(xrange[0], xrange[1], x_len), y=im_max_val_avg)
