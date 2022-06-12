@@ -78,7 +78,7 @@ df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list.csv")
 trange_list = df_jet_reversal.Date.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = 0
-ind_max = 
+ind_max = 13
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         trange = [trange.split("+")[0].split(".")[0]]
@@ -113,7 +113,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
 
             figure_inputs = {
                 "image": [shear, rx_en / np.nanmax(rx_en), va_cs, bisec_msp],
-                "convolution_order": [0, 1, 1, 1],
+                "convolution_order": [1, 1, 1, 1],
                 "t_range": trange,
                 "b_imf": np.round(sw_params['b_imf'], 2),
                 "b_msh": np.round(sw_params['mms_b_gsm'], 2),

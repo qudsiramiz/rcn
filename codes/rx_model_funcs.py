@@ -585,6 +585,20 @@ def ridge_finder_multiple(
     for i in range(len(image)):
         image_rotated = np.transpose(image[i])
 
+        # Create the masked image from result for all the new processings
+        # Find the number of rows in the original image
+        n_rows, n_cols = image_rotated.shape
+
+        # Make a grid of the data based on mumber of rows and columns
+        X, Y = np.ogrid[:n_rows, :n_cols]
+
+        # Find the central row and column
+        c_row = int(n_rows/2)
+        c_col = int(n_cols/2)
+        # Find the distance of each pixel from the central pixel in terms of pixels
+        dist_pxl = np.sqrt((X - c_row) ** 2 + (Y - c_col) ** 2)
+        mask_image = dist_pxl > 80
+
         if cmap_list is None:
             cmap_list = ["viridis", "viridis", "viridis", "viridis"]
         else:
@@ -603,6 +617,16 @@ def ridge_finder_multiple(
                                                             mode=mode)
         result = frangi(image_smooth, **kwargs)  # frangi, hessian, meijering, sato
 
+        #------------------------------------------------------------------------------------------
+        # New Stuff
+        #------------------------------------------------------------------------------------------
+        m_result = result.copy()
+        m_result[mask_image] = np.nan
+        new_image_rotated = image_rotated.copy()
+        new_image_rotated[mask_image] = np.nan
+
+
+
         x_len = image_rotated.shape[0]
         y_len = image_rotated.shape[1]
 
@@ -610,8 +634,8 @@ def ridge_finder_multiple(
         y_vals.append(y_val)
         im_max_val = np.full(y_len, np.nan)
         for xx in range(y_len):
-            y_val[xx] = np.argmax(result[:, xx]) * dr + yrange[0]
-            im_max_val[xx] = np.argmax(image_rotated[:, xx]) * dr + yrange[0]
+            y_val[xx] = np.nanargmax(m_result[:, xx]) * dr + yrange[0]
+            im_max_val[xx] = np.nanargmax(new_image_rotated[:, xx]) * dr + yrange[0]
 
         # plt.close('all')
         # TODO: Find a better way to do this
@@ -639,9 +663,11 @@ def ridge_finder_multiple(
         # Take rolling average of the y_val array
         y_val_avg = np.full(len(y_val), np.nan)
         im_max_val_avg = np.full(len(y_val), np.nan)
+
+        r_a_l = 10
         for xx in range(len(y_val)):
-            y_val_avg[xx] = np.nanmean(y_val[max(0, xx - 15):min(len(y_val), xx + 15)])
-            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - 15):min(len(y_val), xx + 15)])
+            y_val_avg[xx] = np.nanmean(y_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
+            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
 
         if draw_ridge:
             # axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
@@ -651,10 +677,10 @@ def ridge_finder_multiple(
             # If the square root of the sum of squares of x_intr_vals and y_intr_vals is greater
             # than 15, then mask those values
             r_intr_vals = np.sqrt(x_intr_vals ** 2 + y_intr_vals ** 2)
-            mask = r_intr_vals > 15
+            #mask = r_intr_vals > 15
             # Mask the values of x_intr_vals and y_intr_vals
-            x_intr_vals[mask] = np.nan
-            y_intr_vals[mask] = np.nan
+            #x_intr_vals[mask] = np.nan
+            #y_intr_vals[mask] = np.nan
             axs1.plot(x_intr_vals, y_intr_vals, color='aqua', ls='-', alpha=0.9)
 
         # Find the interpolation function corresponding to the x_vals and y_val_avg array
@@ -759,7 +785,7 @@ def ridge_finder_multiple(
         axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * b_msh_dir[1], 5 * b_msh_dir[2], head_width=0.4,
                    head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
 
-        print([r0[1], x_y_point[0]], [r0[2], x_y_point[1]])
+        # print([r0[1], x_y_point[0]], [r0[2], x_y_point[1]])
         # Plot line connecting the spacecraft position and the reconnection line
         if ~np.isnan(dist_rc):
             # axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
@@ -873,14 +899,17 @@ def ridge_finder_multiple(
             else:
                 print(f"folder already exists: {fig_folder}\n")
 
-            fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}_{b_imf}.{fig_format}'
+            bbb = f"{b_imf[0]}_{b_imf[1]}_{b_imf[2]}"
+            fig_name = f'{fig_folder}/ridge_plot_{fig_time_range}_{bbb}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=200)
             print(f'Figure saved as {fig_name}')
         except Exception as e:
             print(e)
             print('Figure not saved, folder does not exist. Create folder ../figures')
             # pass
-        plt.close()
+        #plt.close()
+    #plt.savefig("/home/cephadrius/Dropbox/test.pdf", bbox_inches='tight', pad_inches=0.05, dpi=200)
+    plt.close()
     return y_vals, x_intr_vals_list, y_intr_vals_list
 
 
