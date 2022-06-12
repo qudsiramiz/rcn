@@ -78,7 +78,7 @@ df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list.csv")
 trange_list = df_jet_reversal.Date.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = 0
-ind_max = 400
+ind_max = 
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         trange = [trange.split("+")[0].split(".")[0]]
@@ -152,7 +152,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 "walen1": df_jet_reversal['walen1'][ind_range],
                 "walen2": df_jet_reversal["walen2"][ind_range],
                 "jet_detection": df_jet_reversal['jet_detection'][ind_range],
-                "fig_version": 'v6',
+                "fig_version": 'v07',
             }
 
             y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
