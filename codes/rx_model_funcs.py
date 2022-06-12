@@ -445,7 +445,8 @@ def ridge_finder_multiple(
     rc_file_name="rc_file.csv",
     rc_folder="../data",
     save_rc_file=False,
-    walen=False,
+    walen1=False,
+    walen2=False,
     jet_detection=False,
     fig_version='v6',
 ):
@@ -737,12 +738,12 @@ def ridge_finder_multiple(
             if not os.path.exists(rc_folder + rc_file_name):
                 with open(rc_folder + rc_file_name, 'w') as f:
                     f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +
-                            ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen,jet_detection\n")
+                            ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection\n")
                     f.close()
                     print(f"Created {rc_folder + rc_file_name} to store data")
             # Open file and append the relevant data
             with open(rc_folder + rc_file_name, 'a') as f:
-                f.write(f"{mms_probe_num},{t_range[0]},{t_range[1]},{r0[0]},{r0[1]},{r0[2]},{b_msh[0]},{b_msh[1]},{b_msh[2]},{dist_rc:.3f},{method_used},{walen},{jet_detection}\n")
+                f.write(f"{mms_probe_num},{t_range[0]},{t_range[1]},{r0[0]},{r0[1]},{r0[2]},{b_msh[0]},{b_msh[1]},{b_msh[2]},{dist_rc:.3f},{method_used},{walen1},{walen2},{jet_detection}\n")
                 f.close()
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
