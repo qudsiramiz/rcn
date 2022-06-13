@@ -1227,9 +1227,16 @@ def get_sw_params(
              ["IMF Proton density (1/cm^-3)", f"{np_imf:.2f}"],
              ["IMF Plasma velocity (km/sec)", f"[{v_imf[0]:.2f}, {v_imf[1]:.2f}, {v_imf[2]:.2f}]"],
              ["IMF clock angle (degrees)", f"{imf_clock_angle:.2f}"],
+<<<<<<< Updated upstream
              ["IMF Sym H", f"{sym_h_imf:.2f}"],
              ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f}, {mean_mms_sc_pos[2]:.2f}]"]],
             headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f", numalign="center"))
+=======
+             ["IMF Sym H", sym_h_imf],
+             ["MMS position (GSM) (R_E)", mean_mms_sc_pos]],
+            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
+            numalign="center"))
+>>>>>>> Stashed changes
 
     # Check if the values are finite, if not then assign a default value to each of them
     if ~(np.isfinite(np_imf)):
