@@ -39,20 +39,25 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
         df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)]
         df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)]
         df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)]
-    elif cut_type == "walen":
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen)]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen)]
+    elif cut_type == "walen1":
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen1)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen1)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen1)]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen1)]
+    elif cut_type == "walen2":
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen2)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen2)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen2)]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen2)]
     elif cut_type == "walen_jet":
         df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)
-                            & (df_shear.walen)]
+                            & (df_shear.walen1)]
         df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)
-                            & (df_rx_en.walen)]
+                            & (df_rx_en.walen1)]
         df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)
-                            & (df_va_cs.walen)]
+                            & (df_va_cs.walen1)]
         df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)
-                            & (df_bisec.walen)]
+                            & (df_bisec.walen1)]
     if dark_mode:
         plt.style.use('dark_background')
         tick_color = 'w' # color of the tick lines
@@ -216,8 +221,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/*_20220608.csv"))
-cut_type_list = ["jet", "walen", "walen_jet"]
+fnames = np.sort(glob.glob(f"{data_folder}/*_20220612.csv"))
+cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 for file_name in fnames:
     for cut_type in cut_type_list:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
@@ -228,7 +233,7 @@ for file_name in fnames:
             'dark_mode': False,
             'fig_name':  f"rx_hist_{mms_probe_num}",
             'fig_format': 'pdf',
-            'fig_folder': '../figures/rx_hist_v6',
+            'fig_folder': '../figures/rx_hist_v07',
             'fig_size': (8, 8),
             'histtype': 'step',
             'linewidth': 3,
