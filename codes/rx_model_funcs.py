@@ -830,9 +830,10 @@ def ridge_finder_multiple(
                              labelbottom=False, pad=0.01, labelsize=ct_tick_size,
                              labelcolor=label_color)
         cbar1.ax.xaxis.set_label_position('top')
-        cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size,
+        #cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size,
+        #                    color=clabel_color)
+        cbar1.ax.set_xlabel(f'{c_label[i]}', fontsize=c_label_size,
                             color=clabel_color)
-
         # Draw the spacecraft position
         axs1.plot(mms_sc_pos[1], mms_sc_pos[2], 'white', marker='$\\bigoplus$', ms=15, alpha=1)
         # axs1.text(mms_sc_pos[1], mms_sc_pos[2], f'MMS: {mms_sc_pos}', horizontalalignment='right',

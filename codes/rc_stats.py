@@ -35,10 +35,10 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     if cut_type == "jet":
         # Remove all data points where the value of 'r_rc' is greater than 12
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)]
+        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection) & (df_shear.b_msh_x>3)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection) & (df_rx_en.b_msh_x>3)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection) & (df_va_cs.b_msh_x>3)]
+        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection) & (df_bisec.b_msh_x>3)]
     elif cut_type == "walen1":
         df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen1)]
         df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen1)]
@@ -51,13 +51,13 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
         df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen2)]
     elif cut_type == "walen_jet":
         df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)
-                            & (df_shear.walen1)]
+                            & ((df_shear.walen1) | (df_shear.walen2))]
         df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)
-                            & (df_rx_en.walen1)]
+                            & ((df_rx_en.walen1) | (df_rx_en.walen2))]
         df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)
-                            & (df_va_cs.walen1)]
+                            & ((df_va_cs.walen1) | (df_va_cs.walen2))]
         df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)
-                            & (df_bisec.walen1)]
+                            & ((df_bisec.walen1) | (df_bisec.walen2))]
     if dark_mode:
         plt.style.use('dark_background')
         tick_color = 'w' # color of the tick lines
@@ -80,7 +80,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     plt.close("all")
 
     fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor='k', edgecolor='w')
-    fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0.1)
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0.)
     gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1])
 
     # Plot the histogram of the shear data
@@ -92,7 +92,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs1.text(df_shear.r_rc.median()+0.2, axs1.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_shear.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs1.set_xlim(0, 15)
+
+    axs1.set_xlim(0, 12)
     #axs1.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs1.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
 
@@ -105,7 +106,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs2.text(df_rx_en.r_rc.median()+0.2, axs2.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_rx_en.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs2.set_xlim(0, 15)
+    axs2.set_xlim(0, 12)
     #axs2.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.yaxis.set_label_position("right")
@@ -119,7 +120,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs3.text(df_va_cs.r_rc.median()+0.2, axs3.get_ylim()[1]*0.2,
              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_va_cs.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs3.set_xlim(0, 15)
+    axs3.set_xlim(0, 12)
     axs3.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
     axs3.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
@@ -133,7 +134,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     axs4.text(df_bisec.r_rc.median()+0.2, axs4.get_ylim()[1]*0.2,
              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_bisec.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs4.set_xlim(0, 15)
+    axs4.set_xlim(0, 12)
     axs4.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
     axs4.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
@@ -142,12 +143,12 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     # Set the tick parameters
     axs1.tick_params(axis='both', direction='in', which='major', left=True, right=True,
                      top=True, bottom=True, labelleft=True, labelright=False,
-                     labeltop=False, labelbottom=True, labelsize=t_label_size,
+                     labeltop=False, labelbottom=False, labelsize=t_label_size,
                      length=tick_len, width=tick_width, labelcolor=label_color)
 
     axs2.tick_params(axis='both', direction='in', which='major', left=True, right=True,
                 top=True, bottom=True, labelleft=False, labelright=True,
-                labeltop=False, labelbottom=True, labelsize=t_label_size,
+                labeltop=False, labelbottom=False, labelsize=t_label_size,
                 length=tick_len, width=tick_width, labelcolor=label_color)
 
     axs3.tick_params(axis='both', direction='in', which='major', left=True, right=True,
@@ -220,11 +221,13 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
     plt.close()
     print(f"Figure saved as {fig_name} in {fig_format} format in {fig_folder}")
 
+    return df_shear, df_rx_en, df_va_cs, df_bisec
+
 data_folder = '../data/rx_d'
 fnames = np.sort(glob.glob(f"{data_folder}/*_20220612.csv"))
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 for file_name in fnames:
-    for cut_type in cut_type_list:
+    for cut_type in cut_type_list[3:]:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
         fig_inputs ={
@@ -240,4 +243,4 @@ for file_name in fnames:
             'cut_type': cut_type,
         }
 
-        plot_hist(**fig_inputs)
+        df_shear, df_rx_en, df_va_cs, df_bisec = plot_hist(**fig_inputs)

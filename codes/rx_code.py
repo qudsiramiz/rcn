@@ -75,13 +75,23 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 # trange_list.sort(key=lambda x: x[0])
 
 df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list.csv")
-trange_list = df_jet_reversal.Date.tolist()
+# Set the index to Date in UTC
+df_jet_reversal.set_index('Date', inplace=True)
+# Sort the dataframe by the index
+df_jet_reversal.sort_index(inplace=True)
+# Convert the index to datetime
+df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
+
+trange_list = df_jet_reversal.index.tolist()
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 2500
-ind_max = 2600
+ind_min = 127
+ind_max = 128
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
+        # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
+        trange = trange.strftime('%Y-%m-%d %H:%M:%S')
         trange = [trange.split("+")[0].split(".")[0]]
+        print(trange)
         try:
             for something in range(1):
                 mms_probe_num = str(mms_probe_num)
@@ -111,8 +121,16 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu,
                  b_msx, b_msy, b_msz) = rmf.rx_model(**model_inputs)
 
+                # mask = shear > 175
+                # shear[mask] = 0
+                # Normalize each quantity to the range [0, 1]
+                shear_norm = (shear - np.nanmin(shear)) / (np.nanmax(shear) - np.nanmin(shear))
+                rx_en_norm = (rx_en - np.nanmin(rx_en)) / (np.nanmax(rx_en) - np.nanmin(rx_en))
+                va_cs_norm = (va_cs - np.nanmin(va_cs)) / (np.nanmax(va_cs) - np.nanmin(va_cs))
+                bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.nanmax(bisec_msp) - np.nanmin(bisec_msp))
+                
                 figure_inputs = {
-                    "image": [shear, rx_en / np.nanmax(rx_en), va_cs, bisec_msp],
+                    "image": [shear_norm, rx_en_norm, va_cs_norm, bisec_msp_norm],
                     "convolution_order": [1, 1, 1, 1],
                     "t_range": trange,
                     "b_imf": np.round(sw_params['b_imf'], 2),
@@ -127,8 +145,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "sigma": [2, 2, 2, 2],
                     "mode": "nearest",
                     "alpha": 1,
-                    "vmin": [0, 0, None, None],
-                    "vmax": [180, 1, None, None],
+                    "vmin": [0, 0, 0, 0],
+                    "vmax": [1, 1, 1, 1],
                     "cmap_list": ["viridis", "cividis", "plasma", "magma"],
                     "draw_patch": [True, True, True, True],
                     "draw_ridge": [True, True, True, True],
@@ -136,19 +154,20 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "fig_name": 'crossing_all_ridge_plots',
                     # "fig_format": 'png',
                     "c_label": ['Shear', 'Reconnection Energy', 'Exhaust Velocity', 'Bisection Field'],
-                    "c_unit": [r'${}^\circ$', 'nPa', 'km/s', 'nT'],
+                    #"c_unit": [r'${}^\circ$', 'nPa', 'km/s', 'nT'],
+                    "c_unit": ['', 'nPa', 'km/s', 'nT'],
                     "wspace": 0.0,
                     "hspace": 0.17,
                     "fig_size": (8.775, 10),
                     "box_style": dict(boxstyle='round', color='k', alpha=0.8),
                     # "box_style": dict(boxstyle='round', color=None, alpha=0.8),
                     "title_y_pos": 1.09,
-                    "interpolation": 'gaussian',
+                    "interpolation": 'None',
                     "tsy_model": model_type,
-                    "dark_mode": True,
+                    "dark_mode": False,
                     "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220612.csv",
                     "rc_folder": "../data/rx_d/",
-                    "save_rc_file": True,
+                    "save_rc_file": False,
                     "walen1": df_jet_reversal['walen1'][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal['jet_detection'][ind_range],
