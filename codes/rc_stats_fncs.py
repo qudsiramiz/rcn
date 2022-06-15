@@ -62,50 +62,50 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
         df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)
                             & ((df_bisec.walen1) | (df_bisec.walen2))]
 
-    # Check the sw_params to see if the conditions of b_imf
-    for i in range(len(df_shear)):
-        trange = [df_shear.date_from.values[i], df_shear.date_to.values[i]]
-        print(f"Trange is {trange}\n\n\n\n")
-        sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-        try:
-            if sw_params["b_imf"][2] > 0:
-                df_shear.iloc[i] = np.nan
-            print(f"Done for {i}/{len(df_shear)}")
-        except:
-            print(f"Error for {i}/{len(df_shear)}")
-            df_shear.iloc[i] = np.nan
-    for i in range(len(df_rx_en)):
-        trange = [df_rx_en.date_from.values[i], df_rx_en.date_to.values[i]]
-        sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-        try:
-            if sw_params["b_imf"][2] > 0:
-                df_rx_en.iloc[i] = np.nan
-            print(f"Done for {i}/{len(df_rx_en)}")
-        except:
-            print(f"Error for {i}/{len(df_rx_en)}")
-            df_rx_en.iloc[i] = np.nan
-
-    for i in range(len(df_va_cs)):
-        trange = [df_va_cs.date_from.values[i], df_va_cs.date_to.values[i]]
-        sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-        try:
-            if sw_params["b_imf"][2] > 0:
-                df_va_cs.iloc[i] = np.nan
-            print(f"Done for {i}/{len(df_va_cs)}")
-        except:
-            print(f"Error for {i}/{len(df_va_cs)}")
-            df_va_cs.iloc[i] = np.nan
-
-    for i in range(len(df_bisec)):
-        trange = [df_bisec.date_from.values[i], df_bisec.date_to.values[i]]
-        sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-        try:
-            if sw_params["b_imf"][2] > 0:
-                df_bisec.iloc[i] = np.nan
-            print(f"Done for {i}/{len(df_bisec)}")
-        except:
-            print(f"Error for {i}/{len(df_bisec)}")
-            df_bisec.iloc[i] = np.nan
+    ## Check the sw_params to see if the conditions of b_imf
+    #for i in range(len(df_shear)):
+    #    trange = [df_shear.date_from.values[i], df_shear.date_to.values[i]]
+    #    print(f"Trange is {trange}\n\n\n\n")
+    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #    try:
+    #        if sw_params["b_imf"][2] > 0:
+    #            df_shear.iloc[i] = np.nan
+    #        print(f"Done for {i}/{len(df_shear)}")
+    #    except:
+    #        print(f"Error for {i}/{len(df_shear)}")
+    #        df_shear.iloc[i] = np.nan
+    #for i in range(len(df_rx_en)):
+    #    trange = [df_rx_en.date_from.values[i], df_rx_en.date_to.values[i]]
+    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #    try:
+    #        if sw_params["b_imf"][2] > 0:
+    #            df_rx_en.iloc[i] = np.nan
+    #        print(f"Done for {i}/{len(df_rx_en)}")
+    #    except:
+    #        print(f"Error for {i}/{len(df_rx_en)}")
+    #        df_rx_en.iloc[i] = np.nan
+#
+    #for i in range(len(df_va_cs)):
+    #    trange = [df_va_cs.date_from.values[i], df_va_cs.date_to.values[i]]
+    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #    try:
+    #        if sw_params["b_imf"][2] > 0:
+    #            df_va_cs.iloc[i] = np.nan
+    #        print(f"Done for {i}/{len(df_va_cs)}")
+    #    except:
+    #        print(f"Error for {i}/{len(df_va_cs)}")
+    #        df_va_cs.iloc[i] = np.nan
+#
+    #for i in range(len(df_bisec)):
+    #    trange = [df_bisec.date_from.values[i], df_bisec.date_to.values[i]]
+    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #    try:
+    #        if sw_params["b_imf"][2] > 0:
+    #            df_bisec.iloc[i] = np.nan
+    #        print(f"Done for {i}/{len(df_bisec)}")
+    #    except:
+    #        print(f"Error for {i}/{len(df_bisec)}")
+    #        df_bisec.iloc[i] = np.nan
 
     if dark_mode:
         plt.style.use('dark_background')
