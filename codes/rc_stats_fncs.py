@@ -31,10 +31,10 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     df = pd.read_csv(file_name)
 
-    df_shear = df[df.method_used=="shear"][:1000]
-    df_rx_en = df[df.method_used=="rx_en"][:1000]
-    df_va_cs = df[df.method_used=="va_cs"][:1000]
-    df_bisec = df[df.method_used=="bisection"][:1000]
+    df_shear = df[df.method_used=="shear"]
+    df_rx_en = df[df.method_used=="rx_en"]
+    df_va_cs = df[df.method_used=="va_cs"]
+    df_bisec = df[df.method_used=="bisection"]
 
     if cut_type == "jet":
         # Remove all data points where the value of 'r_rc' is greater than 12
