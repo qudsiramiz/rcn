@@ -73,7 +73,7 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 #                ]
 #  Sort the trange_list by the start time
 # trange_list.sort(key=lambda x: x[0])
-trange_ind_list = np.array([2273, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
+trange_ind_list = np.array([2273]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
 
 df_jet_reversal = pd.read_csv("../data/mms3_jet_reversal_times_list.csv")
 # Set the index to Date in UTC
@@ -86,7 +86,7 @@ df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 trange_list = df_jet_reversal.index.tolist()
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = trange_ind_list[9]
+ind_min = trange_ind_list[0]
 ind_max = ind_min + 1
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
