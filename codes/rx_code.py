@@ -73,7 +73,7 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 #                ]
 #  Sort the trange_list by the start time
 # trange_list.sort(key=lambda x: x[0])
-trange_ind_list = np.array([2273]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
+trange_ind_list = np.array([0]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
 
 df_jet_reversal = pd.read_csv("../data/mms3_jet_reversal_times_list.csv")
 # Set the index to Date in UTC
@@ -84,6 +84,7 @@ df_jet_reversal.sort_index(inplace=True)
 df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 
 trange_list = df_jet_reversal.index.tolist()
+trange_list = [datetime.datetime(2016, 12, 28, 5, 38)]
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = trange_ind_list[0]
@@ -93,7 +94,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
         trange = trange.strftime('%Y-%m-%d %H:%M:%S')
         trange = [trange.split("+")[0].split(".")[0]]
-        trange = ["2015-12-06 23:38:31"]
+        trange = ["2016-12-28 05:38:00"]
         print(trange)
         try:
             for something in range(1):

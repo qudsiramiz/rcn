@@ -169,8 +169,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             df_mms_fpi['vp_diff_z'] == df_mms_fpi['vp_diff_z'].max()]
 
         # Set a time window of +/- 60 seconds around the maximum value
-        time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=1),
-                            ind_max_z_diff[0] + pd.Timedelta(minutes=1)]
+        time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=0.25),
+                            ind_max_z_diff[0] + pd.Timedelta(minutes=0.25)]
 
         # Define a velocity which might refer to a jet
         vp_jet = df_mms_fpi['vp_diff_z'].loc[time_check_range[0]:time_check_range[1]]
@@ -288,40 +288,72 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         ind_min_np_std_gt_05_left = np.nan
 
     # Find the distance of the left and right hanfd indices in terms of number of indices
-    diff_right = ind_min_np_std_gt_05_right - ind_min_np_std
-    diff_left = ind_min_np_std - ind_min_np_std_gt_05_left
+    # Check to ensure that the indices are not NaN
+    if np.isnan(ind_min_np_std_gt_05_left):
+        diff_left = np.inf
+    else:
+        diff_left = ind_min_np_std - ind_min_np_std_gt_05_left
+    if np.isnan(ind_min_np_std_gt_05_right):
+        diff_right = np.inf
+    else:
+        diff_right = ind_min_np_std_gt_05_right - ind_min_np_std
+
+    # diff_right = ind_min_np_std_gt_05_right - ind_min_np_std
+    # diff_left = ind_min_np_std - ind_min_np_std_gt_05_left
+
+    if verbose:
+        print(f"ind_min_np_std_gt_05_right: {ind_min_np_std_gt_05_right}")
+        print(f"ind_min_np_std_gt_05_left: {ind_min_np_std_gt_05_left}")
+        print(f"diff_right: {diff_right}")
+        print(f"diff_left: {diff_left}")
 
     n_points_walen = n_points * 3
     # Set the index value of magnetosheath to whichever one is closer to the minimum value.
     # 'ind_msp' is the index value of magnetosphere and 'ind_msh' is the index value of
     # magnetosheath.)
     # Check if both diff_left and diff_right are greater than 0
-    if diff_left > 0 and diff_right > 0:
+    # if diff_left > 0 and diff_right > 0:
+    for tttt in range(1):
         if diff_right <= diff_left:
-            ind_msp = ind_min_np_std_gt_05_right
-            ind_msh = ind_min_np_std_gt_05_right
-            ind_range_msp = np.arange(ind_msp, min(ind_min_np_std_gt_05_left, ind_msp - n_points_walen))
-            ind_range_msh = np.arange(ind_msh, min(len(df_mms.index), ind_msh + n_points_walen))
+            ind_max_msp = ind_min_np_std_gt_05_right
+            ind_min_msh = ind_min_np_std_gt_05_right
+            ind_min_msp = max(0, ind_min_np_std_gt_05_left, ind_max_msp - n_points_walen)
+            ind_max_msh = min(len(df_mms.index) - 1, ind_min_msh + n_points_walen)
+
+            ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+            ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
+
             # Compare the length of the two ranges. If one is larger than the other, then starting at
             # their starting point, set their length to be the same.
             if len(ind_range_msp) > len(ind_range_msh):
                 ind_range_msp = ind_range_msp[-len(ind_range_msh):]
             elif len(ind_range_msp) < len(ind_range_msh):
                 ind_range_msh = ind_range_msh[:len(ind_range_msp)]
-        #elif diff_right > diff_left:
-        else:
-            ind_msp = ind_min_np_std_gt_05_left
-            ind_msh = ind_min_np_std_gt_05_left
-            ind_range_msp = np.arange(ind_msp, min(len(df_mms.index), ind_msp + n_points_walen))
-            ind_range_msh = np.arange(max(0, ind_msh - n_points_walen), ind_msh)
+            if verbose:
+                print("Magnetopause is on the left and Magnetosheath is on the right")
+                print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
+                print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
+        elif diff_right > diff_left:
+        #else:
+            ind_min_msp = ind_min_np_std_gt_05_left
+            ind_max_msh = ind_min_np_std_gt_05_left
+            ind_max_msp = min(len(df_mms.index) - 1, ind_min_msp + n_points_walen,
+                              ind_min_np_std_gt_05_right)
+            ind_min_msh = max(0, ind_max_msh - n_points_walen)
+
+            ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+            ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
+
             # Compare the length of the two ranges. If one is larger than the other, then starting at
             # their starting point, set their length to be the same.
             if len(ind_range_msp) > len(ind_range_msh):
                 ind_range_msp = ind_range_msp[:len(ind_range_msh)]
             elif len(ind_range_msp) < len(ind_range_msh):
                 ind_range_msh = ind_range_msp[-len(ind_range_msp):]
-        #elif diff_left is np.nan and diff_right is np.nan:
-
+            if verbose:
+                print("Magnetopause is on the right and Magnetosheath is on the left")
+                print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
+                print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
 
     # Set the index values to the full range where we have decided magnetosphere and magnetosheath
     # are.
@@ -331,18 +363,35 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Get different parameters for magnetosphere and magnetosheath
     np_msp = df_mms['np'][ind_msp] * 1e6  # Convert to m^-3 from cm^-3
     np_msh = df_mms['np'][ind_msh] * 1e6  # Convert to m^-3 from cm^-3
-    vp_gse_vec_msp = np.array([df_mms['vp_gse_x'][ind_msp], df_mms['vp_gse_y'][ind_msp],
-                                 df_mms['vp_gse_z'][ind_msp]]) * 1e3  # Convert to m/s from km/s
-    vp_gse_vec_msp = vp_gse_vec_msp.T
-    vp_gse_vec_msh = np.array([df_mms['vp_gse_x'][ind_msh], df_mms['vp_gse_y'][ind_msh],
-                                df_mms['vp_gse_z'][ind_msh]]) * 1e3  # Convert to m/s from km/s
-    vp_gse_vec_msh = vp_gse_vec_msh.T
-    b_gse_vec_msp = np.array([df_mms['b_gse_x'][ind_msp], df_mms['b_gse_y'][ind_msp],
-                                df_mms['b_gse_z'][ind_msp]]) * 1e-9  # Convert to T from nT
-    b_gse_vec_msp = b_gse_vec_msp.T
-    b_gse_vec_msh = np.array([df_mms['b_gse_x'][ind_msh], df_mms['b_gse_y'][ind_msh],
-                               df_mms['b_gse_z'][ind_msh]]) * 1e-9  # Convert to T from nT
-    b_gse_vec_msh = b_gse_vec_msh.T
+
+    if coord_type == 'lmn':
+        vp_lmn_vec_msp = np.array([df_mms['vp_lmn_n'][ind_msp], df_mms['vp_lmn_m'][ind_msp],
+                                   df_mms['vp_lmn_l'][ind_msp]]) * 1e3  # Convert to m/s from km/s
+        vp_lmn_vec_msp = vp_lmn_vec_msp.T
+        vp_lmn_vec_msh = np.array([df_mms['vp_lmn_n'][ind_msh], df_mms['vp_lmn_m'][ind_msh],
+                                   df_mms['vp_lmn_l'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+        vp_lmn_vec_msh = vp_lmn_vec_msh.T
+        b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][ind_msp], df_mms['b_lmn_m'][ind_msp],
+                                  df_mms['b_lmn_l'][ind_msp]]) * 1e-9  # Convert to T from nT
+        b_lmn_vec_msp = b_lmn_vec_msp.T
+        b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][ind_msh], df_mms['b_lmn_m'][ind_msh],
+                                  df_mms['b_lmn_l'][ind_msh]]) * 1e-9  # Convert to T from nT
+        b_lmn_vec_msh = b_lmn_vec_msh.T
+
+    else:
+        vp_gse_vec_msp = np.array([df_mms['vp_gse_x'][ind_msp], df_mms['vp_gse_y'][ind_msp],
+                                   df_mms['vp_gse_z'][ind_msp]]) * 1e3  # Convert to m/s from km/s
+        vp_gse_vec_msp = vp_gse_vec_msp.T
+        vp_gse_vec_msh = np.array([df_mms['vp_gse_x'][ind_msh], df_mms['vp_gse_y'][ind_msh],
+                                    df_mms['vp_gse_z'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+        vp_gse_vec_msh = vp_gse_vec_msh.T
+        b_gse_vec_msp = np.array([df_mms['b_gse_x'][ind_msp], df_mms['b_gse_y'][ind_msp],
+                                    df_mms['b_gse_z'][ind_msp]]) * 1e-9  # Convert to T from nT
+        b_gse_vec_msp = b_gse_vec_msp.T
+        b_gse_vec_msh = np.array([df_mms['b_gse_x'][ind_msh], df_mms['b_gse_y'][ind_msh],
+                                   df_mms['b_gse_z'][ind_msh]]) * 1e-9  # Convert to T from nT
+        b_gse_vec_msh = b_gse_vec_msh.T
+
     tp_para_msp = df_mms['tp_para'][ind_msp] * 1160  # Convert to K from ev
     tp_para_msh = df_mms['tp_para'][ind_msh] * 1160  # Convert to K from ev
     tp_perp_msp = df_mms['tp_perp'][ind_msp] * 1160  # Convert to K from ev
@@ -362,18 +411,32 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     v_th_msp = np.full((len(ind_msp), 3), np.nan)
     v_th_msh = np.full((len(ind_msp), 3), np.nan)
 
-    for i in range(len(ind_msp)):
-        alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
-            np.linalg.norm(b_gse_vec_msp[i,:])**2)
-        alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-            np.linalg.norm(b_gse_vec_msh[i,:])**2)
-        for j in range(3):
-            v_th_msp[i, j] = b_gse_vec_msp[i,j] * (1 - alpha_msp[i]) / (
-                mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
-            )**0.5
-            v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
-                mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
-            )**0.5
+    if coord_type == 'lmn':
+        for i in range(len(ind_msp)):
+            alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
+                np.linalg.norm(b_lmn_vec_msp[i,:])**2)
+            alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
+                np.linalg.norm(b_lmn_vec_msh[i,:])**2)
+            for j in range(3):
+                v_th_msp[i, j] = b_lmn_vec_msp[i,j] * (1 - alpha_msp[i]) / (
+                    mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
+                )**0.5
+                v_th_msh[i, j] = b_lmn_vec_msh[i, j] * (1 - alpha_msh[i]) / (
+                    mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
+                )**0.5
+    else:
+        for i in range(len(ind_msp)):
+            alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
+                np.linalg.norm(b_gse_vec_msp[i,:])**2)
+            alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
+                np.linalg.norm(b_gse_vec_msh[i,:])**2)
+            for j in range(3):
+                v_th_msp[i, j] = b_gse_vec_msp[i,j] * (1 - alpha_msp[i]) / (
+                    mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
+                )**0.5
+                v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
+                    mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
+                )**0.5
 
     delta_v_th = v_th_msh - v_th_msp
     # delta_v_th_mag = np.linalg.norm(delta_v_th, axis=1)
@@ -381,12 +444,19 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Check on which side the density is smaller and assign it to be magnetopause
     # Check to see if b_gse_z_msp has same sign as vp_gse_z_msp
     for i in range(len(ind_msp)):
-        if b_gse_vec_msp[i, 2] * vp_gse_vec_msp[i, 2] > 0:
-            delta_v_th[i] = delta_v_th[i]
+        if coord_type == 'lmn':
+            if b_lmn_vec_msp[i,2] * vp_lmn_vec_msp[i,2] > 0:
+                delta_v_th[i,:] = - delta_v_th[i,:]
         else:
-            delta_v_th[i] = - delta_v_th[i]
+            if b_gse_vec_msp[i, 2] * vp_gse_vec_msp[i, 2] > 0:
+                delta_v_th[i] = delta_v_th[i]
+            else:
+                delta_v_th[i] = - delta_v_th[i]
 
-    delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
+    if coord_type == 'lmn':
+        delta_v_obs = vp_lmn_vec_msh - vp_lmn_vec_msp
+    else:
+        delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
     # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
 
     # Compute the angle between the observed and the theoretical velocity jumps
@@ -493,17 +563,44 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             print(f"{bnv_figname}.png")
             # ptt.xlim(datetime.datetime.strftime(df_mms.index[0], "%Y-%m-%d %H:%M:%S.%f"),
             #          datetime.datetime.strftime(df_mms.index[-1], "%Y-%m-%d %H:%M:%S.%f"))
-            ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
-                       f'mms{probe}_dis_numberdensity_{data_rate}',
-                       f'mms{probe}_dis_bulkv_lmn_{data_rate}'],
-                      combine_axes=True, save_png=bnv_figname, display=False)
-            plt.close("all")
+            if coord_type == 'lmn':
+                # Make a figure with the B, np, and vp in L, M, N coordinates
+                fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+                axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=1)
+                axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='b', lw=1)
+                axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='g', lw=1)
+                axs[0].set_ylabel(r'$B$ (nT)')
+                axs[0].legend(loc='upper right', fontsize=10)
+                axs[0].grid(True)
+
+                axs[1].plot(df_mms.index, df_mms['np'], color='b', lw=1)
+                axs[1].set_ylabel(r'$n_p$ (cm$^{-3}$)')
+                axs[1].grid(True)
+                axs[1].set_yscale('log')
+
+                axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=1)
+                axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=1)
+                axs[2].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='g', lw=1)
+                axs[2].set_ylabel(r'$V_p$ (km/s)')
+                axs[2].legend(loc='upper right', fontsize=10)
+                axs[2].grid(True)
+                axs[2].set_xlabel('Time (UTC)')
+                axs[2].set_xlim(df_mms.index[0], df_mms.index[-1])
+                plt.tight_layout()
+                plt.savefig(f"{bnv_figname}.png", dpi=300)
+                plt.close("all")
+            else:
+                ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
+                           f'mms{probe}_dis_numberdensity_{data_rate}',
+                           f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
+                          combine_axes=True, save_png=bnv_figname, display=False)
+                plt.close("all")
 
             plt.figure(figsize=(6, 3))
             if (walen_relation_satisfied or walen_relation_satisfied_v2):
-                plt.plot(df_mms.index, df_mms.vp_lmn_l_diff, 'g-', lw=1)
+                plt.plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=1)
             else:
-                plt.plot(df_mms.index, df_mms.vp_lmn_l_diff, 'b-', lw=1)
+                plt.plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=1)
             if jet_detection:
                 # Make a box around the jet
                 plt.axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='r',
@@ -516,7 +613,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             plt.ylim(-200, 200)
             plt.xlim(df_mms.index[0], df_mms.index[-1])
             plt.xlabel("Time (UTC)")
-            plt.ylabel("$v_p - <v_p>$ \n $(km/s, GSM, Z)$")
+            plt.ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
             temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
             plt.title(f"MMS {probe} Jet Reversal Check at {temp3}")
 

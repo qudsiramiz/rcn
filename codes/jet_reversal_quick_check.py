@@ -103,7 +103,7 @@ for crossing_time in trange_list[indx_number:indx_max]:
               "verbose": False
         }
     inputs["data_rate"] = 'brst'
-    df_fpi, df_fgm, df_mmsh = jrcf.jet_reversal_check(**inputs)
+    df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
     #try:
     #    try:
     #        inputs["data_rate"] = 'brst'
