@@ -71,21 +71,21 @@ trange_list = [
 
 trange_list = np.sort(trange_list)
 
-trange_list = [datetime.datetime(2016, 12, 28, 5, 38)]
+# trange_list = [datetime.datetime(2016, 12, 28, 5, 38)]
 # Read the data from csv files
 df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 # Set the index to the date column
 df_crossings.set_index("DateStart", inplace=True)
 
-indx_number = 0
-indx_max = indx_number + 1
-for crossing_time in trange_list[indx_number:indx_max]:
-# for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
+indx_number = 3
+indx_max = 10
+# for crossing_time in df_crossings.index[indx_number:indx_max]:
+for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
     # crossing_time = '2017-01-02 02:58:13.0+00:00'
-    # crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0], "%Y-%m-%d %H:%M:%S.%f")
+    crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0], "%Y-%m-%d %H:%M:%S.%f")
     # Set the timezone to UTC
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
@@ -99,21 +99,21 @@ for crossing_time in trange_list[indx_number:indx_max]:
               'time_clip': time_clip,
               'latest_version': latest_version,
               'figname': 'mms_jet_reversal_check_lmn',
-              'fname': '../data/mms_jet_reversal_times_list_20220906.csv',
-              "verbose": False
+              'fname': '../data/mms_jet_reversal_times_list_20220920.csv',
+              "verbose": True
         }
     inputs["data_rate"] = 'brst'
-    df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #try:
-    #    try:
-    #        inputs["data_rate"] = 'brst'
-    #        df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #    except:
-    #        inputs["data_rate"] = 'fast'
-    #        df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #except Exception as e:
-    #    print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-    #    pass
+    # df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    try:
+        try:
+            inputs["data_rate"] = 'brst'
+            df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+        except:
+            inputs["data_rate"] = 'fast'
+            df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    except Exception as e:
+        print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+        pass
 
     # try:
     #     inputs["data_rate"] = 'brst'

@@ -1,3 +1,4 @@
+from cProfile import label
 import datetime
 import os
 
@@ -272,7 +273,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # FIXME: When the location of minimum value of 'np_std' is at the very start or end of the
     # dataframe, then ind_min_np_std_gt_05_left or ind_min_np_std_gt_05_right tends to be empty
     # since the where command returns an empty tuple. Think of a way to fix this.
-    n_thresh = 0
+    n_thresh = 0.5
 
     try:
         ind_min_np_std_gt_05_right = np.where(
@@ -313,47 +314,46 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # magnetosheath.)
     # Check if both diff_left and diff_right are greater than 0
     # if diff_left > 0 and diff_right > 0:
-    for tttt in range(1):
-        if diff_right <= diff_left:
-            ind_max_msp = ind_min_np_std_gt_05_right
-            ind_min_msh = ind_min_np_std_gt_05_right
-            ind_min_msp = max(0, ind_min_np_std_gt_05_left, ind_max_msp - n_points_walen)
-            ind_max_msh = min(len(df_mms.index) - 1, ind_min_msh + n_points_walen)
+    if diff_right <= diff_left:
+        ind_max_msp = ind_min_np_std_gt_05_right - 5
+        ind_min_msh = ind_min_np_std_gt_05_right + 5
+        ind_min_msp = max(0, ind_min_np_std_gt_05_left, ind_max_msp - n_points_walen)
+        ind_max_msh = min(len(df_mms.index) - 1, ind_min_msh + n_points_walen)
 
-            ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
-            ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
+        ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+        ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
 
-            # Compare the length of the two ranges. If one is larger than the other, then starting at
-            # their starting point, set their length to be the same.
-            if len(ind_range_msp) > len(ind_range_msh):
-                ind_range_msp = ind_range_msp[-len(ind_range_msh):]
-            elif len(ind_range_msp) < len(ind_range_msh):
-                ind_range_msh = ind_range_msh[:len(ind_range_msp)]
-            if verbose:
-                print("Magnetopause is on the left and Magnetosheath is on the right")
-                print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
-                print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
-        elif diff_right > diff_left:
-        #else:
-            ind_min_msp = ind_min_np_std_gt_05_left
-            ind_max_msh = ind_min_np_std_gt_05_left
-            ind_max_msp = min(len(df_mms.index) - 1, ind_min_msp + n_points_walen,
-                              ind_min_np_std_gt_05_right)
-            ind_min_msh = max(0, ind_max_msh - n_points_walen)
+        # Compare the length of the two ranges. If one is larger than the other, then starting at
+        # their starting point, set their length to be the same.
+        if len(ind_range_msp) > len(ind_range_msh):
+            ind_range_msp = ind_range_msp[-len(ind_range_msh):]
+        elif len(ind_range_msp) < len(ind_range_msh):
+            ind_range_msh = ind_range_msh[:len(ind_range_msp)]
+        if verbose:
+            print("Magnetopause is on the left and Magnetosheath is on the right")
+            print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
+            print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
+    elif diff_right > diff_left:
+    #else:
+        ind_min_msp = ind_min_np_std_gt_05_left + 5
+        ind_max_msh = ind_min_np_std_gt_05_left - 5
+        ind_max_msp = min(len(df_mms.index) - 1, ind_min_msp + n_points_walen,
+                            ind_min_np_std_gt_05_right)
+        ind_min_msh = max(0, ind_max_msh - n_points_walen)
 
-            ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
-            ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
+        ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+        ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
 
-            # Compare the length of the two ranges. If one is larger than the other, then starting at
-            # their starting point, set their length to be the same.
-            if len(ind_range_msp) > len(ind_range_msh):
-                ind_range_msp = ind_range_msp[:len(ind_range_msh)]
-            elif len(ind_range_msp) < len(ind_range_msh):
-                ind_range_msh = ind_range_msp[-len(ind_range_msp):]
-            if verbose:
-                print("Magnetopause is on the right and Magnetosheath is on the left")
-                print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
-                print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
+        # Compare the length of the two ranges. If one is larger than the other, then starting at
+        # their starting point, set their length to be the same.
+        if len(ind_range_msp) > len(ind_range_msh):
+            ind_range_msp = ind_range_msp[:len(ind_range_msh)]
+        elif len(ind_range_msp) < len(ind_range_msh):
+            ind_range_msh = ind_range_msp[-len(ind_range_msp):]
+        if verbose:
+            print("Magnetopause is on the right and Magnetosheath is on the left")
+            print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
+            print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
 
     # Set the index values to the full range where we have decided magnetosphere and magnetosheath
     # are.
@@ -546,6 +546,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f}\n')
                 f.close()
 
+    for xxxx in range(1):
+        for yyyy in range(1):
             # Set the fontstyle to Times New Roman
             font = {'family': 'serif', 'weight': 'normal', 'size': 10}
             plt.rc('font', **font)
@@ -553,42 +555,109 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
             plt.close("all")
             # Add time to the figname
-            if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
-                folder_name = "../figures/jet_reversal_checks/jet_walen/b_n_v"
-            elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
-                folder_name = "../figures/jet_reversal_checks/walen/b_n_v"
-            elif (not walen_relation_satisfied) & (not walen_relation_satisfied_v2) & jet_detection:
-                folder_name = "../figures/jet_reversal_checks/jet/b_n_v"
-            bnv_figname = f"{folder_name}/b_n_v_lmn_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
-            print(f"{bnv_figname}.png")
+            # if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
+            #     folder_name = "../figures/jet_reversal_checks/jet_walen/b_n_v"
+            # elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
+            #     folder_name = "../figures/jet_reversal_checks/walen/b_n_v"
+            # elif (not walen_relation_satisfied) & (not walen_relation_satisfied_v2) & jet_detection:
+            #     folder_name = "../figures/jet_reversal_checks/jet/b_n_v"
+            # bnv_figname = f"{folder_name}/b_n_v_lmn_{str(crossing_time.strftime('%Y%m%d_%H%M%S'))}"
+            # print(f"{bnv_figname}.png")
             # ptt.xlim(datetime.datetime.strftime(df_mms.index[0], "%Y-%m-%d %H:%M:%S.%f"),
             #          datetime.datetime.strftime(df_mms.index[-1], "%Y-%m-%d %H:%M:%S.%f"))
             if coord_type == 'lmn':
                 # Make a figure with the B, np, and vp in L, M, N coordinates
-                fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
-                axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=1)
-                axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='b', lw=1)
-                axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='g', lw=1)
+                lw = 0.5
+                fig, axs = plt.subplots(4, 1, figsize=(12, 8), sharex=True)
+                fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0)
+                axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=lw)
+                axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='b', lw=lw)
+                axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='g', lw=lw)
                 axs[0].set_ylabel(r'$B$ (nT)')
                 axs[0].legend(loc='upper right', fontsize=10)
                 axs[0].grid(True)
 
-                axs[1].plot(df_mms.index, df_mms['np'], color='b', lw=1)
+                axs[1].plot(df_mms.index, df_mms['np'], color='b', lw=lw)
+                axs1 = axs[1].twinx()
+                axs1.plot(df_mms.index, df_mms['np_std'], color='k', lw=lw, ls='--')
+                axs1.set_ylabel(r'$(n_p - <n_p>)/\sigma_{n_p}$')
+                axs1.set_ylim(-1, 1)
                 axs[1].set_ylabel(r'$n_p$ (cm$^{-3}$)')
                 axs[1].grid(True)
                 axs[1].set_yscale('log')
 
-                axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=1)
-                axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=1)
-                axs[2].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='g', lw=1)
+                axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=lw)
+                axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=lw)
+                axs[2].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='g', lw=lw)
                 axs[2].set_ylabel(r'$V_p$ (km/s)')
                 axs[2].legend(loc='upper right', fontsize=10)
                 axs[2].grid(True)
-                axs[2].set_xlabel('Time (UTC)')
-                axs[2].set_xlim(df_mms.index[0], df_mms.index[-1])
-                plt.tight_layout()
-                plt.savefig(f"{bnv_figname}.png", dpi=300)
+
+                if walen_relation_satisfied:
+                    axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=lw)
+                elif walen_relation_satisfied_v2:
+                    axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=lw)
+                else:
+                    axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'r-', lw=lw)
+                if jet_detection:
+                    # Make a box around the jet
+                    axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
+                                   alpha=0.2, label='Jet Location')
+                    axs[3].legend(loc=1)
+                # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
+                # Draw a dashed line at +/- v_thres
+                axs[3].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
+                axs[3].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
+                axs[3].set_ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
+                axs[3].set_ylim(-200, 200)
+                axs[3].set_xlabel('Time (UTC)')
+                axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
+
+                # Make a shaded region for all three plots where the magnetopause and magnetosheath
+                # are
+                axs[0].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
+                               alpha=0.2, label="Magnetopause")
+                axs[0].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
+                               alpha=0.2, label="Magnetosheath")
+
+                axs[1].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
+                               alpha=0.2, label="Magnetopause")
+                axs[1].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
+                               alpha=0.2, label="Magnetosheath")
+                axs[1].legend(loc=1)
+                axs[2].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
+                               alpha=0.2, label="Magnetopause")
+                axs[2].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
+                               alpha=0.2, label="Magnetosheath")
+
+                temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
+                axs[0].set_title(f"MMS {probe} Jet Reversal Check at {temp3}")
+
+                # Add text to the plot
+                text = f"$R_w$ = {np.nanmedian(R_w):.2f}\n" +\
+                       f"$\\Theta_w$ = {np.nanmedian(theta_w_deg):.2f}"
+                axs[3].text(0.02, 0.98, text, transform=axs[3].transAxes, ha='left', va='top')
+
+                if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
+                    folder_name = "../figures/jet_reversal_checks/jet_walen"
+                elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
+                    folder_name = "../figures/jet_reversal_checks/walen"
+                elif (not walen_relation_satisfied) & (
+                      not walen_relation_satisfied_v2) & jet_detection:
+                    folder_name = "../figures/jet_reversal_checks/jet"
+                else:
+                    folder_name = "../figures/jet_reversal_checks/no_jet_no_walen"
+                ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
+                fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}_lmn.png"
+                plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
+                # plt.savefig(f"{fig_name.replace('.png', '.pdf')}", dpi=300, bbox_inches='tight',
+                #             pad_inches=0.1)
+                print(f"{fig_name}")
                 plt.close("all")
+
+                # plt.tight_layout()
+                # plt.savefig(f"{bnv_figname}.png", dpi=300)
+                # plt.close("all")
             else:
                 ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
                            f'mms{probe}_dis_numberdensity_{data_rate}',
@@ -596,41 +665,41 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                           combine_axes=True, save_png=bnv_figname, display=False)
                 plt.close("all")
 
-            plt.figure(figsize=(6, 3))
-            if (walen_relation_satisfied or walen_relation_satisfied_v2):
-                plt.plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=1)
-            else:
-                plt.plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=1)
-            if jet_detection:
-                # Make a box around the jet
-                plt.axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='r',
-                            alpha=0.2, label='Jet Location')
-                plt.legend(loc=1)
-            # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
-            # Draw a dashed line at +/- v_thres
-            plt.axhline(y=v_thresh, color='k', linestyle='--', lw=1)
-            plt.axhline(y=-v_thresh, color='k', linestyle='--', lw=1)
-            plt.ylim(-200, 200)
-            plt.xlim(df_mms.index[0], df_mms.index[-1])
-            plt.xlabel("Time (UTC)")
-            plt.ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
-            temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
-            plt.title(f"MMS {probe} Jet Reversal Check at {temp3}")
-
-            # Add text to the plot
-            # plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ =
-            # {walen_relation_satisfied} \n $j_v$ = {jet_detection}",
-            #          transform=plt.gca().transAxes, ha='left', va='top')
-            if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
-                folder_name = "../figures/jet_reversal_checks/jet_walen"
-            elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
-                folder_name = "../figures/jet_reversal_checks/walen"
-            elif (not walen_relation_satisfied) & (not walen_relation_satisfied_v2) & jet_detection:
-                folder_name = "../figures/jet_reversal_checks/jet"
-            ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
-            fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}_lmn.png"
-            plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
-            print(f"{fig_name}")
-            plt.close("all")
+            # plt.figure(figsize=(6, 3))
+            # if (walen_relation_satisfied or walen_relation_satisfied_v2):
+            #     plt.plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=1)
+            # else:
+            #     plt.plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=1)
+            # if jet_detection:
+            #     # Make a box around the jet
+            #     plt.axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='r',
+            #                 alpha=0.2, label='Jet Location')
+            #     plt.legend(loc=1)
+            # # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
+            # # Draw a dashed line at +/- v_thres
+            # plt.axhline(y=v_thresh, color='k', linestyle='--', lw=1)
+            # plt.axhline(y=-v_thresh, color='k', linestyle='--', lw=1)
+            # plt.ylim(-200, 200)
+            # plt.xlim(df_mms.index[0], df_mms.index[-1])
+            # plt.xlabel("Time (UTC)")
+            # plt.ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
+            # temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
+            # plt.title(f"MMS {probe} Jet Reversal Check at {temp3}")
+# 
+            # # Add text to the plot
+            # # plt.text(0.02, 0.98, f"$R_w$ = {R_w:.2f}\n $\\Theta_w$ = {theta_w_deg:.2f} \n $W_v$ =
+            # # {walen_relation_satisfied} \n $j_v$ = {jet_detection}",
+            # #          transform=plt.gca().transAxes, ha='left', va='top')
+            # if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
+            #     folder_name = "../figures/jet_reversal_checks/jet_walen"
+            # elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
+            #     folder_name = "../figures/jet_reversal_checks/walen"
+            # elif (not walen_relation_satisfied) & (not walen_relation_satisfied_v2) & jet_detection:
+            #     folder_name = "../figures/jet_reversal_checks/jet"
+            # ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
+            # fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}_lmn.png"
+            # plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
+            # print(f"{fig_name}")
+            # plt.close("all")
 
     return df_mms_fpi, df_mms_fgm, df_mms
