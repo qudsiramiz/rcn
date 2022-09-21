@@ -84,7 +84,7 @@ df_jet_reversal.sort_index(inplace=True)
 df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 
 trange_list = df_jet_reversal.index.tolist()
-trange_list = [datetime.datetime(2016, 12, 28, 5, 38)]
+trange_list = [datetime.datetime(2015, 9, 9, 8, 43, 44)]
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = trange_ind_list[0]
@@ -94,7 +94,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
         trange = trange.strftime('%Y-%m-%d %H:%M:%S')
         trange = [trange.split("+")[0].split(".")[0]]
-        trange = ["2016-12-28 05:38:00"]
+        trange = ["2015-9-9 14:11:14"]
         print(trange)
         try:
             for something in range(1):
