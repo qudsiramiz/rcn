@@ -601,3 +601,56 @@ DateStart,Error
 2015-10-19 13:00:44.147000+00:00,No variable by this name: mms3_fgm_b_gse_srvy_l2
 2015-10-19 13:02:34.098000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
 2015-10-19 12:58:54.195000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2015-10-19 08:39:34.171000+00:00,a cannot be empty
+2015-10-19 09:34:34.218000+00:00,v cannot be empty
+2015-10-19 11:46:54.133000+00:00,a cannot be empty
+2015-10-19 09:35:14.119000+00:00,v cannot be empty
+2015-10-20 06:42:34.172000+00:00,cannot fit 'int' into an index-sized integer
+2015-10-20 14:44:34.138000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2015-10-20 05:54:54.082000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2015-10-20 10:51:34.086000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2015-10-20 08:03:34.091000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2015-10-20 15:45:14.091000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2015-10-20 06:00:04.137000+00:00,a cannot be empty
+2015-10-20 06:15:54.100000+00:00,a cannot be empty
+2015-10-20 05:56:34.134000+00:00,v cannot be empty
+2015-10-20 08:46:44.178000+00:00,a cannot be empty
+2015-10-20 05:58:24.085000+00:00,v cannot be empty
+2015-10-20 08:23:44.158000+00:00,a cannot be empty
+2015-10-20 09:31:44.216000+00:00,a cannot be empty
+2015-10-20 16:42:54.191000+00:00,v cannot be empty
+2015-10-20 09:00:34.139000+00:00,v cannot be empty
+2015-10-20 11:40:14.178000+00:00,a cannot be empty
+2015-10-20 16:44:34.093000+00:00,v cannot be empty
+2015-10-20 11:55:14.191000+00:00,a cannot be empty
+2015-10-20 06:01:54.088000+00:00,a cannot be empty
+2015-10-20 08:14:34.100000+00:00,a cannot be empty
+2015-10-20 07:45:44.125000+00:00,a cannot be empty
+2015-10-20 16:41:14.140000+00:00,v cannot be empty
+2015-10-20 10:23:04.211000+00:00,a cannot be empty
+2015-10-21 04:43:04.187000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2015-10-21 08:03:04.207000+00:00,a cannot be empty
+2015-10-21 08:30:34.081000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2015-10-21 08:38:14.137000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2015-10-21 06:06:44.157000+00:00,cannot fit 'int' into an index-sized integer
+2015-10-21 06:05:04.106000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2015-10-21 04:37:24.133000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-10-21 08:26:24.177000+00:00,a cannot be empty
+2015-10-21 09:10:54.216000+00:00,v cannot be empty
+2015-10-21 08:47:54.196000+00:00,v cannot be empty
+2015-10-21 10:52:44.105000+00:00,a cannot be empty
+2015-10-21 12:43:04.152000+00:00,a cannot be empty
+2015-10-21 06:55:04.148000+00:00,a cannot be empty
+2015-10-21 09:48:54.099000+00:00,a cannot be empty
+2015-10-21 07:57:34.202000+00:00,v cannot be empty
+2015-10-21 10:16:54.124000+00:00,a cannot be empty
+2015-10-21 10:37:44.092000+00:00,a cannot be empty
+2015-10-21 10:10:44.218000+00:00,v cannot be empty
+2015-10-21 13:00:44.217000+00:00,a cannot be empty
+2015-10-21 15:39:34.157000+00:00,a cannot be empty
+2015-10-21 14:54:14.167000+00:00,a cannot be empty
+2015-10-21 14:37:24.202000+00:00,a cannot be empty
+2015-10-21 14:48:24.212000+00:00,a cannot be empty
+2015-10-21 14:52:14.165000+00:00,a cannot be empty
+2015-10-21 14:58:14.170000+00:00,v cannot be empty
+2015-10-21 14:56:14.169000+00:00,v cannot be empty
