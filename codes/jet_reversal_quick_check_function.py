@@ -208,6 +208,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ind_jet = np.array([])
             if verbose:
                 print("\033[1;31m No jet detected \033[0m \n")
+    else:
+        ind_jet = np.array([])
+        if verbose:
+            print("\033[1;31m No jet detected \033[0m \n")
 
     # Get the data from the FGM
     # mms_fgm_varnames = [f'mms{probe}_fgm_b_gsm_srvy_l2_bvec']
@@ -401,6 +405,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][ind_msh], df_mms['b_lmn_m'][ind_msh],
                                   df_mms['b_lmn_l'][ind_msh]]) * 1e-9  # Convert to T from nT
         b_lmn_vec_msh = b_lmn_vec_msh.T
+        # Get the median value of b_lmn_vec_msp and b_lmn_vec_msh
+        b_lmn_vec_msp_median = np.median(b_lmn_vec_msp, axis=0)
+        b_lmn_vec_msh_median = np.median(b_lmn_vec_msh, axis=0)
+        # Get the angle between the two vectors
+        angle_b_lmn_vec_msp_msh = np.arccos(np.dot(b_lmn_vec_msp_median, b_lmn_vec_msh_median) /
+                                           (np.linalg.norm(b_lmn_vec_msp_median) *
+                                            np.linalg.norm(b_lmn_vec_msh_median))) * 180 / np.pi
 
     else:
         vp_gse_vec_msp = np.array([df_mms['vp_gse_x'][ind_msp], df_mms['vp_gse_y'][ind_msp],
@@ -560,7 +571,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date,Probe,walen1,walen2,jet_detection,x_gsm,y_gsm,z_gsm,r_spc,r_W,theta_w,jet_time\n')
+                    f.write('Date,Probe,walen1,walen2,jet_detection,x_gsm,y_gsm,z_gsm,r_spc,r_W,theta_w,jet_time,ind_min_msp,ind_max_msp,ind_min_msh,ind_max_msh,angle_b_lmn_vec_msp_msh,b_lmn_vec_msp_n,b_lmn_vec_msp_m,b_lmn_vec_msp_l,b_lmn_vec_msh_n,b_lmn_vec_msh_m,b_lmn_vec_msh_l\n')
                     if verbose:
                         print(f'File {fname} created')
             # Append the crossing time to the csv file if it does not exist already
@@ -569,8 +580,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
             if ttt not in old_crossing_times:
                 with open(fname, 'a') as f:
-                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time}\n')
+                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time},{ind_min_msp},{ind_max_msp},{ind_min_msh},{ind_max_msh},{angle_b_lmn_vec_msp_msh:.3f},{b_lmn_vec_msp_median[0]*1e9:0.3f},{b_lmn_vec_msp_median[1]*1e9:0.3f},{b_lmn_vec_msp_median[2]*1e9:0.3f},{b_lmn_vec_msh_median[0]*1e9:0.3f},{b_lmn_vec_msh_median[1]*1e9:0.3f},{b_lmn_vec_msh_median[2]*1e9:0.3f}\n')
                 f.close()
+
+    # Get the index corresponding to the crossing time in the data
+    df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv")
+    df_crossing_temp.set_index("DateStart", inplace=True)
+    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
 
     # Set the fontstyle to Times New Roman
     font = {'family': 'serif', 'weight': 'normal', 'size': 10}
@@ -665,6 +682,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                 f"$\\Theta_w$ = {np.nanmedian(theta_w_deg):.2f}"
         axs[3].text(0.02, 0.98, text, transform=axs[3].transAxes, ha='left', va='top')
 
+        # Add the index of crossing time to the top of the first axis
+        axs[0].text(-0.05, 1.07, f"{ind_crossing}", transform=axs[0].transAxes, ha='left', 
+                    va='top', color='r')
+
+        axs[0].text(1, 1.0, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh:.3f}",
+                    transform=axs[0].transAxes, ha='right',  va='bottom', color='r')
         if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
             folder_name = "../figures/jet_reversal_checks/jet_walen"
         elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):

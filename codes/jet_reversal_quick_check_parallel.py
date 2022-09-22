@@ -2,8 +2,9 @@ import datetime
 import importlib
 import itertools
 import multiprocessing as mp
+import os
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 
-import numpy as np
 import pandas as pd
 import pytz
 
@@ -36,42 +37,52 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              #'fname': '../data/mms_jet_reversal_times_list_20220921.csv',
-              'fname': '../data/test.csv',
-              "verbose": False
+              'fname': '../data/mms_jet_reversal_times_list_20220922.csv',
+              #'fname': '../data/test.csv',
+              "verbose": True
         }
     inputs["data_rate"] = 'brst'
-    df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #try:
-    #    try:
-    #        inputs["data_rate"] = 'brst'
-    #        df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #    except:
-    #        inputs["data_rate"] = 'fast'
-    #        df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #except Exception as e:
-    #    print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-    #    pass
+    error_file_log_name = "../data/mms_jet_reversal_check_error_log_20220922.csv"
+    # df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    try:
+        try:
+            inputs["data_rate"] = 'brst'
+            df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+        except:
+            inputs["data_rate"] = 'fast'
+            df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    except Exception as e:
+        # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+        # Save the crossing time to a file
+        # Check if the file exists
+        if not os.path.isfile(error_file_log_name):
+            # If it doesn't exist, create it
+            with open(error_file_log_name, 'w') as f:
+                f.write(f"DateStart,Error\n")
+                f.write(f"{crossing_time},{e}\n")
+        else:
+            # If it exists, append to it
+            with open(error_file_log_name, 'a') as f:
+                f.write(f"{crossing_time},{e}\n")
+        f.close()        
+        pass
 
-
-
-from contextlib import contextmanager,redirect_stderr,redirect_stdout
-from os import devnull
 
 @contextmanager
 def suppress_stdout_stderr():
     """A context manager that redirects stdout and stderr to devnull"""
-    with open(devnull, 'w') as fnull:
+    with open(os.devnull, 'w') as fnull:
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
 
-#with suppress_stdout_stderr():
-for xxx in range(1):
-    indx_number = 197
-    indx_max = 198
+with suppress_stdout_stderr():
+# for xxx in range(1):
+    indx_number = 100 * 1
+    indx_max = 100 * 3
     if __name__ == '__main__':
         # Setup a list of processes that we want to run
-        processes = [mp.Process(target=check_jet_reversal, args=(crossing_time,)) for crossing_time in df_crossings.index[indx_number:indx_max]]
+        processes = [mp.Process(target=check_jet_reversal, args=(crossing_time,))
+                     for crossing_time in df_crossings.index[indx_number:indx_max]]
         # Run processes
         for p in processes:
             p.start()
