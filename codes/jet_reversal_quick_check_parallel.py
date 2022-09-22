@@ -77,11 +77,12 @@ def suppress_stdout_stderr():
 with suppress_stdout_stderr():
 # for xxx in range(1):
     # Set the number of processes to use
-    num_processes = 15
+    num_processes = 18
     # Ask the user for index number
     indx_min = int(input("Enter the index number: "))
     # Ask the user for the maximum index number
-    indx_max = int(input("Enter the maximum index number: "))
+    # indx_max = int(input("Enter the maximum index number: "))
+    indx_max = indx_min + 100
     # create a pool of processes
     pool = mp.Pool(processes=num_processes)
     # create a list of processes to run
