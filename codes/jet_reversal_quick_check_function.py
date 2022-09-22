@@ -286,8 +286,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     else:
         ind_min_np_std = np.where(df_mms['np'] == df_mms['np'].min())[0][0]
         print(f"ind_min_np_std = {ind_min_np_std}")
-    print(f"ind_jet = {ind_jet}")
-    print(f"Jet times are: {df_mms.index[ind_jet]}")
+    # print(f"ind_jet = {ind_jet}")
+    # print(f"Jet times are: {df_mms.index[ind_jet]}")
     if verbose:
         print(f"Magnetopause location: {df_mms.index[ind_min_np_std]} at location index {ind_min_np_std}\n")
 
