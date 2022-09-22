@@ -592,7 +592,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
             if ttt not in old_crossing_times:
                 with open(fname, 'a') as f:
-                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time},{ind_min_msp},{ind_max_msp},{ind_min_msh},{ind_max_msh},{angle_b_lmn_vec_msp_msh:.3f},{b_lmn_vec_msp_median[0]*1e9:0.3f},{b_lmn_vec_msp_median[1]*1e9:0.3f},{b_lmn_vec_msp_median[2]*1e9:0.3f},{b_lmn_vec_msh_median[0]*1e9:0.3f},{b_lmn_vec_msh_median[1]*1e9:0.3f},{b_lmn_vec_msh_median[2]*1e9:0.3f},{np_median_msp:0.35},{np_median_msh:0.3f}\n')
+                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time},{ind_min_msp},{ind_max_msp},{ind_min_msh},{ind_max_msh},{angle_b_lmn_vec_msp_msh:.3f},{b_lmn_vec_msp_median[0]*1e9:0.3f},{b_lmn_vec_msp_median[1]*1e9:0.3f},{b_lmn_vec_msp_median[2]*1e9:0.3f},{b_lmn_vec_msh_median[0]*1e9:0.3f},{b_lmn_vec_msh_median[1]*1e9:0.3f},{b_lmn_vec_msh_median[2]*1e9:0.3f},{np_median_msp:0.3},{np_median_msh:0.3f}\n')
                 f.close()
 
     # Get the index corresponding to the crossing time in the data
