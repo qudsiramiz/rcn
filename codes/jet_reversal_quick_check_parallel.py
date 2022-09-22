@@ -1,10 +1,8 @@
 import datetime
 import importlib
-import itertools
 import multiprocessing as mp
 import os
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
-from time import sleep
 
 import pandas as pd
 import pytz
@@ -21,7 +19,6 @@ df_crossings.set_index("DateStart", inplace=True)
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
 def check_jet_reversal(crossing_time):
-    sleep(0.01)
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
@@ -79,16 +76,33 @@ def suppress_stdout_stderr():
 
 with suppress_stdout_stderr():
 # for xxx in range(1):
-    indx_number = 0
-    indx_max = indx_number + 200
-    if __name__ == '__main__':
-        # Setup a list of processes that we want to run
-        processes = [mp.Process(target=check_jet_reversal, args=(crossing_time,))
-                     for crossing_time in df_crossings.index[indx_number:indx_max]]
-        # Run processes
-        for p in processes:
-            p.start()
-        # Exit the completed processes
-        for p in processes:
-            p.join()
+    # Set the number of processes to use
+    num_processes = 15
+    # Ask the user for index number
+    indx_min = int(input("Enter the index number: "))
+    # Ask the user for the maximum index number
+    indx_max = int(input("Enter the maximum index number: "))
+    # create a pool of processes
+    pool = mp.Pool(processes=num_processes)
+    # create a list of processes to run
+    processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for crossing_time in df_crossings.index[indx_min:indx_max]]
+    # run the processes
+    for p in processes:
+        p.get()
+    # close the pool and wait for the processes to finish
+    pool.close()
+    pool.join()
+
+    # indx_number = 0
+    # indx_max = indx_number + 200
+    # if __name__ == '__main__':
+    #     # Setup a list of processes that we want to run
+    #     processes = [mp.Process(target=check_jet_reversal, args=(crossing_time,))
+    #                  for crossing_time in df_crossings.index[indx_number:indx_max]]
+    #     # Run processes
+    #     for p in processes:
+    #         p.start()
+    #     # Exit the completed processes
+    #     for p in processes:
+    #         p.join()
 

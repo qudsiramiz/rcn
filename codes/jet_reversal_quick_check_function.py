@@ -535,7 +535,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
                                     np.ones(n_points_walen, dtype=int),
                                     'valid') >= n_points_walen/10)
-    
+
     if len(ind_walen_vals) > 0:
         walen_relation_satisfied_v2 = True
     else:

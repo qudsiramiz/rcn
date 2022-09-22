@@ -9,13 +9,13 @@ import jet_reversal_quick_check_function as jrcf
 importlib.reload(jrcf)
 
 # Read the list of dates from the csv file
-df = pd.read_csv("../data/mms_jet_reversal_check_error_log_20220922.csv")
+# df = pd.read_csv("../data/mms_jet_reversal_check_error_log_20220922.csv")
 
 # Convert the dates to datetime objects
 # df["DateStart"] = pd.to_datetime(df["DateStart"])
 
 # Set the index to the date column
-df.set_index("DateStart", inplace=True)
+# df.set_index("DateStart", inplace=True)
 
 # Set the timezone to UTC
 # df.index = df.index.tz_localize(pytz.utc)
@@ -72,9 +72,11 @@ trange_list = np.sort(trange_list)
 
 # trange_list = [datetime.datetime(2016, 12, 28, 5, 38)]
 # Read the data from csv files
-df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
+df_crossings = pd.read_csv("../data/mms_jet_reversal_check_error_log_20220922.csv")
+df_o = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 # Set the index to the date column
 df_crossings.set_index("DateStart", inplace=True)
+df_o.set_index("DateStart", inplace=True)
 
 from contextlib import contextmanager,redirect_stderr,redirect_stdout
 from os import devnull
@@ -91,8 +93,8 @@ import sys
 
 #with suppress_stdout_stderr():
 for xxxx in range(1):
-    indx_number = 2
-    indx_max = indx_number + 10
+    indx_number = 4
+    indx_max = indx_number + 1
     # for crossing_time in df_crossings.index[indx_number:indx_max]:
     for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
         # Convert the crossing time to a datetime object
