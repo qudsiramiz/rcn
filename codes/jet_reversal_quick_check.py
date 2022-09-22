@@ -9,7 +9,7 @@ import jet_reversal_quick_check_function as jrcf
 importlib.reload(jrcf)
 
 # Read the list of dates from the csv file
-df = pd.read_csv("../data/mms_magnetopause_crossings.csv")
+df = pd.read_csv("../data/mms_jet_reversal_check_error_log_20220922.csv")
 
 # Convert the dates to datetime objects
 # df["DateStart"] = pd.to_datetime(df["DateStart"])
@@ -91,8 +91,8 @@ import sys
 
 #with suppress_stdout_stderr():
 for xxxx in range(1):
-    indx_number = 179
-    indx_max = 180
+    indx_number = 2
+    indx_max = indx_number + 10
     # for crossing_time in df_crossings.index[indx_number:indx_max]:
     for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
         # Convert the crossing time to a datetime object
@@ -117,6 +117,7 @@ for xxxx in range(1):
                   'figname': 'mms_jet_reversal_check_lmn',
                   #'fname': '../data/mms_jet_reversal_times_list_20220920.csv',
                   'fname': '../data/tst2.csv',
+                  'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922.csv",
                   "verbose": True
             }
         inputs["data_rate"] = 'brst'

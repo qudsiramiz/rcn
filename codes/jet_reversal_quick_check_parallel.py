@@ -4,6 +4,7 @@ import itertools
 import multiprocessing as mp
 import os
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from time import sleep
 
 import pandas as pd
 import pytz
@@ -20,6 +21,7 @@ df_crossings.set_index("DateStart", inplace=True)
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
 def check_jet_reversal(crossing_time):
+    sleep(0.01)
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
@@ -39,10 +41,10 @@ def check_jet_reversal(crossing_time):
               'figname': 'mms_jet_reversal_check_lmn_mean',
               'fname': '../data/mms_jet_reversal_times_list_20220922.csv',
               #'fname': '../data/test.csv',
-              "verbose": True
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922.csv",
+              "verbose": False
         }
     inputs["data_rate"] = 'brst'
-    error_file_log_name = "../data/mms_jet_reversal_check_error_log_20220922.csv"
     # df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
     try:
         try:
@@ -55,16 +57,16 @@ def check_jet_reversal(crossing_time):
         # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
         # Save the crossing time to a file
         # Check if the file exists
-        if not os.path.isfile(error_file_log_name):
+        if not os.path.isfile(inputs["error_file_log_name"]):
             # If it doesn't exist, create it
-            with open(error_file_log_name, 'w') as f:
+            with open(inputs["error_file_log_name"], 'w') as f:
                 f.write(f"DateStart,Error\n")
                 f.write(f"{crossing_time},{e}\n")
         else:
             # If it exists, append to it
-            with open(error_file_log_name, 'a') as f:
+            with open(inputs["error_file_log_name"], 'a') as f:
                 f.write(f"{crossing_time},{e}\n")
-        f.close()        
+        f.close()
         pass
 
 
@@ -77,8 +79,8 @@ def suppress_stdout_stderr():
 
 with suppress_stdout_stderr():
 # for xxx in range(1):
-    indx_number = 100 * 1
-    indx_max = 100 * 3
+    indx_number = 0
+    indx_max = indx_number + 200
     if __name__ == '__main__':
         # Setup a list of processes that we want to run
         processes = [mp.Process(target=check_jet_reversal, args=(crossing_time,))

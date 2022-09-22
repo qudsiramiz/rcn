@@ -13,7 +13,9 @@ import pytz
 def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', level='l2',
                        coord_type='lmn', data_type='dis-moms', time_clip=True, latest_version=True,
                        jet_len=5, figname='mms_jet_reversal_check',
-                       fname='../data/mms_jet_reversal_times.csv', verbose=True
+                       fname='../data/mms_jet_reversal_times.csv',
+                       error_file_log_name="../data/mms_jet_reversal_check_error_log.csv",
+                       verbose=True
                        ):
     """
     For a given crossing time and a given probe, the function finds out if MMS observed a jet during
@@ -270,7 +272,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # df_mms['np_std'] = (df_mms['np'] - df_mms['np'].mean()) / df_mms['np'].std()
 
     # Find out the index for which 'np_std' is minimum
-    #ind_min_np_std = np.where(df_mms['np_std'] == df_mms['np_std'].min())[0][0]
+    #ind_min_np = np.where(df_mms['np_std'] == df_mms['np_std'].min())[0][0]
     if len(ind_jet) > 0:
         # Get the time check range centered around jet location 
         time_check_center = vp_jet.index[ind_jet[0]] + (
@@ -283,56 +285,49 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Get the time corresponding to the minimum np
         np_min_time = np_check[np_check == np_check.min()].index[0]
         # Get the index of the minimum np time in that range
-        ind_min_np_std = np.where(df_mms.index==np_min_time)[0][0]
-        # np_check = df_mms['np'].loc[time_check_range[0]:time_check_range[1]]
-        # ind_min_np_std = np.where(np_check == np_check.min())[0][0]
-        print(f"ind_min_np_std: {ind_min_np_std}")
+        ind_min_np = np.where(df_mms.index==np_min_time)[0][0]
+        print(f"ind_min_np: {ind_min_np}")
     else:
-        ind_min_np_std = np.where(df_mms['np'] == df_mms['np'].min())[0][0]
-        print(f"ind_min_np_std = {ind_min_np_std}")
-    # print(f"ind_jet = {ind_jet}")
-    # print(f"Jet times are: {df_mms.index[ind_jet]}")
+        ind_min_np = np.where(df_mms['np'] == df_mms['np'].min())[0][0]
+
     if verbose:
-        print(f"Magnetopause location: {df_mms.index[ind_min_np_std]} at location index {ind_min_np_std}\n")
+        print(f"Magnetopause location: {df_mms.index[ind_min_np]} at location index {ind_min_np}\n")
 
-    # Find the index value closest to 'ind_min_np_std' where 'np_std' is greater than 'n_thresh' on
-    # both sides of the minimum value
-    # TODO: Check if 1 threshold is fine or if we need to decrease/increase it
-    # FIXME: When the location of minimum value of 'np_std' is at the very start or end of the
-    # dataframe, then ind_min_np_std_gt_05_left or ind_min_np_std_gt_05_right tends to be empty
-    # since the where command returns an empty tuple. Think of a way to fix this.
-    n_thresh = 5
+    # Find the index value closest to 'ind_min_np' where 'np' is greater than 'n_thresh' on both
+    # sides of the minimum value
+    # TODO: Check if threshold value of 3 is fine or if we need to decrease/increase it
+    n_thresh = 3
 
     try:
-        ind_min_np_std_gt_05_right = np.where(
-            df_mms['np'][ind_min_np_std:] > n_thresh)[0][0] + ind_min_np_std
+        ind_min_np_gt_05_right = np.where(
+            df_mms['np'][ind_min_np:] > n_thresh)[0][0] + ind_min_np
         # Check if the value is at the end of the dataframe
-        if ind_min_np_std_gt_05_right > len(df_mms['np']) - 1:
-            ind_min_np_std_gt_05_right = len(df_mms['np']) - 1
+        if ind_min_np_gt_05_right > len(df_mms['np']) - 1:
+            ind_min_np_gt_05_right = len(df_mms['np']) - 1
     except Exception:
-        ind_min_np_std_gt_05_right = np.nan
+        ind_min_np_gt_05_right = np.nan
     try:
-        ind_min_np_std_gt_05_left = np.where(df_mms['np'][:ind_min_np_std] > n_thresh)[0][-1]
+        ind_min_np_gt_05_left = np.where(df_mms['np'][:ind_min_np] > n_thresh)[0][-1]
     except Exception:
-        ind_min_np_std_gt_05_left = np.nan
+        ind_min_np_gt_05_left = np.nan
 
     # Find the distance of the left and right hanfd indices in terms of number of indices
     # Check to ensure that the indices are not NaN
-    if np.isnan(ind_min_np_std_gt_05_left):
+    if np.isnan(ind_min_np_gt_05_left):
         diff_left = np.inf
     else:
-        diff_left = ind_min_np_std - ind_min_np_std_gt_05_left
-    if np.isnan(ind_min_np_std_gt_05_right):
+        diff_left = ind_min_np - ind_min_np_gt_05_left
+    if np.isnan(ind_min_np_gt_05_right):
         diff_right = np.inf
     else:
-        diff_right = ind_min_np_std_gt_05_right - ind_min_np_std
+        diff_right = ind_min_np_gt_05_right - ind_min_np
 
-    # diff_right = ind_min_np_std_gt_05_right - ind_min_np_std
-    # diff_left = ind_min_np_std - ind_min_np_std_gt_05_left
+    # diff_right = ind_min_np_gt_05_right - ind_min_np
+    # diff_left = ind_min_np - ind_min_np_gt_05_left
 
     if verbose:
-        print(f"ind_min_np_std_gt_05_right: {ind_min_np_std_gt_05_right}")
-        print(f"ind_min_np_std_gt_05_left: {ind_min_np_std_gt_05_left}")
+        print(f"ind_min_np_gt_05_right: {ind_min_np_gt_05_right}")
+        print(f"ind_min_np_gt_05_left: {ind_min_np_gt_05_left}")
         print(f"diff_right: {diff_right}")
         print(f"diff_left: {diff_left}")
 
@@ -340,12 +335,28 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Set the index value of magnetosheath to whichever one is closer to the minimum value.
     # 'ind_msp' is the index value of magnetosphere and 'ind_msh' is the index value of
     # magnetosheath.)
-    # Check if both diff_left and diff_right are greater than 0
-    # if diff_left > 0 and diff_right > 0:
-    if diff_right <= diff_left:
-        ind_max_msp = ind_min_np_std_gt_05_right - 10
-        ind_min_msh = ind_min_np_std_gt_05_right + 10
-        ind_min_msp = max(0, ind_min_np_std_gt_05_left, ind_max_msp - n_points_walen)
+    # Check to see if both diff_left and diff_right are infinite
+    if np.isinf(diff_left) and np.isinf(diff_right):
+        # Save the details to the error log
+        # Check if the file exists
+        if not os.path.isfile(error_file_log_name):
+            # If it doesn't exist, create it
+            with open(error_file_log_name, 'w') as f:
+                f.write(f"DateStart,Error\n")
+                f.write(f"{crossing_time},magnetopause location not found\n")
+        else:
+            # If it exists, append to it
+            with open(error_file_log_name, 'a') as f:
+                f.write(f"{crossing_time},magnetopause location not found\n")
+        f.close()
+        # End the function here
+        if verbose:
+            print(f"\033[1;31m Magnetopause not found \033[0m \n")
+        return np.nan, np.nan, np.nan
+    elif diff_right <= diff_left:
+        ind_max_msp = ind_min_np_gt_05_right - 10
+        ind_min_msh = ind_min_np_gt_05_right + 10
+        ind_min_msp = max(0, ind_min_np_gt_05_left, ind_max_msp - n_points_walen)
         ind_max_msh = min(len(df_mms.index) - 1, ind_min_msh + n_points_walen)
 
         ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
@@ -362,11 +373,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
             print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
     elif diff_right > diff_left:
-    #else:
-        ind_min_msp = ind_min_np_std_gt_05_left + 10
-        ind_max_msh = ind_min_np_std_gt_05_left - 10
+        ind_min_msp = ind_min_np_gt_05_left + 10
+        ind_max_msh = ind_min_np_gt_05_left - 10
         ind_max_msp = min(len(df_mms.index) - 1, ind_min_msp + n_points_walen,
-                            ind_min_np_std_gt_05_right)
+                            ind_min_np_gt_05_right)
         ind_min_msh = max(0, ind_max_msh - n_points_walen)
 
         ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
