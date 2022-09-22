@@ -156,3 +156,101 @@ DateStart,Error
 2015-09-13 11:14:04.216000+00:00,read length must be non-negative or -1
 2015-09-13 14:22:44.120000+00:00,read length must be non-negative or -1
 2015-09-13 15:31:24.076000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2015-09-13 10:34:34.184000+00:00,read length must be non-negative or -1
+2015-09-14 09:48:34.190000+00:00,v cannot be empty
+2015-09-13 15:16:24.213000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-13 17:27:54.171000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-14 10:00:54.149000+00:00,v cannot be empty
+2015-09-14 10:27:04.220000+00:00,v cannot be empty
+2015-09-14 09:46:44.088000+00:00,v cannot be empty
+2015-09-14 10:14:44.110000+00:00,v cannot be empty
+2015-09-14 10:18:34.213000+00:00,v cannot be empty
+2015-09-14 10:20:54.165000+00:00,v cannot be empty
+2015-09-14 10:29:54.172000+00:00,v cannot be empty
+2015-09-14 10:33:14.124000+00:00,a cannot be empty
+2015-09-14 10:34:24.175000+00:00,v cannot be empty
+2015-09-14 10:35:04.076000+00:00,v cannot be empty
+2015-09-14 10:36:44.127000+00:00,v cannot be empty
+2015-09-14 12:40:24.124000+00:00,magnetopause location not found
+2015-09-14 12:24:44.212000+00:00,a cannot be empty
+2015-09-14 12:28:04.164000+00:00,a cannot be empty
+2015-09-14 14:13:04.097000+00:00,a cannot be empty
+2015-09-14 14:26:54.208000+00:00,v cannot be empty
+2015-09-14 14:42:04.120000+00:00,a cannot be empty
+2015-09-14 14:53:44.179000+00:00,a cannot be empty
+2015-09-14 14:46:34.124000+00:00,v cannot be empty
+2015-09-14 14:38:44.168000+00:00,v cannot be empty
+2015-09-14 15:24:14.204000+00:00,v cannot be empty
+2015-09-14 15:43:34.169000+00:00,v cannot be empty
+2015-09-14 16:13:14.093000+00:00,v cannot be empty
+2015-09-13 11:08:44.111000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-15 11:25:04.213000+00:00,v cannot be empty
+2015-09-15 12:25:14.162000+00:00,v cannot be empty
+2015-09-15 11:45:24.180000+00:00,v cannot be empty
+2015-09-15 11:42:24.177000+00:00,v cannot be empty
+2015-09-15 12:41:14.175000+00:00,a cannot be empty
+2015-09-15 11:17:44.107000+00:00,v cannot be empty
+2015-09-15 12:51:44.184000+00:00,local variable 'jet_time' referenced before assignment
+2015-09-16 13:03:34.154000+00:00,read length must be non-negative or -1
+2015-09-15 17:19:04.202000+00:00,magnetopause location not found
+2015-09-15 16:11:24.097000+00:00,v cannot be empty
+2015-09-16 12:57:24.099000+00:00,v cannot be empty
+2015-09-18 08:44:14.146000+00:00,v cannot be empty
+2015-09-18 08:46:34.098000+00:00,v cannot be empty
+2015-09-18 08:51:04.101000+00:00,v cannot be empty
+2015-09-18 09:04:54.212000+00:00,v cannot be empty
+2015-09-18 09:24:44.178000+00:00,a cannot be empty
+2015-09-18 10:07:54.112000+00:00,a cannot be empty
+2015-09-18 09:07:44.164000+00:00,v cannot be empty
+2015-09-18 11:06:34.209000+00:00,a cannot be empty
+2015-09-18 10:51:44.097000+00:00,a cannot be empty
+2015-09-18 11:31:34.079000+00:00,v cannot be empty
+2015-09-18 11:51:34.095000+00:00,v cannot be empty
+2015-09-18 11:48:34.093000+00:00,a cannot be empty
+2015-09-18 11:53:54.197000+00:00,v cannot be empty
+2015-09-18 13:07:04.156000+00:00,a cannot be empty
+2015-09-18 12:06:04.107000+00:00,v cannot be empty
+2015-09-18 13:34:14.077000+00:00,magnetopause location not found
+2015-09-18 12:49:44.192000+00:00,v cannot be empty
+2015-09-18 12:52:34.144000+00:00,v cannot be empty
+2015-09-18 13:20:24.116000+00:00,a cannot be empty
+2015-09-18 08:39:14.142000+00:00,a cannot be empty
+2015-09-18 08:42:34.094000+00:00,v cannot be empty
+2015-09-18 15:44:44.183000+00:00,magnetopause location not found
+2015-09-19 07:45:24.156000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2015-09-19 10:38:54.145000+00:00,cannot fit 'int' into an index-sized integer
+2015-09-19 08:34:04.095000+00:00,a cannot be empty
+2015-09-19 08:48:04.106000+00:00,a cannot be empty
+2015-09-19 10:01:34.165000+00:00,a cannot be empty
+2015-09-19 08:25:54.188000+00:00,v cannot be empty
+2015-09-19 09:11:34.125000+00:00,v cannot be empty
+2015-09-19 08:53:54.210000+00:00,a cannot be empty
+2015-09-19 09:33:34.142000+00:00,v cannot be empty
+2015-09-19 12:41:04.146000+00:00,a cannot be empty
+2015-09-19 18:00:03.960000+00:00,magnetopause location not found
+2015-09-19 11:14:04.224000+00:00,a cannot be empty
+2015-09-19 12:11:34.122000+00:00,a cannot be empty
+2015-09-19 12:14:44.174000+00:00,a cannot be empty
+2015-09-19 12:18:04.127000+00:00,v cannot be empty
+2015-09-19 08:36:44.147000+00:00,a cannot be empty
+2015-09-20 07:09:14.127000+00:00,a cannot be empty
+2015-09-20 07:29:04.093000+00:00,v cannot be empty
+2015-09-19 09:04:44.169000+00:00,v cannot be empty
+2015-09-20 06:33:24.150000+00:00,v cannot be empty
+2015-09-20 06:36:54.153000+00:00,v cannot be empty
+2015-09-20 07:21:44.137000+00:00,v cannot be empty
+2015-09-20 06:55:34.217000+00:00,v cannot be empty
+2015-09-20 07:48:14.158000+00:00,a cannot be empty
+2015-09-19 08:50:54.208000+00:00,a cannot be empty
+2015-09-20 10:03:14.115000+00:00,a cannot be empty
+2015-09-20 06:46:34.210000+00:00,v cannot be empty
+2015-09-20 07:33:04.096000+00:00,v cannot be empty
+2015-09-20 11:18:34.125000+00:00,v cannot be empty
+2015-09-20 11:37:44.190000+00:00,v cannot be empty
+2015-09-20 11:48:14.199000+00:00,a cannot be empty
+2015-09-20 14:17:14.168000+00:00,a cannot be empty
+2015-09-20 11:56:04.155000+00:00,v cannot be empty
+2015-09-20 14:49:34.145000+00:00,v cannot be empty
+2015-09-20 14:52:54.097000+00:00,v cannot be empty
+2015-09-20 12:44:14.094000+00:00,v cannot be empty
+2015-09-20 13:10:34.215000+00:00,v cannot be empty
