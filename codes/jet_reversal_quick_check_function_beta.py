@@ -432,6 +432,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
         b_lmn_vec_msp_median = np.nanmedian(b_lmn_vec_msp, axis=0)  # T
         b_lmn_vec_msh_median = np.nanmedian(b_lmn_vec_msh, axis=0)  # T
+        b_lmn_vec_msp_mean = np.nanmean(b_lmn_vec_msp, axis=0)  # T
+        b_lmn_vec_msh_mean = np.nanmean(b_lmn_vec_msh, axis=0)  # T
 
         # Get the angle between the two vectors
         angle_b_lmn_vec_msp_msh_median = np.arccos(np.dot(b_lmn_vec_msp_median,
@@ -476,6 +478,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Define the Boltzmann constant in J K^-1
     k_B = 1.38064852e-23
+
+    # Compute the magnetosheath beta value
+    beta_msh_mean = 2 * mu_0 * np_msh_mean * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean) / \
+                    (3 * np.linalg.norm(b_lmn_vec_msh_mean) ** 2)
 
     alpha_msp = np.full(len(ind_msp), np.nan)
     alpha_msh = np.full(len(ind_msp), np.nan)
@@ -610,11 +616,82 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         r_yz = np.sqrt(y**2 + z**2)  # Projection distance in yz plane.
 
         # TODO: Add magnetic beta for sheath
+        # List of variables to be saved in the csv file
+        var_list = 'Date,Probe,walen1,walen2,jet_detection,x_gsm,y_gsm,z_gsm,r_spc,r_W,theta_w,'\
+                   'jet_time,ind_min_msp,ind_max_msp,ind_min_msh,ind_max_msh,'\
+                   'angle_b_lmn_vec_msp_msh_median,b_lmn_vec_msp_mean_n,b_lmn_vec_msp_mean_m,'\
+                   'b_lmn_vec_msp_mean_l,b_lmn_vec_msp_median_n,b_lmn_vec_msp_median_m,'\
+                   'b_lmn_vec_msp_median_l,b_lmn_vec_msh_mean_n,b_lmn_vec_msh_mean_m,'\
+                   'b_lmn_vec_msh_mean_l,b_lmn_vec_msh_median_n,b_lmn_vec_msh_median_m,'\
+                   'b_lmn_vec_msh_median_l,np_msp_median,np_msp_mean,np_msh_median,np_msh_mean,'\
+                   'vp_lmn_vec_msp_mean_n,vp_lmn_vec_msp_mean_m,vp_lmn_vec_msp_mean_l,'\
+                   'vp_lmn_vec_msp_median_n,vp_lmn_vec_msp_median_m,vp_lmn_vec_msp_median_l,'\
+                   'vp_lmn_vec_msh_mean_n,vp_lmn_vec_msh_mean_m,vp_lmn_vec_msh_mean_l,'\
+                   'vp_lmn_vec_msh_median_n,vp_lmn_vec_msh_median_m,vp_lmn_vec_msh_median_l,'\
+                   'tp_para_msp_median,tp_para_msh_median,tp_para_msp_mean,tp_para_msh_mean,'\
+                   'tp_perp_msp_median,tp_perp_msh_median,tp_perp_msp_mean,tp_perp_msh_mean,'\
+                   'beta_msh_mean'
+
+        data_dict = {'Date': crossing_time,
+                     'Probe': probe,
+                     'walen1': walen_relation_satisfied,
+                     'walen2': walen_relation_satisfied_v2,
+                     'jet_detection': jet_detection,
+                     'x_gsm': np.round(x, 3),
+                     'y_gsm': np.round(y, 3),
+                     'z_gsm': np.round(z, 3),
+                     'r_spc': np.round(r_yz, 3),
+                     'r_W': np.round(R_w, 3),
+                     'theta_w': np.round(np.nanmedian(theta_w_deg), 3),
+                     'jet_time': jet_time,
+                     'ind_min_msp': ind_min_msp,
+                     'ind_max_msp': ind_max_msp,
+                     'ind_min_msh': ind_min_msh,
+                     'ind_max_msh': ind_max_msh,
+                     'angle_b_lmn_vec_msp_msh_median': angle_b_lmn_vec_msp_msh_median,
+                     'b_lmn_vec_msp_mean_n': np.round(b_lmn_vec_msp_mean[0] * 1e9, 3),
+                     'b_lmn_vec_msp_mean_m': np.round(b_lmn_vec_msp_mean[1] * 1e9, 3),
+                     'b_lmn_vec_msp_mean_l': np.round(b_lmn_vec_msp_mean[2] * 1e9, 3),
+                     'b_lmn_vec_msp_median_n': np.round(b_lmn_vec_msp_median[0] * 1e9, 3),
+                     'b_lmn_vec_msp_median_m': np.round(b_lmn_vec_msp_median[1] * 1e9, 3),
+                     'b_lmn_vec_msp_median_l': np.round(b_lmn_vec_msp_median[2] * 1e9, 3),
+                     'b_lmn_vec_msh_mean_n': np.round(b_lmn_vec_msh_median[0] * 1e9, 3),
+                     'b_lmn_vec_msh_mean_m': np.round(b_lmn_vec_msh_median[1] * 1e9, 3),
+                     'b_lmn_vec_msh_mean_l': np.round(b_lmn_vec_msh_median[2] * 1e9, 3),
+                     'b_lmn_vec_msh_median_n': np.round(b_lmn_vec_msh_median[0] * 1e9, 3),
+                     'b_lmn_vec_msh_median_m': np.round(b_lmn_vec_msh_median[1] * 1e9, 3),
+                     'b_lmn_vec_msh_median_l': np.round(b_lmn_vec_msh_median[2] * 1e9, 3),
+                     'np_msp_median': np.round(np_msp_median, 3),
+                     'np_msp_mean': np.round(np_msp_mean, 3),
+                     'np_msh_median': np.round(np_msh_median, 3),
+                     'np_msh_mean': np.round(np_msh_mean, 3),
+                     'vp_lmn_vec_msp_mean_n': np.round(vp_lmn_vec_msp_mean[0] / 1e3, 3),
+                     'vp_lmn_vec_msp_mean_m': np.round(vp_lmn_vec_msp_mean[1] / 1e3, 3),
+                     'vp_lmn_vec_msp_mean_l': np.round(vp_lmn_vec_msp_mean[2] / 1e3, 3),
+                     'vp_lmn_vec_msp_median_n': np.round(vp_lmn_vec_msp_median[0] / 1e3, 3),
+                     'vp_lmn_vec_msp_median_m': np.round(vp_lmn_vec_msp_median[1] / 1e3, 3),
+                     'vp_lmn_vec_msp_median_l': np.round(vp_lmn_vec_msp_median[2] / 1e3, 3),
+                     'vp_lmn_vec_msh_mean_n': np.round(vp_lmn_vec_msh_mean[0], 3),
+                     'vp_lmn_vec_msh_mean_m': np.round(vp_lmn_vec_msh_mean[1], 3),
+                     'vp_lmn_vec_msh_mean_l': np.round(vp_lmn_vec_msh_mean[2], 3),
+                     'vp_lmn_vec_msh_median_n': np.round(vp_lmn_vec_msh_median[0], 3),
+                     'vp_lmn_vec_msh_median_m': np.round(vp_lmn_vec_msh_median[1], 3),
+                     'vp_lmn_vec_msh_median_l': np.round(vp_lmn_vec_msh_median[2], 3),
+                     'tp_para_msp_median': np.round(tp_para_msp_median, 3),
+                     'tp_para_msh_median': np.round(tp_para_msh_median, 3),
+                     'tp_para_msp_mean': np.round(tp_para_msp_mean, 3),
+                     'tp_para_msh_mean': np.round(tp_para_msh_mean, 3),
+                     'tp_perp_msp_median': np.round(tp_perp_msp_median, 3),
+                     'tp_perp_msh_median': np.round(tp_perp_msh_median, 3),
+                     'tp_perp_msp_mean': np.round(tp_perp_msp_mean, 3),
+                     'beta_msh_mean': np.round(beta_msh_mean, 3)
+                        }
+
         if x > -5 and x < 12 and r_yz < 12:
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date,Probe,walen1,walen2,jet_detection,x_gsm,y_gsm,z_gsm,r_spc,r_W,theta_w,jet_time,ind_min_msp,ind_max_msp,ind_min_msh,ind_max_msh,angle_b_lmn_vec_msp_msh,b_lmn_vec_msp_n,b_lmn_vec_msp_m,b_lmn_vec_msp_l,b_lmn_vec_msh_n,b_lmn_vec_msh_m,b_lmn_vec_msh_l,np_msp_median,np_msh_median\n')
+                    f.write(var_list + '\n')
                     if verbose:
                         print(f'File {fname} created')
             # Append the crossing time to the csv file if it does not exist already
@@ -623,7 +700,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
             if ttt not in old_crossing_times:
                 with open(fname, 'a') as f:
-                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time},{ind_min_msp},{ind_max_msp},{ind_min_msh},{ind_max_msh},{angle_b_lmn_vec_msp_msh:.3f},{b_lmn_vec_msp_median[0]*1e9:0.3f},{b_lmn_vec_msp_median[1]*1e9:0.3f},{b_lmn_vec_msp_median[2]*1e9:0.3f},{b_lmn_vec_msh_median[0]*1e9:0.3f},{b_lmn_vec_msh_median[1]*1e9:0.3f},{b_lmn_vec_msh_median[2]*1e9:0.3f},{np_msp_median:0.3},{np_msh_median:0.3f}\n')
+                    for key in data_dict.keys():
+                        f.write(f'{data_dict[key]},')
+                    f.write('\n')
                 f.close()
 
     # Get the index corresponding to the crossing time in the data
@@ -655,6 +734,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[1].set_ylabel(r'$n_p$ (cm$^{-3}$)')
         axs[1].grid(True)
         axs[1].set_yscale('log')
+
+        # axs1 = axs[1].twinx()
+        # axs1.plot(R_w, color='r', lw=lw)
 
         axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=lw)
         axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=lw)
@@ -715,17 +797,18 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[0].text(-0.05, 1.07, f"{ind_crossing}", transform=axs[0].transAxes, ha='left', 
                     va='top', color='r')
 
-        axs[0].text(1, 1.0, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh:.3f}",
-                    transform=axs[0].transAxes, ha='right',  va='bottom', color='r')
+        axs[0].text(
+            1, 1.0, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh_median:.3f}",
+            transform=axs[0].transAxes, ha='right',  va='bottom', color='r')
         if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks/jet_walen"
+            folder_name = "../figures/jet_reversal_checks_beta/jet_walen"
         elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
-            folder_name = "../figures/jet_reversal_checks/walen"
+            folder_name = "../figures/jet_reversal_checks_beta/walen"
         elif (not walen_relation_satisfied) & (
                 not walen_relation_satisfied_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks/jet"
+            folder_name = "../figures/jet_reversal_checks_beta/jet"
         else:
-            folder_name = "../figures/jet_reversal_checks/no_jet_no_walen"
+            folder_name = "../figures/jet_reversal_checks_beta/no_jet_no_walen"
         ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
         fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}_lmn_rolling_median.png"
         plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
@@ -741,4 +824,4 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     combine_axes=True, save_png='b_n_v_fig', display=False)
         plt.close("all")
 
-    return df_mms_fpi, df_mms_fgm, df_mms
+    return df_mms_fpi, df_mms_fgm, df_mms, R_w, theta_w_deg

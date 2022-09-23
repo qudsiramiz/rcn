@@ -36,10 +36,10 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20220922.csv',
+              'fname': '../data/mms_jet_reversal_times_list_20220922_beta.csv',
               #'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922.csv",
-              "verbose": False
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922_beta.csv",
+              "verbose": True
         }
     inputs["data_rate"] = 'brst'
     df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
@@ -80,7 +80,7 @@ for xxx in range(1):
     num_processes = 20
     # Ask the user for index number
     # indx_min = int(input("Enter the index number: "))
-    indx_min = 1
+    indx_min = 179
     #indx_min = 400
     # Ask the user for the maximum index number
     # indx_max = int(input("Enter the maximum index number: "))
