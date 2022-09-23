@@ -418,19 +418,21 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][ind_msh], df_mms['b_lmn_m'][ind_msh],
                                   df_mms['b_lmn_l'][ind_msh]]) * 1e-9  # Convert to T from nT
         b_lmn_vec_msh = b_lmn_vec_msh.T
-        # Get the mean and median values of np, vp, and b for the magnetosphere and magnetosheath
-        np_msp_median = np.median(np_msp) / 1e6  # Convert to cm^-3 from m^-3
-        np_msh_median = np.median(np_msh) / 1e6  # Convert to cm^-3 from m^-3
-        np_msp_mean = np.mean(np_msp) / 1e6  # Convert to cm^-3 from m^-3
-        np_msh_mean = np.mean(np_msh) / 1e6  # Convert to cm^-3 from m^-3
 
-        vp_lmn_vec_msp_median = np.median(vp_lmn_vec_msp, axis=0)  # km/sec
-        vp_lmn_vec_msh_median = np.median(vp_lmn_vec_msh, axis=0)  # km/sec
-        vp_lmn_vec_msp_mean = np.mean(vp_lmn_vec_msp, axis=0)  # km/sec
-        vp_lmn_vec_msh_mean = np.mean(vp_lmn_vec_msh, axis=0)  # km/sec
+        # Get the mean and median values of np, vp, and b for the magnetosphere and magnetosheath
+        np_msp_median = np.nanmedian(np_msp) / 1e6  # Convert to cm^-3 from m^-3
+        np_msh_median = np.nanmedian(np_msh) / 1e6  # Convert to cm^-3 from m^-3
+        np_msp_mean = np.nanmean(np_msp) / 1e6  # Convert to cm^-3 from m^-3
+        np_msh_mean = np.nanmean(np_msh) / 1e6  # Convert to cm^-3 from m^-3
+
+        vp_lmn_vec_msp_median = np.nanmedian(vp_lmn_vec_msp, axis=0)  # km/sec
+        vp_lmn_vec_msh_median = np.nanmedian(vp_lmn_vec_msh, axis=0)  # km/sec
+        vp_lmn_vec_msp_mean = np.nanmean(vp_lmn_vec_msp, axis=0)  # km/sec
+        vp_lmn_vec_msh_mean = np.nanmean(vp_lmn_vec_msh, axis=0)  # km/sec
 
         b_lmn_vec_msp_median = np.nanmedian(b_lmn_vec_msp, axis=0)  # T
         b_lmn_vec_msh_median = np.nanmedian(b_lmn_vec_msh, axis=0)  # T
+
         # Get the angle between the two vectors
         angle_b_lmn_vec_msp_msh_median = np.arccos(np.dot(b_lmn_vec_msp_median,
                                                           b_lmn_vec_msh_median) /
@@ -455,6 +457,16 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     tp_para_msh = df_mms['tp_para'][ind_msh] * 1160  # Convert to K from ev
     tp_perp_msp = df_mms['tp_perp'][ind_msp] * 1160  # Convert to K from ev
     tp_perp_msh = df_mms['tp_perp'][ind_msh] * 1160  # Convert to K from ev
+
+    # Get the mean and median values of temperature for the magnetosphere and magnetosheath
+    tp_para_msp_median = np.nanmedian(tp_para_msp)
+    tp_para_msh_median = np.nanmedian(tp_para_msh)
+    tp_para_msp_mean = np.nanmean(tp_para_msp)
+    tp_para_msh_mean = np.nanmean(tp_para_msh)
+    tp_perp_msp_median = np.nanmedian(tp_perp_msp)
+    tp_perp_msh_median = np.nanmedian(tp_perp_msh)
+    tp_perp_msp_mean = np.nanmean(tp_perp_msp)
+    tp_perp_msh_mean = np.nanmean(tp_perp_msh)
 
     # Define the mass of proton in kg
     m_p = 1.6726219e-27
