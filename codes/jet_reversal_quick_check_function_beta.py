@@ -509,23 +509,26 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
                 )**0.5
 
-    delta_v_th = v_th_msh - v_th_msp
+    delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_msp
     # delta_v_th_mag = np.linalg.norm(delta_v_th, axis=1)
 
     # Check on which side the density is smaller and assign it to be magnetopause
     # Check to see if b_gse_z_msp has same sign as vp_gse_z_msp
-    for i in range(len(ind_msp)):
-        if coord_type == 'lmn':
-            if b_lmn_vec_msp[i,2] * vp_lmn_vec_msp[i,2] > 0:
-                delta_v_th[i,:] = - delta_v_th[i,:]
-        else:
-            if b_gse_vec_msp[i, 2] * vp_gse_vec_msp[i, 2] > 0:
-                delta_v_th[i] = delta_v_th[i]
-            else:
-                delta_v_th[i] = - delta_v_th[i]
+    # Ideally this would matter, however, since we are just iunterested in magnitudes and we also
+    # take into account theta not only between 0 and 30 but also 150 and 180, this sign issue
+    # doesn't matter. So I have commented out the code below.
+    # for i in range(len(ind_msp)):
+    #     if coord_type == 'lmn':
+    #         if b_lmn_vec_msp[i,2] * vp_lmn_vec_msp[i,2] > 0:
+    #             delta_v_th[i,:] = - delta_v_th[i,:]
+    #     else:
+    #         if b_gse_vec_msp[i, 2] * vp_gse_vec_msp[i, 2] > 0:
+    #             delta_v_th[i] = delta_v_th[i]
+    #         else:
+    #             delta_v_th[i] = - delta_v_th[i]
 
     if coord_type == 'lmn':
-        delta_v_obs = vp_lmn_vec_msh - vp_lmn_vec_msp
+        delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_msp
     else:
         delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
     # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
@@ -534,7 +537,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     theta_w = np.full(len(ind_msp), np.nan)
     for i in range(len(ind_msp)):
         theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
-                        np.linalg.norm(delta_v_th[i, :]) * np.linalg.norm(delta_v_obs[i, :])))
+                               np.linalg.norm(delta_v_th[i, :]) * 
+                               np.linalg.norm(delta_v_obs[i, :])
+                               )
+                            )
 
     # Convert angle to degrees
     theta_w_deg = theta_w * 180 / np.pi
