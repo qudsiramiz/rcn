@@ -77,16 +77,16 @@ def suppress_stdout_stderr():
 with suppress_stdout_stderr():
 # for xxx in range(1):
     # Set the number of processes to use
-    # num_processes = 20
+    num_processes = 15
     # Ask the user for index number
     # indx_min = int(input("Enter the index number: "))
-    indx_min = 15000
+    indx_min = 5000
     #indx_min = 400
     # Ask the user for the maximum index number
     # indx_max = int(input("Enter the maximum index number: "))
-    indx_max = indx_min + 5000
+    indx_max = indx_min + 1000
     # create a pool of processes
-    pool = mp.Pool()
+    pool = mp.Pool(processes=num_processes)
     # create a list of processes to run
     processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for crossing_time in df_crossings.index[indx_min:indx_max]]
     # run the processes
