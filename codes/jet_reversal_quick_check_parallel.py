@@ -80,7 +80,7 @@ with suppress_stdout_stderr():
     # num_processes = 20
     # Ask the user for index number
     # indx_min = int(input("Enter the index number: "))
-    indx_min = 5000
+    indx_min = 15000
     #indx_min = 400
     # Ask the user for the maximum index number
     # indx_max = int(input("Enter the maximum index number: "))

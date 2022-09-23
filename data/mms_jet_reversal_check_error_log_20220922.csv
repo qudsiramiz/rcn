@@ -3017,3 +3017,45 @@ DateStart,Error
 2016-03-02 19:17:34.223000+00:00,v cannot be empty
 2016-03-02 00:04:14.194000+00:00,a cannot be empty
 2016-03-02 00:15:24.103000+00:00,a cannot be empty
+2018-02-21 05:56:03.129000+00:00,No variable by this name: mms3_mec_gmst
+2018-02-20 17:06:43.167000+00:00,No variable by this name: mms3_dis_temppara_fast
+2018-02-20 17:05:43.166000+00:00,read length must be non-negative or -1
+2018-02-21 05:52:33.126000+00:00,read length must be non-negative or -1
+2018-02-21 05:53:53.077000+00:00,Variable name 'mms3_mec_r_sm' not found.
+2018-02-20 17:31:13.190000+00:00,v cannot be empty
+2018-02-20 16:45:43.148000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2018-02-21 04:58:03.078000+00:00,magnetopause location not found
+2018-02-21 06:57:43.083000+00:00,No variable by this name: mms3_fgm_mode_srvy_l2
+2018-02-21 06:48:33.175000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2018-02-21 06:46:53.124000+00:00,a cannot be empty
+2018-02-21 06:54:33.181000+00:00,a cannot be empty
+2018-02-20 17:40:43.198000+00:00,a cannot be empty
+2018-02-20 17:15:53.076000+00:00,a cannot be empty
+2018-02-21 06:05:03.137000+00:00,a cannot be empty
+2018-02-21 05:58:33.131000+00:00,a cannot be empty
+2018-02-21 06:57:03.183000+00:00,a cannot be empty
+2018-02-20 16:42:03.095000+00:00,a cannot be empty
+2018-02-20 16:59:03.110000+00:00,v cannot be empty
+2018-02-21 06:43:23.121000+00:00,a cannot be empty
+2018-02-21 06:58:23.134000+00:00,a cannot be empty
+2018-02-21 06:41:13.219000+00:00,a cannot be empty
+2018-02-21 06:50:13.077000+00:00,a cannot be empty
+2018-02-21 06:49:03.176000+00:00,a cannot be empty
+2018-02-21 07:11:13.095000+00:00,a cannot be empty
+2018-02-21 07:00:43.086000+00:00,a cannot be empty
+2018-02-21 07:16:03.200000+00:00,a cannot be empty
+2018-02-21 07:21:53.155000+00:00,a cannot be empty
+2018-02-21 07:19:33.203000+00:00,a cannot be empty
+2018-02-21 07:20:43.104000+00:00,a cannot be empty
+2018-02-21 07:23:03.206000+00:00,a cannot be empty
+2018-02-21 07:24:03.207000+00:00,a cannot be empty
+2018-02-21 07:24:43.107000+00:00,a cannot be empty
+2018-02-21 07:31:53.164000+00:00,a cannot be empty
+2018-02-21 07:51:13.131000+00:00,a cannot be empty
+2018-02-21 07:48:53.179000+00:00,a cannot be empty
+2018-02-21 07:53:33.083000+00:00,a cannot be empty
+2018-02-21 07:56:03.085000+00:00,a cannot be empty
+2018-02-21 07:58:23.187000+00:00,v cannot be empty
+2018-02-21 08:37:23.222000+00:00,a cannot be empty
+2018-02-21 08:01:43.140000+00:00,v cannot be empty
+2018-02-21 08:04:43.143000+00:00,v cannot be empty
