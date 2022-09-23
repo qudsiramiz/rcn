@@ -5102,3 +5102,435 @@ DateStart,Error
 2016-10-22 13:05:24.172000+00:00,v cannot be empty
 2016-10-22 10:22:14.142000+00:00,a cannot be empty
 2016-10-22 14:49:04.155000+00:00,'NoneType' object is not subscriptable
+2016-10-22 14:06:44.171000+00:00,v cannot be empty
+2016-10-22 16:36:24.192000+00:00,a cannot be empty
+2016-10-22 13:16:14.130000+00:00,v cannot be empty
+2016-10-22 16:05:04.216000+00:00,a cannot be empty
+2016-10-22 13:46:14.154000+00:00,v cannot be empty
+2016-10-22 17:50:44.203000+00:00,a cannot be empty
+2016-10-22 16:55:34.107000+00:00,a cannot be empty
+2016-10-22 19:54:04.105000+00:00,magnetopause location not found
+2016-10-22 17:54:44.206000+00:00,a cannot be empty
+2016-10-23 12:44:14.145000+00:00,magnetopause location not found
+2016-10-23 14:54:44.100000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-23 15:54:14.149000+00:00,a cannot be empty
+2016-10-23 15:40:44.138000+00:00,local variable 'jet_time' referenced before assignment
+2016-10-23 15:41:44.139000+00:00,local variable 'jet_time' referenced before assignment
+2016-10-23 15:47:54.194000+00:00,v cannot be empty
+2016-10-23 15:44:34.091000+00:00,a cannot be empty
+2016-10-23 16:06:34.109000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-23 16:34:54.083000+00:00,v cannot be empty
+2016-10-23 22:41:04.137000+00:00,magnetopause location not found
+2016-10-23 17:38:14.085000+00:00,magnetopause location not found
+2016-10-24 09:56:44.116000+00:00,v cannot be empty
+2016-10-24 11:06:04.122000+00:00,v cannot be empty
+2016-10-24 10:58:44.166000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-10-24 11:08:24.224000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-10-24 10:30:54.194000+00:00,v cannot be empty
+2016-10-24 10:13:34.080000+00:00,v cannot be empty
+2016-10-24 10:02:04.221000+00:00,v cannot be empty
+2016-10-24 11:10:54.076000+00:00,v cannot be empty
+2016-10-24 09:54:44.115000+00:00,v cannot be empty
+2016-10-24 10:33:14.146000+00:00,v cannot be empty
+2016-10-24 11:03:34.120000+00:00,v cannot be empty
+2016-10-24 13:13:04.076000+00:00,a cannot be empty
+2016-10-24 11:13:14.178000+00:00,v cannot be empty
+2016-10-24 13:10:44.124000+00:00,a cannot be empty
+2016-10-24 14:32:04.140000+00:00,v cannot be empty
+2016-10-24 14:33:54.092000+00:00,v cannot be empty
+2016-10-24 16:44:14.149000+00:00,v cannot be empty
+2016-10-24 16:46:44.151000+00:00,v cannot be empty
+2016-10-24 21:53:44.108000+00:00,magnetopause location not found
+2016-10-24 16:54:24.207000+00:00,v cannot be empty
+2016-10-25 19:35:54.102000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-10-25 09:52:24.222000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2016-10-25 10:33:34.155000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-10-25 09:48:04.119000+00:00,a cannot be empty
+2016-10-25 10:35:54.107000+00:00,a cannot be empty
+2016-10-25 19:30:14.197000+00:00,a cannot be empty
+2016-10-25 19:32:04.149000+00:00,v cannot be empty
+2016-10-25 19:48:44.213000+00:00,magnetopause location not found
+2016-10-25 20:19:04.188000+00:00,read length must be non-negative or -1
+2016-10-25 18:24:04.092000+00:00,v cannot be empty
+2016-10-25 10:31:14.203000+00:00,a cannot be empty
+2016-10-25 19:34:04.151000+00:00,v cannot be empty
+2016-10-25 09:50:14.170000+00:00,a cannot be empty
+2016-10-25 09:45:54.217000+00:00,a cannot be empty
+2016-10-25 20:01:54.124000+00:00,v cannot be empty
+2016-10-25 21:11:34.082000+00:00,magnetopause location not found
+2016-10-25 21:12:54.183000+00:00,magnetopause location not found
+2016-10-25 21:33:54.201000+00:00,magnetopause location not found
+2016-10-26 10:45:54.113000+00:00,v cannot be empty
+2016-10-26 12:11:04.084000+00:00,v cannot be empty
+2016-10-26 10:43:24.111000+00:00,v cannot be empty
+2016-10-26 10:02:14.177000+00:00,a cannot be empty
+2016-10-26 14:40:34.209000+00:00,v cannot be empty
+2016-10-26 17:01:54.127000+00:00,v cannot be empty
+2016-10-26 14:36:14.105000+00:00,v cannot be empty
+2016-10-26 14:38:24.157000+00:00,v cannot be empty
+2016-10-26 17:05:24.130000+00:00,v cannot be empty
+2016-10-26 17:13:24.137000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-26 17:03:34.179000+00:00,v cannot be empty
+2016-10-26 19:55:44.075000+00:00,v cannot be empty
+2016-10-26 20:22:04.197000+00:00,magnetopause location not found
+2016-10-26 20:23:34.199000+00:00,magnetopause location not found
+2016-10-26 19:41:54.113000+00:00,v cannot be empty
+2016-10-26 20:03:04.181000+00:00,v cannot be empty
+2016-10-26 20:42:24.165000+00:00,magnetopause location not found
+2016-10-27 12:00:14.137000+00:00,v cannot be empty
+2016-10-27 12:40:04.119000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-10-27 11:41:14.121000+00:00,v cannot be empty
+2016-10-27 12:14:14.148000+00:00,v cannot be empty
+2016-10-27 11:43:34.223000+00:00,v cannot be empty
+2016-10-27 12:12:24.196000+00:00,a cannot be empty
+2016-10-27 10:03:44.192000+00:00,v cannot be empty
+2016-10-27 12:16:14.150000+00:00,v cannot be empty
+2016-10-27 12:18:04.101000+00:00,a cannot be empty
+2016-10-27 10:56:24.134000+00:00,v cannot be empty
+2016-10-27 12:43:44.172000+00:00,v cannot be empty
+2016-10-27 12:41:54.221000+00:00,v cannot be empty
+2016-10-27 13:05:14.190000+00:00,v cannot be empty
+2016-10-27 13:38:54.117000+00:00,magnetopause location not found
+2016-10-27 13:14:24.097000+00:00,v cannot be empty
+2016-10-27 13:16:54.099000+00:00,a cannot be empty
+2016-10-27 13:06:44.191000+00:00,v cannot be empty
+2016-10-27 15:54:24.079000+00:00,v cannot be empty
+2016-10-27 16:10:14.192000+00:00,v cannot be empty
+2016-10-27 14:33:34.213000+00:00,a cannot be empty
+2016-10-27 14:44:44.122000+00:00,v cannot be empty
+2016-10-27 19:49:04.175000+00:00,a cannot be empty
+2016-10-27 20:00:14.084000+00:00,magnetopause location not found
+2016-10-27 16:06:34.139000+00:00,a cannot be empty
+2016-10-27 16:04:54.088000+00:00,a cannot be empty
+2016-10-28 10:25:14.132000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-10-28 09:23:24.132000+00:00,v cannot be empty
+2016-10-28 10:34:54.190000+00:00,magnetopause location not found
+2016-10-28 09:46:44.101000+00:00,magnetopause location not found
+2016-10-28 10:06:14.117000+00:00,magnetopause location not found
+2016-10-28 12:21:54.128000+00:00,magnetopause location not found
+2016-10-28 12:56:14.107000+00:00,v cannot be empty
+2016-10-28 12:55:24.156000+00:00,v cannot be empty
+2016-10-28 12:35:14.089000+00:00,v cannot be empty
+2016-10-28 15:07:04.165000+00:00,v cannot be empty
+2016-10-28 15:44:44.097000+00:00,v cannot be empty
+2016-10-28 17:48:54.102000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-28 21:01:34.165000+00:00,magnetopause location not found
+2016-10-29 11:13:54.224000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-10-29 10:40:34.097000+00:00,No variable by this name: mms3_fgm_stemp_srvy_l2
+2016-10-29 09:33:34.192000+00:00,cannot fit 'int' into an index-sized integer
+2016-10-29 11:59:44.212000+00:00,v cannot be empty
+2016-10-29 11:11:34.122000+00:00,a cannot be empty
+2016-10-29 09:27:44.087000+00:00,v cannot be empty
+2016-10-29 11:16:24.076000+00:00,v cannot be empty
+2016-10-29 11:33:24.090000+00:00,a cannot be empty
+2016-10-29 12:13:14.223000+00:00,magnetopause location not found
+2016-10-29 12:25:44.083000+00:00,v cannot be empty
+2016-10-29 17:43:54.099000+00:00,magnetopause location not found
+2016-10-29 15:27:14.084000+00:00,a cannot be empty
+2016-10-29 16:13:34.223000+00:00,v cannot be empty
+2016-10-29 16:07:54.168000+00:00,v cannot be empty
+2016-10-29 16:45:04.099000+00:00,v cannot be empty
+2016-10-30 10:20:04.142000+00:00,magnetopause location not found
+2016-10-30 14:08:14.082000+00:00,v cannot be empty
+2016-10-30 10:33:44.203000+00:00,magnetopause location not found
+2016-10-30 10:44:44.212000+00:00,v cannot be empty
+2016-10-30 13:22:34.144000+00:00,v cannot be empty
+2016-10-30 10:42:34.160000+00:00,v cannot be empty
+2016-10-30 11:29:04.199000+00:00,v cannot be empty
+2016-10-30 14:13:44.087000+00:00,a cannot be empty
+2016-10-30 14:16:04.189000+00:00,a cannot be empty
+2016-10-30 14:25:54.147000+00:00,magnetopause location not found
+2016-10-30 14:28:24.149000+00:00,magnetopause location not found
+2016-10-30 10:59:04.174000+00:00,v cannot be empty
+2016-10-30 17:02:04.179000+00:00,magnetopause location not found
+2016-10-30 13:53:54.120000+00:00,v cannot be empty
+2016-10-30 13:07:04.131000+00:00,a cannot be empty
+2016-10-30 14:18:24.141000+00:00,v cannot be empty
+2016-10-31 13:04:14.211000+00:00,magnetopause location not found
+2016-10-31 12:35:34.137000+00:00,v cannot be empty
+2016-10-31 12:09:04.115000+00:00,v cannot be empty
+2016-10-31 12:06:34.113000+00:00,v cannot be empty
+2016-11-01 10:19:34.119000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-01 14:36:54.135000+00:00,read length must be non-negative or -1
+2016-11-01 09:45:54.192000+00:00,a cannot be empty
+2016-10-31 12:19:14.174000+00:00,v cannot be empty
+2016-11-01 12:26:14.125000+00:00,a cannot be empty
+2016-11-01 09:52:44.147000+00:00,v cannot be empty
+2016-11-01 10:38:54.086000+00:00,v cannot be empty
+2016-11-01 14:48:24.145000+00:00,v cannot be empty
+2016-11-01 14:54:44.100000+00:00,magnetopause location not found
+2016-11-01 10:42:24.088000+00:00,v cannot be empty
+2016-11-01 10:41:24.088000+00:00,v cannot be empty
+2016-11-01 09:57:14.151000+00:00,v cannot be empty
+2016-11-01 14:24:44.075000+00:00,a cannot be empty
+2016-11-01 10:33:04.131000+00:00,v cannot be empty
+2016-11-01 14:50:54.147000+00:00,v cannot be empty
+2016-11-01 09:55:34.100000+00:00,v cannot be empty
+2016-11-01 17:51:14.101000+00:00,a cannot be empty
+2016-11-01 17:55:14.104000+00:00,v cannot be empty
+2016-11-02 09:24:44.121000+00:00,No variable by this name: mms3_fgm_rdeltahalf_srvy_l2
+2016-11-02 10:33:24.078000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-02 11:27:24.124000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2016-11-02 09:27:04.223000+00:00,v cannot be empty
+2016-11-02 09:29:24.175000+00:00,v cannot be empty
+2016-11-02 11:06:04.156000+00:00,a cannot be empty
+2016-11-02 09:36:34.080000+00:00,v cannot be empty
+2016-11-02 14:45:44.094000+00:00,v cannot be empty
+2016-11-02 09:34:14.129000+00:00,a cannot be empty
+2016-11-02 14:54:34.202000+00:00,v cannot be empty
+2016-11-03 14:40:24.157000+00:00,v cannot be empty
+2016-11-03 09:17:04.084000+00:00,a cannot be empty
+2016-11-03 09:28:14.143000+00:00,v cannot be empty
+2016-11-03 15:01:24.175000+00:00,a cannot be empty
+2016-11-03 14:09:04.180000+00:00,a cannot be empty
+2016-11-03 14:46:24.162000+00:00,v cannot be empty
+2016-11-05 11:06:54.097000+00:00,read length must be non-negative or -1
+2016-11-03 14:51:14.116000+00:00,v cannot be empty
+2016-11-03 20:04:54.139000+00:00,a cannot be empty
+2016-11-04 08:59:34.129000+00:00,magnetopause location not found
+2016-11-04 12:15:24.095000+00:00,a cannot be empty
+2016-11-05 11:52:04.186000+00:00,magnetopause location not found
+2016-11-06 08:51:54.216000+00:00,v cannot be empty
+2016-11-06 08:39:34.106000+00:00,a cannot be empty
+2016-11-06 09:05:24.077000+00:00,v cannot be empty
+2016-11-06 09:07:04.128000+00:00,v cannot be empty
+2016-11-06 09:14:14.184000+00:00,v cannot be empty
+2016-11-06 09:10:34.131000+00:00,v cannot be empty
+2016-11-06 09:12:24.082000+00:00,v cannot be empty
+2016-11-06 09:15:44.185000+00:00,a cannot be empty
+2016-11-06 13:36:04.207000+00:00,a cannot be empty
+2016-11-06 12:50:34.167000+00:00,a cannot be empty
+2016-11-06 12:55:14.221000+00:00,a cannot be empty
+2016-11-06 15:12:04.139000+00:00,a cannot be empty
+2016-11-06 12:57:24.123000+00:00,a cannot be empty
+2016-11-06 14:07:04.083000+00:00,v cannot be empty
+2016-11-06 13:54:54.173000+00:00,a cannot be empty
+2016-11-06 14:21:54.196000+00:00,a cannot be empty
+2016-11-06 16:52:34.078000+00:00,a cannot be empty
+2016-11-06 16:15:34.195000+00:00,a cannot be empty
+2016-11-06 16:21:34.200000+00:00,v cannot be empty
+2016-11-06 16:34:24.162000+00:00,v cannot be empty
+2016-11-07 08:17:54.130000+00:00,a cannot be empty
+2016-11-07 12:29:14.146000+00:00,v cannot be empty
+2016-11-07 08:35:04.194000+00:00,a cannot be empty
+2016-11-07 08:33:44.093000+00:00,a cannot be empty
+2016-11-07 13:10:24.081000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-11-07 08:15:04.027000+00:00,a cannot be empty
+2016-11-07 16:19:34.148000+00:00,a cannot be empty
+2016-11-07 09:09:24.173000+00:00,magnetopause location not found
+2016-11-07 12:15:04.083000+00:00,a cannot be empty
+2016-11-07 12:11:54.181000+00:00,a cannot be empty
+2016-11-08 09:18:24.104000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2016-11-08 09:45:34.177000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-11-08 09:49:54.131000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-08 09:47:34.179000+00:00,a cannot be empty
+2016-11-08 09:29:34.164000+00:00,v cannot be empty
+2016-11-08 09:39:24.122000+00:00,a cannot be empty
+2016-11-08 09:57:04.187000+00:00,a cannot be empty
+2016-11-08 10:02:04.191000+00:00,v cannot be empty
+2016-11-08 09:59:34.189000+00:00,v cannot be empty
+2016-11-08 10:10:34.199000+00:00,a cannot be empty
+2016-11-08 10:06:04.195000+00:00,a cannot be empty
+2016-11-08 10:08:24.147000+00:00,a cannot be empty
+2016-11-08 11:58:34.142000+00:00,a cannot be empty
+2016-11-08 09:37:24.120000+00:00,v cannot be empty
+2016-11-08 09:52:14.083000+00:00,a cannot be empty
+2016-11-08 09:41:24.124000+00:00,a cannot be empty
+2016-11-08 10:25:14.111000+00:00,a cannot be empty
+2016-11-08 09:43:34.176000+00:00,a cannot be empty
+2016-11-08 10:48:54.182000+00:00,a cannot be empty
+2016-11-08 11:19:04.108000+00:00,a cannot be empty
+2016-11-08 13:55:14.144000+00:00,a cannot be empty
+2016-11-08 13:53:04.092000+00:00,a cannot be empty
+2016-11-08 13:57:14.145000+00:00,v cannot be empty
+2016-11-08 14:32:54.077000+00:00,a cannot be empty
+2016-11-08 13:59:24.197000+00:00,a cannot be empty
+2016-11-08 14:35:04.128000+00:00,a cannot be empty
+2016-11-09 08:36:34.101000+00:00,read length must be non-negative or -1
+2016-11-09 12:27:04.151000+00:00,a cannot be empty
+2016-11-09 12:01:04.129000+00:00,a cannot be empty
+2016-11-09 12:19:24.095000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-09 12:02:54.080000+00:00,a cannot be empty
+2016-11-09 10:03:04.176000+00:00,v cannot be empty
+2016-11-09 12:30:54.105000+00:00,a cannot be empty
+2016-11-09 09:58:14.222000+00:00,v cannot be empty
+2016-11-09 12:33:04.157000+00:00,a cannot be empty
+2016-11-09 12:39:34.162000+00:00,a cannot be empty
+2016-11-09 12:35:14.208000+00:00,a cannot be empty
+2016-11-09 12:57:04.177000+00:00,a cannot be empty
+2016-11-09 10:00:34.174000+00:00,v cannot be empty
+2016-11-09 12:04:54.082000+00:00,a cannot be empty
+2016-11-09 13:24:54.152000+00:00,v cannot be empty
+2016-11-09 12:09:34.136000+00:00,a cannot be empty
+2016-11-09 13:20:04.198000+00:00,a cannot be empty
+2016-11-09 13:22:24.150000+00:00,a cannot be empty
+2016-11-09 13:27:14.104000+00:00,v cannot be empty
+2016-11-09 13:29:44.106000+00:00,v cannot be empty
+2016-11-09 14:08:34.090000+00:00,a cannot be empty
+2016-11-09 13:38:04.213000+00:00,a cannot be empty
+2016-11-09 13:35:44.111000+00:00,v cannot be empty
+2016-11-09 13:40:24.165000+00:00,a cannot be empty
+2016-11-09 13:32:54.159000+00:00,v cannot be empty
+2016-11-09 13:42:54.167000+00:00,a cannot be empty
+2016-11-09 13:59:14.132000+00:00,a cannot be empty
+2016-11-09 13:55:34.079000+00:00,a cannot be empty
+2016-11-09 14:04:54.187000+00:00,a cannot be empty
+2016-11-09 14:55:04.131000+00:00,a cannot be empty
+2016-11-09 14:15:44.146000+00:00,a cannot be empty
+2016-11-09 14:13:24.194000+00:00,a cannot be empty
+2016-11-09 17:28:24.217000+00:00,a cannot be empty
+2016-11-09 14:19:34.100000+00:00,v cannot be empty
+2016-11-09 14:57:24.083000+00:00,a cannot be empty
+2016-11-09 17:38:24.076000+00:00,a cannot be empty
+2016-11-09 18:14:34.159000+00:00,a cannot be empty
+2016-11-09 18:04:54.100000+00:00,a cannot be empty
+2016-11-09 19:36:14.132000+00:00,a cannot be empty
+2016-11-09 19:43:14.139000+00:00,a cannot be empty
+2016-11-09 18:34:44.077000+00:00,v cannot be empty
+2016-11-09 18:32:24.125000+00:00,v cannot be empty
+2016-11-09 19:11:24.160000+00:00,a cannot be empty
+2016-11-09 20:01:24.205000+00:00,v cannot be empty
+2016-11-09 19:46:14.141000+00:00,a cannot be empty
+2016-11-09 20:13:14.166000+00:00,a cannot be empty
+2016-11-09 20:06:14.160000+00:00,v cannot be empty
+2016-11-09 20:03:44.157000+00:00,v cannot be empty
+2016-11-10 08:31:14.090000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-11-10 09:06:54.170000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-11-10 08:06:44.220000+00:00,a cannot be empty
+2016-11-10 08:26:44.086000+00:00,v cannot be empty
+2016-11-10 08:43:44.101000+00:00,v cannot be empty
+2016-11-10 08:11:24.124000+00:00,a cannot be empty
+2016-11-10 08:46:04.203000+00:00,v cannot be empty
+2016-11-10 08:19:54.131000+00:00,v cannot be empty
+2016-11-10 08:28:54.138000+00:00,v cannot be empty
+2016-11-10 09:09:14.122000+00:00,v cannot be empty
+2016-11-10 16:58:14.082000+00:00,v cannot be empty
+2016-11-10 17:09:24.142000+00:00,a cannot be empty
+2016-11-10 08:33:34.192000+00:00,v cannot be empty
+2016-11-10 09:18:14.130000+00:00,a cannot be empty
+2016-11-10 08:36:54.145000+00:00,v cannot be empty
+2016-11-10 17:49:04.077000+00:00,v cannot be empty
+2016-11-10 08:41:34.199000+00:00,a cannot be empty
+2016-11-10 17:53:34.081000+00:00,v cannot be empty
+2016-11-10 08:39:14.097000+00:00,v cannot be empty
+2016-11-10 17:56:04.084000+00:00,v cannot be empty
+2016-11-10 18:02:44.140000+00:00,v cannot be empty
+2016-11-10 17:51:34.080000+00:00,v cannot be empty
+2016-11-10 18:05:34.092000+00:00,v cannot be empty
+2016-11-10 18:14:44.151000+00:00,v cannot be empty
+2016-11-10 18:11:54.198000+00:00,v cannot be empty
+2016-11-10 18:23:34.108000+00:00,a cannot be empty
+2016-11-10 18:17:14.153000+00:00,a cannot be empty
+2016-11-10 18:18:54.204000+00:00,v cannot be empty
+2016-11-10 18:25:54.211000+00:00,v cannot be empty
+2016-11-10 20:05:24.150000+00:00,magnetopause location not found
+2016-11-10 18:20:44.156000+00:00,v cannot be empty
+2016-11-10 18:33:14.167000+00:00,v cannot be empty
+2016-11-10 18:41:34.125000+00:00,a cannot be empty
+2016-11-10 18:39:24.223000+00:00,a cannot be empty
+2016-11-10 18:43:44.177000+00:00,a cannot be empty
+2016-11-10 18:28:24.213000+00:00,v cannot be empty
+2016-11-10 18:46:24.079000+00:00,a cannot be empty
+2016-11-11 13:50:54.116000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-11 17:43:04.223000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2016-11-11 08:22:34.179000+00:00,a cannot be empty
+2016-11-11 09:10:44.120000+00:00,v cannot be empty
+2016-11-11 08:41:44.095000+00:00,a cannot be empty
+2016-11-11 18:24:54.210000+00:00,v cannot be empty
+2016-11-11 08:38:14.092000+00:00,a cannot be empty
+2016-11-11 07:59:54.109000+00:00,a cannot be empty
+2016-11-11 18:22:04.107000+00:00,a cannot be empty
+2016-11-11 08:25:04.181000+00:00,v cannot be empty
+2016-11-11 08:40:04.194000+00:00,v cannot be empty
+2016-11-11 08:46:54.150000+00:00,a cannot be empty
+2016-11-11 09:05:44.116000+00:00,v cannot be empty
+2016-11-11 19:14:14.204000+00:00,v cannot be empty
+2016-11-11 19:16:14.206000+00:00,v cannot be empty
+2016-11-11 19:18:44.208000+00:00,v cannot be empty
+2016-11-12 07:51:04.112000+00:00,read length must be non-negative or -1
+2016-11-12 07:41:34.104000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-12 17:50:24.145000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2016-11-12 18:04:54.158000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2016-11-12 12:03:54.132000+00:00,a cannot be empty
+2016-11-12 07:47:34.109000+00:00,a cannot be empty
+2016-11-12 15:58:34.093000+00:00,v cannot be empty
+2016-11-12 12:30:14.105000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2016-11-12 18:19:24.171000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2016-11-12 09:11:54.130000+00:00,v cannot be empty
+2016-11-12 07:49:24.210000+00:00,a cannot be empty
+2016-11-12 11:41:04.161000+00:00,v cannot be empty
+2016-11-12 13:17:24.198000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-12 18:11:04.214000+00:00,v cannot be empty
+2016-11-12 09:13:44.082000+00:00,v cannot be empty
+2016-11-12 12:28:24.154000+00:00,a cannot be empty
+2016-11-12 18:58:14.157000+00:00,v cannot be empty
+2016-11-12 18:13:04.216000+00:00,v cannot be empty
+2016-11-12 19:05:14.163000+00:00,v cannot be empty
+2016-11-12 19:07:54.215000+00:00,v cannot be empty
+2016-11-12 19:09:44.167000+00:00,v cannot be empty
+2016-11-13 07:42:34.204000+00:00,v cannot be empty
+2016-11-13 08:24:44.141000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-13 13:40:34.219000+00:00,No variable by this name: mms3_fgm_b_bcs_srvy_l2
+2016-11-13 09:38:24.105000+00:00,v cannot be empty
+2016-11-13 07:55:14.115000+00:00,v cannot be empty
+2016-11-13 11:04:24.181000+00:00,a cannot be empty
+2016-11-13 07:50:44.111000+00:00,v cannot be empty
+2016-11-13 13:48:34.076000+00:00,v cannot be empty
+2016-11-13 08:55:44.168000+00:00,v cannot be empty
+2016-11-13 09:09:24.080000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-11-13 16:42:14.132000+00:00,a cannot be empty
+2016-11-13 20:40:44.198000+00:00,a cannot be empty
+2016-11-13 14:54:04.134000+00:00,v cannot be empty
+2016-11-13 15:27:24.114000+00:00,v cannot be empty
+2016-11-13 16:04:44.098000+00:00,v cannot be empty
+2016-11-14 07:42:44.134000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-11-14 10:30:04.078000+00:00,a cannot be empty
+2016-11-14 12:42:14.095000+00:00,magnetopause location not found
+2016-11-14 12:46:54.149000+00:00,v cannot be empty
+2016-11-14 12:44:04.197000+00:00,a cannot be empty
+2016-11-14 12:54:04.206000+00:00,v cannot be empty
+2016-11-14 16:31:44.151000+00:00,v cannot be empty
+2016-11-14 16:33:34.102000+00:00,a cannot be empty
+2016-11-14 15:31:24.146000+00:00,v cannot be empty
+2016-11-14 15:39:44.103000+00:00,a cannot be empty
+2016-11-14 16:29:44.149000+00:00,v cannot be empty
+2016-11-14 16:35:34.104000+00:00,a cannot be empty
+2016-11-15 11:01:04.109000+00:00,v cannot be empty
+2016-11-15 09:20:04.170000+00:00,a cannot be empty
+2016-11-15 11:06:34.114000+00:00,No variable by this name: mms3_fgm_b_gsm_srvy_l2
+2016-11-15 10:59:04.108000+00:00,v cannot be empty
+2016-11-15 12:23:04.183000+00:00,v cannot be empty
+2016-11-15 12:59:34.216000+00:00,v cannot be empty
+2016-11-15 14:09:44.180000+00:00,v cannot be empty
+2016-11-15 15:06:04.181000+00:00,a cannot be empty
+2016-11-15 14:55:34.171000+00:00,v cannot be empty
+2016-11-15 15:45:14.117000+00:00,v cannot be empty
+2016-11-15 15:51:54.173000+00:00,a cannot be empty
+2016-11-16 09:03:44.208000+00:00,a cannot be empty
+2016-11-16 07:24:04.222000+00:00,magnetopause location not found
+2016-11-16 08:37:44.185000+00:00,v cannot be empty
+2016-11-16 09:01:24.106000+00:00,a cannot be empty
+2016-11-16 09:17:44.220000+00:00,a cannot be empty
+2016-11-16 10:19:24.175000+00:00,a cannot be empty
+2016-11-16 10:27:34.082000+00:00,v cannot be empty
+2016-11-16 10:37:44.141000+00:00,v cannot be empty
+2016-11-16 11:10:14.170000+00:00,a cannot be empty
+2016-11-16 11:22:34.131000+00:00,v cannot be empty
+2016-11-16 08:29:14.178000+00:00,a cannot be empty
+2016-11-16 11:48:34.154000+00:00,a cannot be empty
+2016-11-16 11:35:24.092000+00:00,v cannot be empty
+2016-11-16 13:07:34.224000+00:00,a cannot be empty
+2016-11-16 15:42:04.213000+00:00,a cannot be empty
+2016-11-16 12:01:14.215000+00:00,a cannot be empty
+2016-11-16 13:09:24.176000+00:00,a cannot be empty
+2016-11-16 11:55:34.160000+00:00,v cannot be empty
+2016-11-16 15:33:44.106000+00:00,v cannot be empty
+2016-11-17 09:38:14.133000+00:00,No variable by this name: mms3_fgm_flag_srvy_l2
+2016-11-17 10:04:14.155000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-17 10:07:54.209000+00:00,No variable by this name: mms3_fgm_b_dmpa_srvy_l2
+2016-11-16 11:24:24.082000+00:00,v cannot be empty
+2016-11-17 09:59:04.101000+00:00,a cannot be empty
+2016-11-17 10:54:34.150000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-11-18 07:09:14.157000+00:00,magnetopause location not found
+2016-11-18 09:11:04.206000+00:00,a cannot be empty
+2016-11-18 10:34:34.126000+00:00,a cannot be empty
