@@ -403,25 +403,37 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     np_msh = df_mms['np'][ind_msh] * 1e6  # Convert to m^-3 from cm^-3
 
     if coord_type == 'lmn':
-        np_median_msp = np.median(np_msp) / 1e6  # Convert to cm^-3 from m^-3
-        np_median_msh = np.median(np_msh) / 1e6  # Convert to cm^-3 from m^-3
+
         vp_lmn_vec_msp = np.array([df_mms['vp_lmn_n'][ind_msp], df_mms['vp_lmn_m'][ind_msp],
                                    df_mms['vp_lmn_l'][ind_msp]]) * 1e3  # Convert to m/s from km/s
         vp_lmn_vec_msp = vp_lmn_vec_msp.T
+
         vp_lmn_vec_msh = np.array([df_mms['vp_lmn_n'][ind_msh], df_mms['vp_lmn_m'][ind_msh],
                                    df_mms['vp_lmn_l'][ind_msh]]) * 1e3  # Convert to m/s from km/s
         vp_lmn_vec_msh = vp_lmn_vec_msh.T
+
         b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][ind_msp], df_mms['b_lmn_m'][ind_msp],
                                   df_mms['b_lmn_l'][ind_msp]]) * 1e-9  # Convert to T from nT
         b_lmn_vec_msp = b_lmn_vec_msp.T
         b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][ind_msh], df_mms['b_lmn_m'][ind_msh],
                                   df_mms['b_lmn_l'][ind_msh]]) * 1e-9  # Convert to T from nT
         b_lmn_vec_msh = b_lmn_vec_msh.T
-        # Get the median value of b_lmn_vec_msp and b_lmn_vec_msh
-        b_lmn_vec_msp_median = np.nanmedian(b_lmn_vec_msp, axis=0)
-        b_lmn_vec_msh_median = np.nanmedian(b_lmn_vec_msh, axis=0)
+        # Get the mean and median values of np, vp, and b for the magnetosphere and magnetosheath
+        np_msp_median = np.median(np_msp) / 1e6  # Convert to cm^-3 from m^-3
+        np_msh_median = np.median(np_msh) / 1e6  # Convert to cm^-3 from m^-3
+        np_msp_mean = np.mean(np_msp) / 1e6  # Convert to cm^-3 from m^-3
+        np_msh_mean = np.mean(np_msh) / 1e6  # Convert to cm^-3 from m^-3
+
+        vp_lmn_vec_msp_median = np.median(vp_lmn_vec_msp, axis=0)  # km/sec
+        vp_lmn_vec_msh_median = np.median(vp_lmn_vec_msh, axis=0)  # km/sec
+        vp_lmn_vec_msp_mean = np.mean(vp_lmn_vec_msp, axis=0)  # km/sec
+        vp_lmn_vec_msh_mean = np.mean(vp_lmn_vec_msh, axis=0)  # km/sec
+
+        b_lmn_vec_msp_median = np.nanmedian(b_lmn_vec_msp, axis=0)  # T
+        b_lmn_vec_msh_median = np.nanmedian(b_lmn_vec_msh, axis=0)  # T
         # Get the angle between the two vectors
-        angle_b_lmn_vec_msp_msh = np.arccos(np.dot(b_lmn_vec_msp_median, b_lmn_vec_msh_median) /
+        angle_b_lmn_vec_msp_msh_median = np.arccos(np.dot(b_lmn_vec_msp_median,
+                                                          b_lmn_vec_msh_median) /
                                            (np.linalg.norm(b_lmn_vec_msp_median) *
                                             np.linalg.norm(b_lmn_vec_msh_median))) * 180 / np.pi
 
@@ -584,7 +596,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             # Check if the file exists, if nto then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
-                    f.write('Date,Probe,walen1,walen2,jet_detection,x_gsm,y_gsm,z_gsm,r_spc,r_W,theta_w,jet_time,ind_min_msp,ind_max_msp,ind_min_msh,ind_max_msh,angle_b_lmn_vec_msp_msh,b_lmn_vec_msp_n,b_lmn_vec_msp_m,b_lmn_vec_msp_l,b_lmn_vec_msh_n,b_lmn_vec_msh_m,b_lmn_vec_msh_l,np_median_msp,np_median_msh\n')
+                    f.write('Date,Probe,walen1,walen2,jet_detection,x_gsm,y_gsm,z_gsm,r_spc,r_W,theta_w,jet_time,ind_min_msp,ind_max_msp,ind_min_msh,ind_max_msh,angle_b_lmn_vec_msp_msh,b_lmn_vec_msp_n,b_lmn_vec_msp_m,b_lmn_vec_msp_l,b_lmn_vec_msh_n,b_lmn_vec_msh_m,b_lmn_vec_msh_l,np_msp_median,np_msh_median\n')
                     if verbose:
                         print(f'File {fname} created')
             # Append the crossing time to the csv file if it does not exist already
@@ -593,7 +605,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
             if ttt not in old_crossing_times:
                 with open(fname, 'a') as f:
-                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time},{ind_min_msp},{ind_max_msp},{ind_min_msh},{ind_max_msh},{angle_b_lmn_vec_msp_msh:.3f},{b_lmn_vec_msp_median[0]*1e9:0.3f},{b_lmn_vec_msp_median[1]*1e9:0.3f},{b_lmn_vec_msp_median[2]*1e9:0.3f},{b_lmn_vec_msh_median[0]*1e9:0.3f},{b_lmn_vec_msh_median[1]*1e9:0.3f},{b_lmn_vec_msh_median[2]*1e9:0.3f},{np_median_msp:0.3},{np_median_msh:0.3f}\n')
+                    f.write(f'{crossing_time},{probe},{walen_relation_satisfied},{walen_relation_satisfied_v2},{jet_detection},{x:.3f},{y:.3f},{z:.3f},{r_yz:.3f},{np.nanmedian(R_w):.3f},{np.nanmedian(theta_w_deg):.3f},{jet_time},{ind_min_msp},{ind_max_msp},{ind_min_msh},{ind_max_msh},{angle_b_lmn_vec_msp_msh:.3f},{b_lmn_vec_msp_median[0]*1e9:0.3f},{b_lmn_vec_msp_median[1]*1e9:0.3f},{b_lmn_vec_msp_median[2]*1e9:0.3f},{b_lmn_vec_msh_median[0]*1e9:0.3f},{b_lmn_vec_msh_median[1]*1e9:0.3f},{b_lmn_vec_msh_median[2]*1e9:0.3f},{np_msp_median:0.3},{np_msh_median:0.3f}\n')
                 f.close()
 
     # Get the index corresponding to the crossing time in the data
