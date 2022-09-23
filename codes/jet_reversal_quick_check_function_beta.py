@@ -480,7 +480,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     k_B = 1.38064852e-23
 
     # Compute the magnetosheath beta value
-    beta_msh_mean = 2 * mu_0 * np_msh_mean * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean) / \
+    beta_msh_mean = 2 * mu_0 * np_msh_mean * 1e6 * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean) / \
                     (3 * np.linalg.norm(b_lmn_vec_msh_mean) ** 2)
 
     alpha_msp = np.full(len(ind_msp), np.nan)
@@ -641,7 +641,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'y_gsm': np.round(y, 3),
                      'z_gsm': np.round(z, 3),
                      'r_spc': np.round(r_yz, 3),
-                     'r_W': np.round(R_w, 3),
+                     'r_W': np.round(np.nanmedian(R_w), 3),
                      'theta_w': np.round(np.nanmedian(theta_w_deg), 3),
                      'jet_time': jet_time,
                      'ind_min_msp': ind_min_msp,
@@ -671,12 +671,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'vp_lmn_vec_msp_median_n': np.round(vp_lmn_vec_msp_median[0] / 1e3, 3),
                      'vp_lmn_vec_msp_median_m': np.round(vp_lmn_vec_msp_median[1] / 1e3, 3),
                      'vp_lmn_vec_msp_median_l': np.round(vp_lmn_vec_msp_median[2] / 1e3, 3),
-                     'vp_lmn_vec_msh_mean_n': np.round(vp_lmn_vec_msh_mean[0], 3),
-                     'vp_lmn_vec_msh_mean_m': np.round(vp_lmn_vec_msh_mean[1], 3),
-                     'vp_lmn_vec_msh_mean_l': np.round(vp_lmn_vec_msh_mean[2], 3),
-                     'vp_lmn_vec_msh_median_n': np.round(vp_lmn_vec_msh_median[0], 3),
-                     'vp_lmn_vec_msh_median_m': np.round(vp_lmn_vec_msh_median[1], 3),
-                     'vp_lmn_vec_msh_median_l': np.round(vp_lmn_vec_msh_median[2], 3),
+                     'vp_lmn_vec_msh_mean_n': np.round(vp_lmn_vec_msh_mean[0] / 1e3, 3),
+                     'vp_lmn_vec_msh_mean_m': np.round(vp_lmn_vec_msh_mean[1] / 1e3, 3),
+                     'vp_lmn_vec_msh_mean_l': np.round(vp_lmn_vec_msh_mean[2] / 1e3, 3),
+                     'vp_lmn_vec_msh_median_n': np.round(vp_lmn_vec_msh_median[0] / 1e3, 3),
+                     'vp_lmn_vec_msh_median_m': np.round(vp_lmn_vec_msh_median[1] / 1e3, 3),
+                     'vp_lmn_vec_msh_median_l': np.round(vp_lmn_vec_msh_median[2] / 1e3, 3),
                      'tp_para_msp_median': np.round(tp_para_msp_median, 3),
                      'tp_para_msh_median': np.round(tp_para_msh_median, 3),
                      'tp_para_msp_mean': np.round(tp_para_msp_mean, 3),
@@ -684,6 +684,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'tp_perp_msp_median': np.round(tp_perp_msp_median, 3),
                      'tp_perp_msh_median': np.round(tp_perp_msh_median, 3),
                      'tp_perp_msp_mean': np.round(tp_perp_msp_mean, 3),
+                     'tp_perp_msh_mean': np.round(tp_perp_msh_mean, 3),
                      'beta_msh_mean': np.round(beta_msh_mean, 3)
                         }
 
