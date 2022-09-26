@@ -73,7 +73,7 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 #                ]
 #  Sort the trange_list by the start time
 # trange_list.sort(key=lambda x: x[0])
-trange_ind_list = np.array([0]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
+# trange_ind_list = np.array([10]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
 
 df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20220922.csv")
 # Set the index to Date in UTC
@@ -84,17 +84,16 @@ df_jet_reversal.sort_index(inplace=True)
 df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 
 trange_list = df_jet_reversal.index.tolist()
-trange_list = [datetime.datetime(2015, 9, 9, 8, 43, 44)]
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = trange_ind_list[0]
-ind_max = ind_min + 1
+ind_min = 210
+ind_max = ind_min + 100
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
         trange = trange.strftime('%Y-%m-%d %H:%M:%S')
         trange = [trange.split("+")[0].split(".")[0]]
-        trange = ["2015-9-9 14:11:14"]
+        #trange = ["2015-9-9 14:11:14"]
         print(trange)
         try:
             for something in range(1):
@@ -132,7 +131,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 rx_en_norm = (rx_en - np.nanmin(rx_en)) / (np.nanmax(rx_en) - np.nanmin(rx_en))
                 va_cs_norm = (va_cs - np.nanmin(va_cs)) / (np.nanmax(va_cs) - np.nanmin(va_cs))
                 bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.nanmax(bisec_msp) - np.nanmin(bisec_msp))
-                
+
                 figure_inputs = {
                     "image": [shear_norm, rx_en_norm, va_cs_norm, bisec_msp_norm],
                     "convolution_order": [1, 1, 1, 1],
@@ -145,6 +144,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "mms_sc_pos": np.round(np.nanmean(sw_params['mms_sc_pos'], axis=0), 2),
                     "dr": dr,
                     "dipole_tilt_angle": sw_params['ps'],
+                    "p_dyn": np.round(sw_params['p_dyn'], 2),
                     "imf_clock_angle": sw_params['imf_clock_angle'],
                     "sigma": [2, 2, 2, 2],
                     "mode": "nearest",
@@ -168,18 +168,23 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "title_y_pos": 1.09,
                     "interpolation": 'None',
                     "tsy_model": model_type,
-                    "dark_mode": False,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220612.csv",
+                    "dark_mode": True,
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220926.csv",
                     "rc_folder": "../data/rx_d/",
-                    "save_rc_file": False,
+                    "save_rc_file": True,
                     "walen1": df_jet_reversal['walen1'][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal['jet_detection'][ind_range],
-                    "fig_version": 'v07',
+                    "fig_version": 'v08',
+                    "r_W": df_jet_reversal['r_W'][ind_range],
+                    "theta_W": df_jet_reversal['theta_w'][ind_range],
+                    "jet_time": df_jet_reversal['jet_time'][ind_range],
+                    "np_median_msp": df_jet_reversal['np_median_msp'][ind_range],
+                    "np_median_msh": df_jet_reversal['np_median_msh'][ind_range],
                 }
 
-                y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(**figure_inputs,
-                                                                                       fig_format='pdf')
+                y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(
+                                                            **figure_inputs, fig_format='png')
             print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
         except Exception as e:
             print(f"\033[91m \n Figure not plotted for time range {trange} \n because of following exception: {e} \n \033[0m")

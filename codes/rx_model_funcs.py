@@ -420,6 +420,7 @@ def ridge_finder_multiple(
     mms_sc_pos=[0, 0],
     dr=0.5,
     dipole_tilt_angle=None,
+    p_dyn=None,
     imf_clock_angle=None,
     sigma=[2.2, 2.2, 2.2, 2.2],
     mode="nearest",
@@ -449,6 +450,11 @@ def ridge_finder_multiple(
     walen2=False,
     jet_detection=False,
     fig_version='v6',
+    r_W=None,
+    theta_W=None,
+    jet_time=None,
+    np_median_msp=None,
+    np_median_msh=None,
 ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -767,17 +773,49 @@ def ridge_finder_multiple(
         if save_rc_file:
             if not os.path.exists(rc_folder):
                 os.makedirs(rc_folder)
+            var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
+                       "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection,"\
+                       "r_W,theta_W,jet_time,'np_median_msp,np_median_msh,b_imf_x,b_imf_y,"\
+                       "b_imf_z,dipole,imf_clock_angle,p_dyn"
 
+            data_dict = {
+                "mms_spc_num": mms_probe_num,
+                "date_from": t_range[0],
+                "date_to": t_range[1],
+                "spc_pos_x": r0[0],
+                "spc_pos_y": r0[1],
+                "spc_pos_z": r0[2],
+                "b_msh_x": b_msh[0],
+                "b_msh_y": b_msh[1],
+                "b_msh_z": b_msh[2],
+                "r_rc": np.round(dist_rc,3),
+                "method_used": method_used,
+                "walen1": walen1,
+                "walen2": walen2,
+                "jet_detection": jet_detection,
+                "r_W": r_W,
+                "theta_W": theta_W,
+                "jet_time": jet_time,
+                "np_median_msp": np_median_msp,
+                "np_median_msh": np_median_msh,
+                "b_imf_x": b_imf[0],
+                "b_imf_y": b_imf[1],
+                "b_imf_z": b_imf[2],
+                "dipole": dipole_tilt_angle,
+                "imf_clock_angle":imf_clock_angle,
+                "p_dyn": p_dyn
+            }
             # Save data to the csv file using tab delimiter
             if not os.path.exists(rc_folder + rc_file_name):
                 with open(rc_folder + rc_file_name, 'w') as f:
-                    f.write("mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z" +
-                            ",b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection\n")
+                    f.write(var_list + "\n")
                     f.close()
                     print(f"Created {rc_folder + rc_file_name} to store data")
             # Open file and append the relevant data
             with open(rc_folder + rc_file_name, 'a') as f:
-                f.write(f"{mms_probe_num},{t_range[0]},{t_range[1]},{r0[0]},{r0[1]},{r0[2]},{b_msh[0]},{b_msh[1]},{b_msh[2]},{dist_rc:.3f},{method_used},{walen1},{walen2},{jet_detection}\n")
+                for key in data_dict.keys():
+                    f.write(f'{data_dict[key]},')
+                f.write('\n')
                 f.close()
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
