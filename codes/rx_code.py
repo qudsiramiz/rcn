@@ -75,7 +75,7 @@ today_date = datetime.datetime.today().strftime('%Y-%m-%d')
 # trange_list.sort(key=lambda x: x[0])
 trange_ind_list = np.array([0]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
 
-df_jet_reversal = pd.read_csv("../data/mms3_jet_reversal_times_list.csv")
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20220922.csv")
 # Set the index to Date in UTC
 df_jet_reversal.set_index('Date', inplace=True)
 # Sort the dataframe by the index
