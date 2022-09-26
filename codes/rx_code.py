@@ -86,8 +86,8 @@ df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 trange_list = df_jet_reversal.index.tolist()
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 210
-ind_max = ind_min + 100
+ind_min = 310
+ind_max = -1
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'

@@ -825,4 +825,4 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     combine_axes=True, save_png='b_n_v_fig', display=False)
         plt.close("all")
 
-    return df_mms_fpi, df_mms_fgm, df_mms, R_w, theta_w_deg
+    return df_mms_fpi, df_mms_fgm, df_mms

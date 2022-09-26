@@ -26,8 +26,9 @@ mtick_width = 0.7  # minor tick width in points
 label_pad = 5  # padding between label and axis
 
 
-def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="../figures",
-              fig_name="new", fig_format="pdf", histtype="step", linewidth=1, cut_type="jet"):
+def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../figures",
+              fig_name="new", fig_format="pdf", histtype="step", linewidth=1, cut_type="jet",
+              r_lim=[0, 15]):
 
     df = pd.read_csv(file_name)
 
@@ -38,28 +39,28 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     if cut_type == "jet":
         # Remove all data points where the value of 'r_rc' is greater than 12
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)]
+        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.jet_detection)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.jet_detection)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.jet_detection)]
+        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.jet_detection)]
     elif cut_type == "walen1":
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen1)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen1)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen1)]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen1)]
+        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.walen1)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.walen1)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.walen1)]
+        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.walen1)]
     elif cut_type == "walen2":
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.walen2)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.walen2)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.walen2)]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.walen2)]
+        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.walen2)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.walen2)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.walen2)]
+        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.walen2)]
     elif cut_type == "walen_jet":
-        df_shear = df_shear[(df_shear.r_rc<12) & (df_shear.jet_detection)
+        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.jet_detection)
                             & ((df_shear.walen1) | (df_shear.walen2))]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<12) & (df_rx_en.jet_detection)
+        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.jet_detection)
                             & ((df_rx_en.walen1) | (df_rx_en.walen2))]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<12) & (df_va_cs.jet_detection)
+        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.jet_detection)
                             & ((df_va_cs.walen1) | (df_va_cs.walen2))]
-        df_bisec = df_bisec[(df_bisec.r_rc<12) & (df_bisec.jet_detection)
+        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.jet_detection)
                             & ((df_bisec.walen1) | (df_bisec.walen2))]
 
     ## Check the sw_params to see if the conditions of b_imf
@@ -134,7 +135,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
 
     # Plot the histogram of the shear data
     axs1 = plt.subplot(gs[0, 0])
-    axs1.hist(df_shear.r_rc, bins=nbins, range=(0, 15),color='#1f77b4', alpha=0.5,
+    axs1.hist(df_shear.r_rc, bins=bins, range=(0, 15),color='#1f77b4', alpha=0.5,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(df_shear.r_rc.median(), color='#1f77b4', linestyle='--', linewidth=2)
@@ -142,48 +143,52 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, nbins=8, fig_folder="..
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_shear.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
 
-    axs1.set_xlim(0, 12)
+    axs1.set_xlim(r_lim[0], r_lim[1])
+    axs1.set_xscale('log')
     #axs1.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs1.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
 
     # Plot the histogram of the rx_en data
     axs2 = plt.subplot(gs[0, 1])
-    axs2.hist(df_rx_en.r_rc, bins=nbins, range=(0, 15), color='#ff7f0e', alpha=0.5,
+    axs2.hist(df_rx_en.r_rc, bins=bins, range=(0, 15), color='#ff7f0e', alpha=0.5,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(df_rx_en.r_rc.median(), color='#ff7f0e', linestyle='--', linewidth=2)
     axs2.text(df_rx_en.r_rc.median()+0.2, axs2.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_rx_en.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs2.set_xlim(0, 12)
+    axs2.set_xlim(r_lim[0], r_lim[1])
+    axs2.set_xscale('log')
     #axs2.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.yaxis.set_label_position("right")
 
     # Plot the histogram of the va_cs data
     axs3 = plt.subplot(gs[1, 0])
-    axs3.hist(df_va_cs.r_rc, bins=nbins, range=(0, 15), color='#2ca02c', alpha=0.5,
+    axs3.hist(df_va_cs.r_rc, bins=bins, range=(0, 15), color='#2ca02c', alpha=0.5,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(df_va_cs.r_rc.median(), color='#2ca02c', linestyle='--', linewidth=2)
     axs3.text(df_va_cs.r_rc.median()+0.2, axs3.get_ylim()[1]*0.2,
              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_va_cs.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs3.set_xlim(0, 12)
+    axs3.set_xlim(r_lim[0], r_lim[1])
+    axs3.set_xscale('log')
     axs3.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
     axs3.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
 
     # Plot the histogram of the bisection data
     axs4 = plt.subplot(gs[1, 1])
-    axs4.hist(df_bisec.r_rc, bins=nbins, range=(0, 15), color='#d62728', alpha=0.5,
+    axs4.hist(df_bisec.r_rc, bins=bins, range=(0, 15), color='#d62728', alpha=0.5,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(df_bisec.r_rc.median(), color='#d62728', linestyle='--', linewidth=2)
     axs4.text(df_bisec.r_rc.median()+0.2, axs4.get_ylim()[1]*0.2,
              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_bisec.r_rc.median()),
               fontsize=0.8*t_label_size, color=label_color)
-    axs4.set_xlim(0, 12)
+    axs4.set_xlim(r_lim[0], r_lim[1])
+    axs4.set_xscale('log')
     axs4.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
     axs4.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)

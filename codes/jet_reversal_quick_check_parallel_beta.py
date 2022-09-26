@@ -42,29 +42,29 @@ def check_jet_reversal(crossing_time):
               "verbose": True
         }
     inputs["data_rate"] = 'brst'
-    # df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    try:
-        try:
-            inputs["data_rate"] = 'brst'
-            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-        except:
-            inputs["data_rate"] = 'fast'
-            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    except Exception as e:
-        # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-        # Save the crossing time to a file
-        # Check if the file exists
-        if not os.path.isfile(inputs["error_file_log_name"]):
-            # If it doesn't exist, create it
-            with open(inputs["error_file_log_name"], 'w') as f:
-                f.write(f"DateStart,Error\n")
-                f.write(f"{crossing_time},{e}\n")
-        else:
-            # If it exists, append to it
-            with open(inputs["error_file_log_name"], 'a') as f:
-                f.write(f"{crossing_time},{e}\n")
-        f.close()
-        pass
+    df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    #try:
+    #    try:
+    #        inputs["data_rate"] = 'brst'
+    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    #    except:
+    #        inputs["data_rate"] = 'fast'
+    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    #except Exception as e:
+    #    # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+    #    # Save the crossing time to a file
+    #    # Check if the file exists
+    #    if not os.path.isfile(inputs["error_file_log_name"]):
+    #        # If it doesn't exist, create it
+    #        with open(inputs["error_file_log_name"], 'w') as f:
+    #            f.write(f"DateStart,Error\n")
+    #            f.write(f"{crossing_time},{e}\n")
+    #    else:
+    #        # If it exists, append to it
+    #        with open(inputs["error_file_log_name"], 'a') as f:
+    #            f.write(f"{crossing_time},{e}\n")
+    #    f.close()
+    #    pass
 
 
 @contextmanager
@@ -74,8 +74,8 @@ def suppress_stdout_stderr():
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
 
-with suppress_stdout_stderr():
-# for xxx in range(1):
+#with suppress_stdout_stderr():
+for xxx in range(1):
     # Set the number of processes to use
     # num_processes = 20
     # Ask the user for index number
@@ -84,7 +84,7 @@ with suppress_stdout_stderr():
     #indx_min = 400
     # Ask the user for the maximum index number
     # indx_max = int(input("Enter the maximum index number: "))
-    indx_max = indx_min + 17000
+    indx_max = indx_min + 1
     # create a pool of processes
     pool = mp.Pool()
     # create a list of processes to run
