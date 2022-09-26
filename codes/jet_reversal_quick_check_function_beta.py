@@ -648,7 +648,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'ind_max_msp': ind_max_msp,
                      'ind_min_msh': ind_min_msh,
                      'ind_max_msh': ind_max_msh,
-                     'angle_b_lmn_vec_msp_msh_median': angle_b_lmn_vec_msp_msh_median,
+                     'angle_b_lmn_vec_msp_msh_median': np.round(angle_b_lmn_vec_msp_msh_median, 3),
                      'b_lmn_vec_msp_mean_n': np.round(b_lmn_vec_msp_mean[0] * 1e9, 3),
                      'b_lmn_vec_msp_mean_m': np.round(b_lmn_vec_msp_mean[1] * 1e9, 3),
                      'b_lmn_vec_msp_mean_l': np.round(b_lmn_vec_msp_mean[2] * 1e9, 3),
@@ -695,16 +695,17 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     f.write(var_list + '\n')
                     if verbose:
                         print(f'File {fname} created')
-            # Append the crossing time to the csv file if it does not exist already
-            df_temp = pd.read_csv(fname)
-            old_crossing_times = np.array([xx[:19] for xx in df_temp['Date'].values])
-            ttt = datetime.datetime.strftime(crossing_time, '%Y-%m-%d %H:%M:%S.%f')[:19]
-            if ttt not in old_crossing_times:
-                with open(fname, 'a') as f:
-                    for key in data_dict.keys():
-                        f.write(f'{data_dict[key]},')
-                    f.write('\n')
-                f.close()
+            # Check if the file already contains the data corresponding to the crossing time
+            if os.path.isfile(fname):
+                df_added_list = pd.read_csv(fname, sep=',', index_col=False)
+                if not np.any(df_added_list['Date'].values == str(crossing_time)):
+                    with open(fname, 'a') as f:
+                        for key in data_dict.keys():
+                            f.write(f'{data_dict[key]},')
+                        f.write('\n')
+                    if verbose:
+                        print(f'Data for all keys written to file {fname}')
+                    f.close()
 
     # Get the index corresponding to the crossing time in the data
     df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv")

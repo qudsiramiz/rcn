@@ -1,6 +1,7 @@
 import datetime
 import importlib
 import multiprocessing as mp
+import numpy as np
 import os
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 
@@ -42,29 +43,31 @@ def check_jet_reversal(crossing_time):
               "verbose": True
         }
     inputs["data_rate"] = 'brst'
-    df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    #try:
-    #    try:
-    #        inputs["data_rate"] = 'brst'
-    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    #    except:
-    #        inputs["data_rate"] = 'fast'
-    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    #except Exception as e:
-    #    # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-    #    # Save the crossing time to a file
-    #    # Check if the file exists
-    #    if not os.path.isfile(inputs["error_file_log_name"]):
-    #        # If it doesn't exist, create it
-    #        with open(inputs["error_file_log_name"], 'w') as f:
-    #            f.write(f"DateStart,Error\n")
-    #            f.write(f"{crossing_time},{e}\n")
-    #    else:
-    #        # If it exists, append to it
-    #        with open(inputs["error_file_log_name"], 'a') as f:
-    #            f.write(f"{crossing_time},{e}\n")
-    #    f.close()
-    #    pass
+    # df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    try:
+        try:
+            inputs["data_rate"] = 'brst'
+            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+        except:
+            inputs["data_rate"] = 'fast'
+            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    except Exception as e:
+        # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+        # Save the crossing time to a file
+        # Check if the file exists
+        if not os.path.isfile(inputs["error_file_log_name"]):
+            # If it doesn't exist, create it
+            with open(inputs["error_file_log_name"], 'w') as f:
+                f.write(f"DateStart,Error\n")
+                f.write(f"{crossing_time},{e}\n")
+        else:
+            # If it exists, append to it
+            df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
+            if not np.any(df_added_list['Date'].values == str(crossing_time)):
+                with open(inputs["error_file_log_name"], 'a') as f:
+                    f.write(f"{crossing_time},{e}\n")
+            f.close()
+        pass
 
 
 @contextmanager
@@ -74,28 +77,39 @@ def suppress_stdout_stderr():
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
 
-#with suppress_stdout_stderr():
-for xxx in range(1):
-    # Set the number of processes to use
-    # num_processes = 20
-    # Ask the user for index number
-    # indx_min = int(input("Enter the index number: "))
-    indx_min = 0
-    #indx_min = 400
-    # Ask the user for the maximum index number
-    # indx_max = int(input("Enter the maximum index number: "))
-    indx_max = indx_min + 1
-    # create a pool of processes
-    pool = mp.Pool()
-    # create a list of processes to run
-    processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for crossing_time in df_crossings.index[indx_min:indx_max]]
-    # run the processes
-    for p in processes:
-        p.get()
-    # close the pool and wait for the processes to finish
-    pool.close()
-    pool.join()
+use_parallel = True
 
+with suppress_stdout_stderr():
+# for foo in range(1):
+    if use_parallel:
+        # Set the number of processes to use
+        # num_processes = 20
+        # Ask the user for index number
+        # indx_min = int(input("Enter the index number: "))
+        indx_min = 240
+        #indx_min = 400
+        # Ask the user for the maximum index number
+        # indx_max = int(input("Enter the maximum index number: "))
+        indx_max = -1
+        # create a pool of processes
+        pool = mp.Pool()
+        # create a list of processes to run
+        processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for 
+                                             crossing_time in df_crossings.index[indx_min:indx_max]]
+        # run the processes
+        for p in processes:
+            p.get()
+        # close the pool and wait for the processes to finish
+        pool.close()
+        pool.join()
+    else:
+        indx_min = 0
+        #indx_min = 400
+        # Ask the user for the maximum index number
+        # indx_max = int(input("Enter the maximum index number: "))
+        indx_max = indx_min + 1
+        for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max], start=indx_min):
+            check_jet_reversal(crossing_time)
     # indx_number = 0
     # indx_max = indx_number + 200
     # if __name__ == '__main__':

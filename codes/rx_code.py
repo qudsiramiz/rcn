@@ -86,8 +86,8 @@ df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 trange_list = df_jet_reversal.index.tolist()
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 310
-ind_max = -1
+ind_min = 10
+ind_max = 100
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
@@ -130,7 +130,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 shear_norm = (shear - np.nanmin(shear)) / (np.nanmax(shear) - np.nanmin(shear))
                 rx_en_norm = (rx_en - np.nanmin(rx_en)) / (np.nanmax(rx_en) - np.nanmin(rx_en))
                 va_cs_norm = (va_cs - np.nanmin(va_cs)) / (np.nanmax(va_cs) - np.nanmin(va_cs))
-                bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.nanmax(bisec_msp) - np.nanmin(bisec_msp))
+                # bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.nanmax(bisec_msp) - np.nanmin(bisec_msp))
+                bisec_msp_norm = (bisec_msh - np.nanmin(bisec_msh)) / (np.nanmax(bisec_msh) - np.nanmin(bisec_msh))
 
                 figure_inputs = {
                     "image": [shear_norm, rx_en_norm, va_cs_norm, bisec_msp_norm],
@@ -169,13 +170,13 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "interpolation": 'None',
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220926.csv",
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220926_msh.csv",
                     "rc_folder": "../data/rx_d/",
                     "save_rc_file": True,
                     "walen1": df_jet_reversal['walen1'][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal['jet_detection'][ind_range],
-                    "fig_version": 'v08',
+                    "fig_version": 'v09',
                     "r_W": df_jet_reversal['r_W'][ind_range],
                     "theta_W": df_jet_reversal['theta_w'][ind_range],
                     "jet_time": df_jet_reversal['jet_time'][ind_range],
