@@ -74,8 +74,8 @@ def suppress_stdout_stderr():
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
 
-# with suppress_stdout_stderr():
-for xxx in range(1):
+with suppress_stdout_stderr():
+# for xxx in range(1):
     # Set the number of processes to use
     # num_processes = 20
     # Ask the user for index number
