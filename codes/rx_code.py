@@ -1,7 +1,9 @@
 # This the python version of IDL code named "RX_model_batch.pro"
 import datetime
 import importlib
+import os
 import time
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -87,7 +89,15 @@ trange_list = df_jet_reversal.index.tolist()
 #trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = 0
-ind_max = 1
+ind_max = -1
+
+@contextmanager
+def suppress_stdout_stderr():
+    """A context manager that redirects stdout and stderr to devnull"""
+    with open(os.devnull, 'w') as fnull:
+        with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
+            yield (err, out)
+
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
@@ -95,8 +105,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        try:
-            for something in range(1):
+        with suppress_stdout_stderr():
+            try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
                 dr = 0.25
@@ -112,7 +122,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "omni_level": "hro",
                     "mms_probe_num": mms_probe_num,
                     "model_type": model_type,
-                    "m_p": 0.5,
+                    "m_p": 1,
                     "dr": dr,
                     "min_max_val": min_max_val,
                     "y_min": y_min,
@@ -140,7 +150,6 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 # bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.std(bisec_msp))
                 # bisec_msp_norm = (bisec_msh - np.nanmin(bisec_msh)) / (np.nanmax(bisec_msh) -
                 # np.nanmin(bisec_msh))
-
                 figure_inputs = {
                     "image": [shear_norm, rx_en_norm, va_cs_norm, bisec_msp_norm],
                     "convolution_order": [1, 1, 1, 1],
@@ -184,7 +193,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "walen1": df_jet_reversal["walen1"][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal["jet_detection"][ind_range],
-                    "fig_version": "v10",
+                    "fig_version": "v09",
                     "r_W": df_jet_reversal["r_W"][ind_range],
                     "theta_W": df_jet_reversal["theta_w"][ind_range],
                     #"jet_time": df_jet_reversal["jet_time"][ind_range],
@@ -195,9 +204,9 @@ for mms_probe_num in mms_probe_num_list[2:3]:
 
                 y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(
                                                             **figure_inputs, fig_format="png")
-            print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
-        except Exception as e:
-            print(f"\033[91m \n Figure not plotted for time range {trange} \n because of following exception: {e} \n \033[0m")
+                print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
+            except Exception as e:
+                print(f"\033[91m \n Figure not plotted for time range {trange} \n because of following exception: {e} \n \033[0m")
         #except Exception as e:
         #    # Print the error in green
         #    print("\033[92m", f"Figure not plotted for {trange} and index value of {ind_range}\n",

@@ -329,7 +329,7 @@ def ridge_finder(
     kwargs = {'sigmas': [3], 'black_ridges': False, 'mode': mode, 'alpha': 1}
 
     # Smoothen the image
-    image_smooth = sp.ndimage.filters.gaussian_filter(image_rotated, sigma=[5, 5], mode=mode)
+    image_smooth = sp.ndimage.gaussian_filter(image_rotated, sigma=[5, 5], mode=mode)
     # result = meijering(image_smooth, **kwargs)
     result = frangi(image_smooth, **kwargs)
 
@@ -606,7 +606,7 @@ def ridge_finder_multiple(
         c_col = int(n_cols/2)
         # Find the distance of each pixel from the central pixel in terms of pixels
         dist_pxl = np.sqrt((X - c_row) ** 2 + (Y - c_col) ** 2)
-        mask_image = dist_pxl > 80
+        mask_image = dist_pxl > xrange[1] / dr
 
         if cmap_list is None:
             cmap_list = ["viridis", "viridis", "viridis", "viridis"]
@@ -626,15 +626,10 @@ def ridge_finder_multiple(
                                                             mode=mode)
         result = frangi(image_smooth, **kwargs)  # frangi, hessian, meijering, sato
 
-        #------------------------------------------------------------------------------------------
-        # New Stuff
-        #------------------------------------------------------------------------------------------
         m_result = result.copy()
         m_result[mask_image] = np.nan
         new_image_rotated = image_rotated.copy()
         new_image_rotated[mask_image] = np.nan
-
-
 
         x_len = image_rotated.shape[0]
         y_len = image_rotated.shape[1]
@@ -643,8 +638,11 @@ def ridge_finder_multiple(
         y_vals.append(y_val)
         im_max_val = np.full(y_len, np.nan)
         for xx in range(y_len):
-            y_val[xx] = np.nanargmax(m_result[:, xx]) * dr + yrange[0]
-            im_max_val[xx] = np.nanargmax(new_image_rotated[:, xx]) * dr + yrange[0]
+            try:
+                y_val[xx] = np.nanargmax(m_result[:, xx]) * dr + yrange[0]
+                im_max_val[xx] = np.nanargmax(new_image_rotated[:, xx]) * dr + yrange[0]
+            except Exception:
+                pass
 
         # plt.close('all')
         # TODO: Find a better way to do this
@@ -673,7 +671,7 @@ def ridge_finder_multiple(
         y_val_avg = np.full(len(y_val), np.nan)
         im_max_val_avg = np.full(len(y_val), np.nan)
 
-        r_a_l = 10
+        r_a_l = 5
         for xx in range(len(y_val)):
             y_val_avg[xx] = np.nanmean(y_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
             im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
@@ -1566,6 +1564,28 @@ def line_fnc(
 
 
 def line_fnc_der(x, y):
+    """
+    Function to give a line interpolation function
+
+    Parameters
+    ----------
+    x : array
+        x coordinates of the points
+    y : array
+        y coordinates of the points
+
+    Returns
+    -------
+    line_intrp : function
+        Function to interpolate the line
+    """
+
+    nans, x_nan = nan_helper(x)
+    x[nans] = np.interp(x_nan(nans), x_nan(~nans), x[~nans])
+
+    nans, y_nan = nan_helper(y)
+    y[nans] = np.interp(y_nan(nans), y_nan(~nans), y[~nans])
+
     line_intrp = sp.interpolate.CubicSpline(x, y)
     return line_intrp
 
@@ -1574,3 +1594,20 @@ def target_fnc(r, r0, b_msh, line_fnc, line_intrp):
     p_line = line_fnc(r0=r0, b_msh=b_msh, r=r)
     z_surface = line_intrp(p_line[1])
     return np.sum((p_line[2] - z_surface)**2)
+
+def nan_helper(y):
+    """Helper to handle indices and logical indices of NaNs.
+
+    Input:
+        - y, 1d numpy array with possible NaNs
+    Output:
+        - nans, logical indices of NaNs
+        - index, a function, with signature indices= index(logical_indices),
+          to convert logical indices of NaNs to 'equivalent' indices
+    Example:
+        >>> # linear interpolation of NaNs
+        >>> nans, x= nan_helper(y)
+        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+    """
+
+    return np.isnan(y), lambda z: z.nonzero()[0]
