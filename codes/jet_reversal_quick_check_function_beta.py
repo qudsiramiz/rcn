@@ -153,7 +153,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         df_mms_fpi['vp_diff_y'] = df_mms_fpi['vp_lmn_m'] - df_mms_fpi['vp_lmn_m_rolling_median']
         df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - df_mms_fpi['vp_lmn_l_rolling_median']
         #df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - np.nanmean(df_mms_fpi['vp_lmn_l'])
-
     else:
         df_mms_fpi['vp_diff_x'] = df_mms_fpi['vp_gsm_x'] - df_mms_fpi['vp_gsm_x_rolling_median']
         df_mms_fpi['vp_diff_y'] = df_mms_fpi['vp_gsm_y'] - df_mms_fpi['vp_gsm_y_rolling_median']
