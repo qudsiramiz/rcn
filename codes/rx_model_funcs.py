@@ -1,7 +1,9 @@
 # functions to be used in rx_model_batch_parallel.py
 import datetime
+from logging import exception
 import multiprocessing as mp
 import os
+from pydoc import cli
 import warnings
 
 import geopack.geopack as gp
@@ -455,6 +457,7 @@ def ridge_finder_multiple(
     jet_time=None,
     np_median_msp=None,
     np_median_msh=None,
+    df_jet_reversal=None,
 ):
     r"""
     Finds ridges in an image and plot the points with maximum ridge value on the given image.
@@ -775,7 +778,7 @@ def ridge_finder_multiple(
                 os.makedirs(rc_folder)
             var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
                        "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection,"\
-                       "r_W,theta_W,jet_time,'np_median_msp,np_median_msh,b_imf_x,b_imf_y,"\
+                       "r_W,theta_W,np_median_msp,np_median_msh,b_imf_x,b_imf_y,"\
                        "b_imf_z,dipole,imf_clock_angle,p_dyn"
 
             data_dict = {
@@ -785,26 +788,34 @@ def ridge_finder_multiple(
                 "spc_pos_x": r0[0],
                 "spc_pos_y": r0[1],
                 "spc_pos_z": r0[2],
-                "b_msh_x": np.round(b_msh[0], 3),
-                "b_msh_y": np.round(b_msh[1], 3),
-                "b_msh_z": np.round(b_msh[2], 3),
-                "r_rc": np.round(dist_rc,3),
+                "b_msh_x": b_msh[0],
+                "b_msh_y": b_msh[1],
+                "b_msh_z": b_msh[2],
+                "r_rc": np.round(dist_rc, 3),
                 "method_used": method_used,
                 "walen1": walen1,
                 "walen2": walen2,
                 "jet_detection": jet_detection,
                 "r_W": r_W,
                 "theta_W": theta_W,
-                "jet_time": jet_time,
+                #"jet_time": jet_time,
                 "np_median_msp": np_median_msp,
                 "np_median_msh": np_median_msh,
-                "b_imf_x": np.round(b_imf[0], 3),
-                "b_imf_y": np.round(b_imf[1], 3),
-                "b_imf_z": np.round(b_imf[2], 3),
-                "dipole": np.round(dipole_tilt_angle, 3),
-                "imf_clock_angle":np.round(imf_clock_angle, 3),
+                "b_imf_x": b_imf[0],
+                "b_imf_y": b_imf[1],
+                "b_imf_z": b_imf[2],
+                "dipole": dipole_tilt_angle * 180 / np.pi,
+                "imf_clock_angle": imf_clock_angle,
                 "p_dyn": p_dyn
             }
+            # Add keys and data from df_jet_reversal to data_dict if those keys aren't already
+            # present in the dictionary
+            for key in df_jet_reversal.keys():
+                if key not in data_dict.keys():
+                    data_dict[key] = df_jet_reversal[key]
+                    # Add the key to the variable list
+                    var_list += "," + key
+
             # Save data to the csv file using tab delimiter
             if not os.path.exists(rc_folder + rc_file_name):
                 with open(rc_folder + rc_file_name, 'w') as f:
@@ -814,7 +825,10 @@ def ridge_finder_multiple(
             # Open file and append the relevant data
             with open(rc_folder + rc_file_name, 'a') as f:
                 for key in data_dict.keys():
-                    f.write(f'{data_dict[key]},')
+                    try:
+                        f.write(f"{np.round(data_dict[key], 3)},")
+                    except Exception:
+                        f.write(f"{data_dict[key]},")
                 f.write('\n')
                 f.close()
                 print(f"Saved data to {rc_folder + rc_file_name}")
@@ -900,6 +914,21 @@ def ridge_finder_multiple(
                       horizontalalignment='right', verticalalignment='top',
                       transform=axs1.transAxes, rotation=0, color='white', fontsize=l_label_size,
                       bbox=box_style)
+            # Add a cicrle to indicate the status of walen relations.
+            circle_radius = 0.01
+            if walen1:
+                indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
+                                                 transform=axs1.transAxes, fc='g', ec='w', lw=0.5,
+                                                 clip_on=False)
+            if walen2:
+                indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
+                                                 transform=axs1.transAxes, fc='b', ec='w', lw=0.5,
+                                                 clip_on=False)
+            else:
+                indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
+                                                 transform=axs1.transAxes, fc='r', ec='w', lw=0.5,
+                                                 clip_on=False)
+            axs1.add_patch(indicator_patch)
         # Show minor ticks
         axs1.minorticks_on()
         axs1.tick_params(axis='both', which='minor', direction='in', length=mtick_len, left=True,
@@ -1331,7 +1360,8 @@ def rx_model(
     y_max=None,
     z_min=None,
     z_max=None,
-    save_data=False
+    save_data=False,
+    nprocesses=None
 ):
     """
     This function computes the magnetosheath and magnetospheric magnetic fields using the T96 model
@@ -1381,6 +1411,9 @@ def rx_model(
     save_data : bool, optional
         Whether to save the data or not. Default is False. If True, the data will be saved in a
         "HDF5" file.
+    nprocesses : int, optional
+        The number of processes to use for the computation. Default is None, in which case the
+        number of processes will be set to the number of cores in the system.
     """
 
     if y_min is None:
@@ -1437,7 +1470,10 @@ def rx_model(
     len_y = int((y_max - y_min) / dr) + 1
     len_z = int((z_max - z_min) / dr) + 1
 
-    p = mp.Pool()
+    if nprocesses is None:
+        p = mp.Pool()
+    else:
+        p = mp.Pool(processes=nprocesses)
 
     input = ((j, k, y_max, z_max, dr, m_p, ro, alpha, rmp, sw_params, model_type)
              for j in range(len_y) for k in range(len_z))
