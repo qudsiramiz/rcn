@@ -28,7 +28,7 @@ label_pad = 5  # padding between label and axis
 
 def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../figures",
               fig_name="new", fig_format="pdf", histtype="step", linewidth=1, cut_type="jet",
-              r_lim=[0, 15]):
+              r_lim=[0, 15], density=False):
 
     df = pd.read_csv(file_name, index_col=False)
 
@@ -135,7 +135,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
 
     # Plot the histogram of the shear data
     axs1 = plt.subplot(gs[0, 0])
-    axs1.hist(df_shear.r_rc, bins=bins, range=(0, 15),color='#1f77b4', alpha=0.5, density=False,
+    axs1.hist(df_shear.r_rc, bins=bins, range=(0, 15),color='#1f77b4', alpha=0.5, density=density,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(df_shear.r_rc.mean(), color='#1f77b4', linestyle='--', linewidth=2)
@@ -150,7 +150,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
 
     # Plot the histogram of the rx_en data
     axs2 = plt.subplot(gs[0, 1])
-    axs2.hist(df_rx_en.r_rc, bins=bins, range=(0, 15), color='#ff7f0e', alpha=0.5,
+    axs2.hist(df_rx_en.r_rc, bins=bins, range=(0, 15), color='#ff7f0e', alpha=0.5, density=density,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(df_rx_en.r_rc.mean(), color='#ff7f0e', linestyle='--', linewidth=2)
@@ -165,7 +165,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
 
     # Plot the histogram of the va_cs data
     axs3 = plt.subplot(gs[1, 0])
-    axs3.hist(df_va_cs.r_rc, bins=bins, range=(0, 15), color='#2ca02c', alpha=0.5,
+    axs3.hist(df_va_cs.r_rc, bins=bins, range=(0, 15), color='#2ca02c', alpha=0.5, density=density,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(df_va_cs.r_rc.mean(), color='#2ca02c', linestyle='--', linewidth=2)
@@ -180,7 +180,7 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
 
     # Plot the histogram of the bisection data
     axs4 = plt.subplot(gs[1, 1])
-    axs4.hist(df_bisec.r_rc, bins=bins, range=(0, 15), color='#d62728', alpha=0.5,
+    axs4.hist(df_bisec.r_rc, bins=bins, range=(0, 15), color='#d62728', alpha=0.5, density=density,
              histtype=histtype, linewidth=linewidth)
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(df_bisec.r_rc.mean(), color='#d62728', linestyle='--', linewidth=2)

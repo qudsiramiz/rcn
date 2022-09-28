@@ -24,7 +24,8 @@ for file_name in fnames:
             'histtype': 'step',
             'linewidth': 3,
             'cut_type': cut_type,
-            'r_lim': [0.1, 12]
+            'r_lim': [0.1, 12],
+            'density': True,
         }
 
         df_shear, df_rx_en, df_va_cs, df_bisec = rcsf.plot_hist(**fig_inputs)
