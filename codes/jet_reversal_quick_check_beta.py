@@ -1,11 +1,11 @@
 import datetime
-import pytz
 import importlib
 
-import numpy as np
 import pandas as pd
+import pytz
 
 import jet_reversal_quick_check_function_beta as jrcfb
+
 importlib.reload(jrcfb)
 
 # Read the list of dates from the csv file
@@ -37,8 +37,9 @@ df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 # Set the index to the date column
 df_crossings.set_index("DateStart", inplace=True)
 
-from contextlib import contextmanager,redirect_stderr,redirect_stdout
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from os import devnull
+
 
 @contextmanager
 def suppress_stdout_stderr():
@@ -47,10 +48,8 @@ def suppress_stdout_stderr():
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
 
-# Example usage
-import sys
 
-#with suppress_stdout_stderr():
+# with suppress_stdout_stderr():
 for xxxx in range(1):
     indx_number = 179
     indx_max = indx_number + 1
@@ -60,39 +59,40 @@ for xxxx in range(1):
         # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
         # '2017-01-02 02:58:13.0+00:00'
         # crossing_time = '2017-01-02 02:58:13.0+00:00'
-        crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0], "%Y-%m-%d %H:%M:%S.%f")
+        crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0],
+                                                   "%Y-%m-%d %H:%M:%S.%f")
         print(crossing_time)
         # Set the timezone to UTC
         crossing_time = crossing_time.replace(tzinfo=pytz.utc)
         print(crossing_time)
         # Try with 'brst' data rate, if that fails then try with 'fast'
         inputs = {'crossing_time': crossing_time,
-              'dt': 120,
-              'probe': 3,
-              'jet_len': 3,
-              'level': 'l2',
-              'coord_type': 'lmn',
-              'data_type': 'dis-moms',
-              'time_clip': True,
-              'latest_version': True,
-              'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20220922_beta.csv',
-              #'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922_beta.csv",
-              "verbose": True
-        }
+                  'dt': 120,
+                  'probe': 3,
+                  'jet_len': 3,
+                  'level': 'l2',
+                  'coord_type': 'lmn',
+                  'data_type': 'dis-moms',
+                  'time_clip': True,
+                  'latest_version': True,
+                  'figname': 'mms_jet_reversal_check_lmn_mean',
+                  'fname': '../data/mms_jet_reversal_times_list_20220922_beta.csv',
+                  # 'fname': '../data/test.csv',
+                  'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922_beta.csv",
+                  "verbose": True
+                  }
         inputs["data_rate"] = 'brst'
         df_fpi, df_fgm, df_mms, rw, tw = jrcfb.jet_reversal_check(**inputs)
-    #try:
-    #    try:
-    #        inputs["data_rate"] = 'brst'
-    #        df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #    except:
-    #        inputs["data_rate"] = 'fast'
-    #        df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
-    #except Exception as e:
-    #    print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-    #    pass
+    # try:
+    #     try:
+    #         inputs["data_rate"] = 'brst'
+    #         df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    #     except:
+    #         inputs["data_rate"] = 'fast'
+    #         df_fpi, df_fgm, df_mms = jrcf.jet_reversal_check(**inputs)
+    # except Exception as e:
+    #     print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+    #     pass
 
     # try:
     #     inputs["data_rate"] = 'brst'
@@ -111,6 +111,6 @@ for xxxx in range(1):
 # plt.axvline(df_mms.index[ind_msh], color='g', linestyle='-', lw=5, alpha=0.5, label='MSH')
 # plt.legend()
 # #plt.plot(vp_std, 'b.', ms=1)
-# 
+
 # plt.yscale('linear')
 # plt.show()

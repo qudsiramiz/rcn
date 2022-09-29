@@ -120,7 +120,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     df_mms_fpi = df_mms_fpi.sort_index()
 
     if verbose:
-        print(f"\n\033[1;32m FPI dataframe created \033[0m \n")
+        print("\n\033[1;32m FPI dataframe created \033[0m \n")
         print(f"The fpi Datafram:\n {df_mms_fpi.head()}")
 
     # Add rolling median to the dataframe
@@ -142,8 +142,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         df_mms_fpi['vp_gsm_z_rolling_median'] = df_mms_fpi['vp_gsm_z'].rolling(
                                                                         '60s', center=True).median()
 
-    df_mms_fpi['tp_para_rolling_median'] = df_mms_fpi['tp_para'].rolling('60s', center=True).median()
-    df_mms_fpi['tp_perp_rolling_median'] = df_mms_fpi['tp_perp'].rolling('60s', center=True).median()
+    df_mms_fpi['tp_para_rolling_median'] = df_mms_fpi['tp_para'].rolling(
+                                                                        '60s', center=True).median()
+    df_mms_fpi['tp_perp_rolling_median'] = df_mms_fpi['tp_perp'].rolling(
+                                                                        '60s', center=True).median()
 
     # Find the difference wrt the rolling median
     df_mms_fpi['np_diff'] = df_mms_fpi['np'] - df_mms_fpi['np_rolling_median']
@@ -152,7 +154,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         df_mms_fpi['vp_diff_x'] = df_mms_fpi['vp_lmn_n'] - df_mms_fpi['vp_lmn_n_rolling_median']
         df_mms_fpi['vp_diff_y'] = df_mms_fpi['vp_lmn_m'] - df_mms_fpi['vp_lmn_m_rolling_median']
         df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - df_mms_fpi['vp_lmn_l_rolling_median']
-        #df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - np.nanmean(df_mms_fpi['vp_lmn_l'])
+        # df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - np.nanmean(df_mms_fpi['vp_lmn_l'])
     else:
         df_mms_fpi['vp_diff_x'] = df_mms_fpi['vp_gsm_x'] - df_mms_fpi['vp_gsm_x_rolling_median']
         df_mms_fpi['vp_diff_y'] = df_mms_fpi['vp_gsm_y'] - df_mms_fpi['vp_gsm_y_rolling_median']
@@ -238,7 +240,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
         mms_fgm_b_lmn = ptt.get_data(f'mms{probe}_fgm_b_lmn_srvy_{level}')[1:4][0]
 
-
     # Create a dataframe with the FGM data
     if coord_type == 'lmn':
         df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_lmn_n': mms_fgm_b_lmn[:, 2],
@@ -256,7 +257,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     df_mms_fgm = df_mms_fgm.sort_index()
 
     if verbose:
-        print(f"\n\033[1;32m FGM dataframe created \033[0m \n")
+        print("\n\033[1;32m FGM dataframe created \033[0m \n")
         print(f"FGM Dataframe: \n{df_mms_fgm.head()} \n")
     # Merge the two dataframes
     df_mms = pd.merge_asof(df_mms_fpi, df_mms_fgm, left_index=True, right_index=True)
@@ -265,18 +266,18 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         df_mms.index = df_mms.index.tz_localize(pytz.utc)
     except Exception:
         if verbose:
-            print(f"\033[1;31m Timezone conversion failed \033[0m \n")
+            print("\033[1;31m Timezone conversion failed \033[0m \n")
 
     # Standardise the proton density in the dataframe
     # df_mms['np_std'] = (df_mms['np'] - df_mms['np'].mean()) / df_mms['np'].std()
 
     # Find out the index for which 'np_std' is minimum
-    #ind_min_np = np.where(df_mms['np_std'] == df_mms['np_std'].min())[0][0]
+    # ind_min_np = np.where(df_mms['np_std'] == df_mms['np_std'].min())[0][0]
     if len(ind_jet) > 0:
-        # Get the time check range centered around jet location 
+        # Get the time check range centered around jet location
         time_check_center = vp_jet.index[ind_jet[0]] + (
                             vp_jet.index[ind_jet[-1]] - vp_jet.index[ind_jet[0]]) / 2
-        time_check_range = [time_check_center - pd.Timedelta(10, unit='s'), 
+        time_check_range = [time_check_center - pd.Timedelta(10, unit='s'),
                             time_check_center + pd.Timedelta(10, unit='s')]
 
         # Find out where np is minimum in a time range around the jet location
@@ -284,7 +285,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Get the time corresponding to the minimum np
         np_min_time = np_check[np_check == np_check.min()].index[0]
         # Get the index of the minimum np time in that range
-        ind_min_np = np.where(df_mms.index==np_min_time)[0][0]
+        ind_min_np = np.where(df_mms.index == np_min_time)[0][0]
         print(f"ind_min_np: {ind_min_np}")
     else:
         ind_min_np = np.where(df_mms['np'] == df_mms['np'].min())[0][0]
@@ -341,7 +342,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         if not os.path.isfile(error_file_log_name):
             # If it doesn't exist, create it
             with open(error_file_log_name, 'w') as f:
-                f.write(f"DateStart,Error\n")
+                f.write("DateStart,Error\n")
                 f.write(f"{crossing_time},magnetopause location not found\n")
         else:
             # If it exists, append to it
@@ -350,7 +351,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         f.close()
         # End the function here
         if verbose:
-            print(f"\033[1;31m Magnetopause not found \033[0m \n")
+            print("\033[1;31m Magnetopause not found \033[0m \n")
         return np.nan, np.nan, np.nan
     elif diff_right <= diff_left:
         ind_max_msp = ind_min_np_gt_05_right - 10
@@ -375,7 +376,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         ind_min_msp = ind_min_np_gt_05_left + 10
         ind_max_msh = ind_min_np_gt_05_left - 10
         ind_max_msp = min(len(df_mms.index) - 1, ind_min_msp + n_points_walen,
-                            ind_min_np_gt_05_right)
+                          ind_min_np_gt_05_right)
         ind_min_msh = max(0, ind_max_msh - n_points_walen)
 
         ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
@@ -437,21 +438,22 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Get the angle between the two vectors
         angle_b_lmn_vec_msp_msh_median = np.arccos(np.dot(b_lmn_vec_msp_median,
                                                           b_lmn_vec_msh_median) /
-                                           (np.linalg.norm(b_lmn_vec_msp_median) *
-                                            np.linalg.norm(b_lmn_vec_msh_median))) * 180 / np.pi
+                                                   (np.linalg.norm(b_lmn_vec_msp_median) *
+                                                    np.linalg.norm(b_lmn_vec_msh_median))
+                                                   ) * 180 / np.pi
 
     else:
         vp_gse_vec_msp = np.array([df_mms['vp_gse_x'][ind_msp], df_mms['vp_gse_y'][ind_msp],
                                    df_mms['vp_gse_z'][ind_msp]]) * 1e3  # Convert to m/s from km/s
         vp_gse_vec_msp = vp_gse_vec_msp.T
         vp_gse_vec_msh = np.array([df_mms['vp_gse_x'][ind_msh], df_mms['vp_gse_y'][ind_msh],
-                                    df_mms['vp_gse_z'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+                                   df_mms['vp_gse_z'][ind_msh]]) * 1e3  # Convert to m/s from km/s
         vp_gse_vec_msh = vp_gse_vec_msh.T
         b_gse_vec_msp = np.array([df_mms['b_gse_x'][ind_msp], df_mms['b_gse_y'][ind_msp],
-                                    df_mms['b_gse_z'][ind_msp]]) * 1e-9  # Convert to T from nT
+                                  df_mms['b_gse_z'][ind_msp]]) * 1e-9  # Convert to T from nT
         b_gse_vec_msp = b_gse_vec_msp.T
         b_gse_vec_msh = np.array([df_mms['b_gse_x'][ind_msh], df_mms['b_gse_y'][ind_msh],
-                                   df_mms['b_gse_z'][ind_msh]]) * 1e-9  # Convert to T from nT
+                                  df_mms['b_gse_z'][ind_msh]]) * 1e-9  # Convert to T from nT
         b_gse_vec_msh = b_gse_vec_msh.T
 
     tp_para_msp = df_mms['tp_para'][ind_msp] * 1160  # Convert to K from ev
@@ -479,8 +481,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     k_B = 1.38064852e-23
 
     # Compute the magnetosheath beta value
-    beta_msh_mean = 2 * mu_0 * np_msh_mean * 1e6 * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean) / \
-                    (3 * np.linalg.norm(b_lmn_vec_msh_mean) ** 2)
+    beta_msh_mean = 2 * mu_0 * np_msh_mean * 1e6 * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean
+                                                          ) / (3 * np.linalg.norm(
+                                                            b_lmn_vec_msh_mean) ** 2)
 
     alpha_msp = np.full(len(ind_msp), np.nan)
     alpha_msh = np.full(len(ind_msp), np.nan)
@@ -490,11 +493,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     if coord_type == 'lmn':
         for i in range(len(ind_msp)):
             alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
-                np.linalg.norm(b_lmn_vec_msp[i,:])**2)
+                np.linalg.norm(b_lmn_vec_msp[i, :])**2)
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                np.linalg.norm(b_lmn_vec_msh[i,:])**2)
+                np.linalg.norm(b_lmn_vec_msh[i, :])**2)
             for j in range(3):
-                v_th_msp[i, j] = b_lmn_vec_msp[i,j] * (1 - alpha_msp[i]) / (
+                v_th_msp[i, j] = b_lmn_vec_msp[i, j] * (1 - alpha_msp[i]) / (
                     mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
                 )**0.5
                 v_th_msh[i, j] = b_lmn_vec_msh[i, j] * (1 - alpha_msh[i]) / (
@@ -503,11 +506,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     else:
         for i in range(len(ind_msp)):
             alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
-                np.linalg.norm(b_gse_vec_msp[i,:])**2)
+                np.linalg.norm(b_gse_vec_msp[i, :])**2)
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                np.linalg.norm(b_gse_vec_msh[i,:])**2)
+                np.linalg.norm(b_gse_vec_msh[i, :])**2)
             for j in range(3):
-                v_th_msp[i, j] = b_gse_vec_msp[i,j] * (1 - alpha_msp[i]) / (
+                v_th_msp[i, j] = b_gse_vec_msp[i, j] * (1 - alpha_msp[i]) / (
                     mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
                 )**0.5
                 v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
@@ -542,10 +545,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     theta_w = np.full(len(ind_msp), np.nan)
     for i in range(len(ind_msp)):
         theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
-                               np.linalg.norm(delta_v_th[i, :]) * 
+                               np.linalg.norm(delta_v_th[i, :]) *
                                np.linalg.norm(delta_v_obs[i, :])
                                )
-                            )
+                               )
 
     # Convert angle to degrees
     theta_w_deg = theta_w * 180 / np.pi
@@ -553,8 +556,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Compute the ratio of the observed and the theoretical velocity jumps
     R_w = np.linalg.norm(delta_v_th, axis=1) / np.linalg.norm(delta_v_obs, axis=1)
 
-    #print(f"Values of theta_w_deg: {theta_w_deg}")
-    #print(f"Values of R_w: {R_w}")
+    # print(f"Values of theta_w_deg: {theta_w_deg}")
+    # print(f"Values of R_w: {R_w}")
     # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
     # 180) in green color
 
@@ -607,8 +610,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # for xxx in range(1):
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
-        #_ = spd.mms.mec
-        #mms_sc_pos = ptt.get_data(mms_mec_varnames[0])[1:3][0][0] / r_e
+        # _ = spd.mms.mec
+        # mms_sc_pos = ptt.get_data(mms_mec_varnames[0])[1:3][0][0] / r_e
         x = np.nanmean(mms_fgm_r_gsm[:, 0]) / r_e
         y = np.nanmean(mms_fgm_r_gsm[:, 1]) / r_e
         z = np.nanmean(mms_fgm_r_gsm[:, 2]) / r_e
@@ -685,7 +688,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'tp_perp_msp_mean': np.round(tp_perp_msp_mean, 3),
                      'tp_perp_msh_mean': np.round(tp_perp_msh_mean, 3),
                      'beta_msh_mean': np.round(beta_msh_mean, 3)
-                        }
+                     }
 
         if x > -5 and x < 12 and r_yz < 12:
             # Check if the file exists, if nto then create it
@@ -755,10 +758,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         if jet_detection:
             # Make a box around the jet
             axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
-                            alpha=0.2, label='Jet Location')
+                           alpha=0.2, label='Jet Location')
             # Plot a vertical line at the jet time center
-            axs[3].axvline(vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] - vp_jet.index[ind_jet[0]]) / 2,
-                            color='k', lw=0.5, label='Jet Center')
+            axs[3].axvline(vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] -
+                                                       vp_jet.index[ind_jet[0]]) / 2,
+                           color='k', lw=0.5, label='Jet Center')
             axs[3].legend(loc=1)
         # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
         # Draw a dashed line at +/- v_thres
@@ -772,30 +776,30 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Make a shaded region for all three plots where the magnetopause and magnetosheath
         # are
         axs[0].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
-                        alpha=0.2, label="Magnetosphere")
+                       alpha=0.2, label="Magnetosphere")
         axs[0].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
-                        alpha=0.2, label="Magnetosheath")
+                       alpha=0.2, label="Magnetosheath")
 
         axs[1].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
-                        alpha=0.2, label="Magnetosphere")
+                       alpha=0.2, label="Magnetosphere")
         axs[1].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
-                        alpha=0.2, label="Magnetosheath")
+                       alpha=0.2, label="Magnetosheath")
         axs[1].legend(loc=1)
         axs[2].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
-                        alpha=0.2, label="Magnetosphere")
+                       alpha=0.2, label="Magnetosphere")
         axs[2].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
-                        alpha=0.2, label="Magnetosheath")
+                       alpha=0.2, label="Magnetosheath")
 
         temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
         axs[0].set_title(f"MMS {probe} Jet Reversal Check at {temp3}")
 
         # Add text to the plot
         text = f"$R_w$ = {np.nanmedian(R_w):.2f}\n" +\
-                f"$\\Theta_w$ = {np.nanmedian(theta_w_deg):.2f}"
+               f"$\\Theta_w$ = {np.nanmedian(theta_w_deg):.2f}"
         axs[3].text(0.02, 0.98, text, transform=axs[3].transAxes, ha='left', va='top')
 
         # Add the index of crossing time to the top of the first axis
-        axs[0].text(-0.05, 1.07, f"{ind_crossing}", transform=axs[0].transAxes, ha='left', 
+        axs[0].text(-0.05, 1.07, f"{ind_crossing}", transform=axs[0].transAxes, ha='left',
                     va='top', color='r')
 
         axs[0].text(
@@ -820,9 +824,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     else:
         ptt.tplot([f'mms{probe}_fgm_b_gsm_srvy_l2_bvec',
-                    f'mms{probe}_dis_numberdensity_{data_rate}',
-                    f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
-                    combine_axes=True, save_png='b_n_v_fig', display=False)
+                   f'mms{probe}_dis_numberdensity_{data_rate}',
+                   f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
+                  combine_axes=True, save_png='b_n_v_fig', display=False)
         plt.close("all")
 
     return df_mms_fpi, df_mms_fgm, df_mms

@@ -1,10 +1,11 @@
 import geopack.geopack as gp
 import PyGeopack as gpp
-#from geopack import geopack
-#from geopack.geopack import igrf_gsm
-#from geopack.t96 import t96
-#from geopack.t01 import t01
-#from geopack.t04 import t04
+import numpy as np
+# from geopack import geopack
+# from geopack.geopack import igrf_gsm
+# from geopack.t96 import t96
+# from geopack.t01 import t01
+# from geopack.t04 import t04
 import datetime
 from dateutil import parser
 import time

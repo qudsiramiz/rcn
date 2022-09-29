@@ -3,7 +3,6 @@ import os
 import time
 import pytz
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyspedas as spd
@@ -53,18 +52,18 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     mms_fpi_varnames = [f'mms{probe}_dis_numberdensity_{data_rate}',
                         f'mms{probe}_dis_bulkv_gse_{data_rate}']
-    mms_fpi_vars = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level=level,
-                               datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
-                               latest_version=latest_version)
+    _ = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level=level,
+                    datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
+                    latest_version=latest_version)
     # Convert from GSE to GSM data
 
     mms_fpi_time = ptt.get_data(mms_fpi_varnames[0])[0]
     mms_fpi_numberdensity = ptt.get_data(mms_fpi_varnames[0])[1]
-    mms_fpi_bulkv_gse = ptt.get_data(mms_fpi_varnames[1])[1:4][0]
+    _ = ptt.get_data(mms_fpi_varnames[1])[1:4][0]
     # Covert gse to gsm
     _ = spd.cotrans(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}', name_out='v_gsm',
                             coord_in='gse', coord_out='gsm')
-    
+
     mms_fpi_bulkv_gsm = ptt.get_data('v_gsm')[1:4][0]
 
     # Convert the time to a datetime object
@@ -72,11 +71,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Create a dataframe with the data
     df_mms_fpi = pd.DataFrame(index=mms_fpi_time, data={'np': mms_fpi_numberdensity,
-                                                        'vp_gsm_x': mms_fpi_bulkv_gsm[:,0],
-                                                        'vp_gsm_y': mms_fpi_bulkv_gsm[:,1],
-                                                        'vp_gsm_z': mms_fpi_bulkv_gsm[:,2]})
+                                                        'vp_gsm_x': mms_fpi_bulkv_gsm[:, 0],
+                                                        'vp_gsm_y': mms_fpi_bulkv_gsm[:, 1],
+                                                        'vp_gsm_z': mms_fpi_bulkv_gsm[:, 2]})
 
-    # 
+    #
     # Compute the difference in velocity between the two points separated by 2 minutes
     periods = int(dt / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
     df_mms_fpi['vp_diff'] = abs(df_mms_fpi['vp_gsm_z'] -
@@ -87,7 +86,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     v_thresh = 70
     N = 3
     ind_vals = np.flatnonzero(np.convolve(df_mms_fpi['vp_diff'] > v_thresh,
-                              np.ones(N, dtype=int), 'valid')>=N)
+                              np.ones(N, dtype=int), 'valid') >= N)
 
     # If ind_vals is not empty, then append the crossing time to the csv file
     if len(ind_vals) > 0:
@@ -100,9 +99,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
         # Get the position of mms spacecraft in gsm coordinates
         mms_mec_varnames = [f'mms{probe}_mec_r_gsm']
-        mms_mec_vars = spd.mms.mec(trange=trange, varnames=mms_mec_varnames, probe=probe,
-                               data_rate='srvy', level='l2', time_clip=time_clip,
-                               latest_version=latest_version)
+        _ = spd.mms.mec(trange=trange, varnames=mms_mec_varnames, probe=probe,
+                        data_rate='srvy', level='l2', time_clip=time_clip,
+                        latest_version=latest_version)
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
         mms_sc_pos = ptt.get_data(mms_mec_varnames[0])[1:3][0][0] / r_e
@@ -123,27 +122,28 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     return ind_vals
 
+
 # Read the list of dates from the csv file
 df = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 
 # Convert the dates to datetime objects
-#df["DateStart"] = pd.to_datetime(df["DateStart"])
+# df["DateStart"] = pd.to_datetime(df["DateStart"])
 
 # Set the index to the date column
 df.set_index("DateStart", inplace=True)
 
 # Set the timezone to UTC
-#df.index = df.index.tz_localize(pytz.utc)
+# df.index = df.index.tz_localize(pytz.utc)
 
 jet_reversal_inputs = {
-    "dt" : 120,
-    "probe" : 3,
-    "data_rate" : 'fast',
-    "level" : 'l2',
-    "data_type" : 'dis-moms',
-    "time_clip" : True,
-    "latest_version" : True,
-    "fname" : '../data/mms_jet_reversal_times.csv'
+    "dt": 120,
+    "probe": 3,
+    "data_rate": 'fast',
+    "level": 'l2',
+    "data_type": 'dis-moms',
+    "time_clip": True,
+    "latest_version": True,
+    "fname": '../data/mms_jet_reversal_times.csv'
 }
 
 for i, crossing_time in enumerate(df.index[1000:]):
@@ -157,15 +157,14 @@ for i, crossing_time in enumerate(df.index[1000:]):
         print(f'\033[92m{i}\033[0m\n\n')
 
 
-#plt.figure()
-## Convert t from unix seconds to datetime
-#t = pd.to_datetime(t, unit='s')
-#plt.plot(df.np)
-#plt.show()
+# plt.figure()
+# # Convert t from unix seconds to datetime
+# t = pd.to_datetime(t, unit='s')
+# plt.plot(df.np)
+# plt.show()
 
-#plt.figure()
-#plt.plot(df.vp_gsm_x, 'b-', label='Vx GSM')
-#plt.plot(df.vp_gsm_y, 'g-', label='Vy GSM')
-#plt.plot(df.vp_gsm_z, 'r-', label='Vz GSM')
-#plt.show()
-
+# plt.figure()
+# plt.plot(df.vp_gsm_x, 'b-', label='Vx GSM')
+# plt.plot(df.vp_gsm_y, 'g-', label='Vy GSM')
+# plt.plot(df.vp_gsm_z, 'r-', label='Vz GSM')
+# plt.show()

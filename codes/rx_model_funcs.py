@@ -1,9 +1,7 @@
 # functions to be used in rx_model_batch_parallel.py
 import datetime
-from logging import exception
 import multiprocessing as mp
 import os
-from pydoc import cli
 import warnings
 
 import geopack.geopack as gp
@@ -621,9 +619,9 @@ def ridge_finder_multiple(
 
         # Smoothen the image
         image_smooth = sp.ndimage.gaussian_filter(image_rotated, order=convolution_order[i],
-                                                          sigma=[5, 5], mode=mode)
+                                                  sigma=[5, 5], mode=mode)
         image_smooth_p = sp.ndimage.gaussian_filter(image_rotated, order=0, sigma=[5, 5],
-                                                            mode=mode)
+                                                    mode=mode)
         result = frangi(image_smooth, **kwargs)  # frangi, hessian, meijering, sato
 
         m_result = result.copy()
@@ -674,7 +672,8 @@ def ridge_finder_multiple(
         r_a_l = 5
         for xx in range(len(y_val)):
             y_val_avg[xx] = np.nanmean(y_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
-            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
+            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - r_a_l):min(len(y_val),
+                                            xx + r_a_l)])
 
         if draw_ridge:
             # axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
@@ -683,11 +682,11 @@ def ridge_finder_multiple(
             y_intr_vals = im_max_val_avg
             # If the square root of the sum of squares of x_intr_vals and y_intr_vals is greater
             # than 15, then mask those values
-            r_intr_vals = np.sqrt(x_intr_vals ** 2 + y_intr_vals ** 2)
-            #mask = r_intr_vals > 15
+            # r_intr_vals = np.sqrt(x_intr_vals ** 2 + y_intr_vals ** 2)
+            # mask = r_intr_vals > 15
             # Mask the values of x_intr_vals and y_intr_vals
-            #x_intr_vals[mask] = np.nan
-            #y_intr_vals[mask] = np.nan
+            # x_intr_vals[mask] = np.nan
+            # y_intr_vals[mask] = np.nan
             axs1.plot(x_intr_vals, y_intr_vals, color='aqua', ls='-', alpha=0.9)
 
         # Find the interpolation function corresponding to the x_vals and y_val_avg array
@@ -757,7 +756,6 @@ def ridge_finder_multiple(
         if dist_rc > xrange[1]:
             dist_rc = np.nan
 
-        # 
         if i == 0:
             method_used = 'shear'
         elif i == 1:
@@ -796,7 +794,7 @@ def ridge_finder_multiple(
                 "jet_detection": jet_detection,
                 "r_W": r_W,
                 "theta_W": theta_W,
-                #"jet_time": jet_time,
+                # "jet_time": jet_time,
                 "np_median_msp": np_median_msp,
                 "np_median_msh": np_median_msh,
                 "b_imf_x": b_imf[0],
@@ -880,7 +878,7 @@ def ridge_finder_multiple(
                              labelbottom=False, pad=0.01, labelsize=ct_tick_size,
                              labelcolor=label_color)
         cbar1.ax.xaxis.set_label_position('top')
-        #cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size,
+        # cbar1.ax.set_xlabel(f'{c_label[i]} ({c_unit[i]})', fontsize=c_label_size,
         #                    color=clabel_color)
         cbar1.ax.set_xlabel(f'{c_label[i]}', fontsize=c_label_size,
                             color=clabel_color)
@@ -941,10 +939,12 @@ def ridge_finder_multiple(
         plt.setp(axs1.get_yticklabels(), rotation=0, va='center', visible=True)
         # Set the title of the plot
         if dark_mode:
-            fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
+            fig.suptitle(f'Time range: '
+                         f'{t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
                          fontsize=label_size, color='w', y=title_y_pos, alpha=0.65)
         else:
-            fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
+            fig.suptitle(f'Time range: '
+                         f'{t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
                          fontsize=label_size, color='crimson', y=title_y_pos, alpha=1)
 
     # fig.show()
@@ -973,8 +973,8 @@ def ridge_finder_multiple(
             print(e)
             print('Figure not saved, folder does not exist. Create folder ../figures')
             # pass
-        #plt.close()
-    #plt.savefig("/home/cephadrius/Dropbox/test.pdf", bbox_inches='tight', pad_inches=0.05, dpi=200)
+        # plt.close()
+    # plt.savefig("/home/cephadrius/Dropbox/test.pdf", bbox_inches='tight', pad_inches=0.05, dpi=200)
     plt.close()
     return y_vals, x_intr_vals_list, y_intr_vals_list
 
@@ -1034,7 +1034,7 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
         axs1.set_title(r'Magnetosphere Field (nT)', fontsize=label_fontsize)
     else:
         axs1.set_title(r'Draping Field (nT)', fontsize=label_fontsize)
-    
+
     axs1.tick_params(axis='both', which='major', labelsize=tick_fontsize)
 
     if save_fig:
@@ -1160,7 +1160,8 @@ def model_run(*args):
             bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
             break
 
-    return j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz
+    return (j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, x_shu, y_shu, z_shu, b_msx,
+            b_msy, b_msz)
 
 
 def get_sw_params(
@@ -1295,7 +1296,8 @@ def get_sw_params(
              ["IMF clock angle (degrees)", f"{imf_clock_angle:.2f}"],
              ["IMF Sym H", f"{sym_h_imf:.2f}"],
              ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f}, {mean_mms_sc_pos[2]:.2f}]"]],
-            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f", numalign="center"))
+            headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
+            numalign="center"))
 
     # Check if the values are finite, if not then assign a default value to each of them
     if ~(np.isfinite(np_imf)):
@@ -1535,7 +1537,8 @@ def rx_model(
             print(f'Data not saved to file {fn}. Please make sure that file name is correctly' +
                   ' assigned and that the directory exists and you have write permissions')
 
-    return (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu, b_msx, b_msy, b_msz)
+    return (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu,
+            b_msx, b_msy, b_msz)
 
 
 def line_fnc(
@@ -1594,6 +1597,7 @@ def target_fnc(r, r0, b_msh, line_fnc, line_intrp):
     p_line = line_fnc(r0=r0, b_msh=b_msh, r=r)
     z_surface = line_intrp(p_line[1])
     return np.sum((p_line[2] - z_surface)**2)
+
 
 def nan_helper(y):
     """Helper to handle indices and logical indices of NaNs.
