@@ -3,9 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import rx_model_funcs as rxmf
-import seaborn as sns
+import seaborn_plots as sp
 
 importlib.reload(rxmf)
+importlib.reload(sp)
 
 file_name = "../data/rx_d/reconnection_line_data_mms3_20220927.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
@@ -116,7 +117,7 @@ key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} 
              "$Tp_{\\parallel} (K)$", "$Tp_{\\perp} (K)$"]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-dark_mode = True
+dark_mode = False
 
 if dark_mode:
     plt.style.use('dark_background')
@@ -182,7 +183,7 @@ for key, key2 in zip(key_list, key2_list):
 #plt.plot(df_bisec.beta_msh_mean, df_bisec.r_rc, c='w', marker=".", ls=None, lw=0, ms=5, alpha=0.5)
 #plt.xscale('log')
     plt.savefig(f"../figures/rc_v_{key}.png")
-"""
+
 shear_angle_theory = np.logspace(-1, np.log10(180), 100)
 delta_beta_theory_half = np.tan(np.deg2rad(shear_angle_theory/2))
 delta_beta_theory_one = 2 * np.tan(np.deg2rad(shear_angle_theory/2))
@@ -211,3 +212,5 @@ plt.yscale('log')
 plt.savefig("../figures/delta_beta_v_shear_angle_mean.png")
 
 plt.close('all')
+"""
+sp.kde_plots(df_shear.delta_beta.values, df_shear.msh_msp_shear.values)
