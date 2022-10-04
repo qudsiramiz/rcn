@@ -3,6 +3,7 @@ import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 
 import SeabornFig2Grid as sfg
 
@@ -13,12 +14,14 @@ def kde_plots(
               y=None,
               x_label="",
               y_label="",
+              data_type="",
               log_scale=True,
-              x_scale="lin",
-              y_scale="lin",
+              x_log_scale=False,
+              y_log_scale=False,
               xlim=[0, 2e1],
               ylim=[1e-1, 2e2],
               color="blue",
+              marker_size=20,
               spearman=None,
               pearson=None,
               cmap="Blues",
@@ -28,6 +31,8 @@ def kde_plots(
               ratio=8,
               space=0,
               alpha=0.7,
+              bins=20,
+              dark_mode=False,
               ):
 
     pad = 7
@@ -35,23 +40,6 @@ def kde_plots(
     ticklabelsize = 38
     clabelsize = 30
     ticklength = 10
-    
-    #plt.subplots_adjust(left=.1, right=.9, top=0.9, bottom=0.1)
-
-    # Find indices of the data where the data is not nan
-    # ind_not_nan_x = np.where(np.logical_not(np.isnan(x_data)))[0]
-    # ind_not_nan_y = np.where(np.logical_not(np.isnan(y_data)))[0]
-    # # Find the intersection of the two sets of indices
-    # ind_not_nan = np.intersect1d(ind_not_nan_x, ind_not_nan_y)
-    # x_data = x_data[ind_not_nan]
-    # y_data = y_data[ind_not_nan]
-
-    # axs1 = sns.jointplot(x=x_data, y=y_data, kind=kind, cbar=cbar_status, thresh=thresh,
-    #                     fill=fill_status, levels=nlevels, log_scale=log_scale, hue_norm=hue_norm,
-    #                     cmap=cmap, xlim=xlim, ylim=ylim, height=height, ratio=ratio, space=space,
-    #                     vertical=vertical)
-    # axs1 = sns.jointplot(x=x_data, y=y_data, kind=kind, hue_norm=hue_norm,
-    #                     cmap=cmap, xlim=xlim, ylim=ylim, height=height, ratio=ratio, space=space)
 
     # Remove all occurances of delta_beta where delta_beta is less than 0
     if log_scale:
@@ -60,8 +48,16 @@ def kde_plots(
 
     axs1 = sns.JointGrid(x=x, y=y, data=df, xlim=xlim, ylim=ylim, height=height, ratio=ratio,
                          space=space, hue_norm=hue_norm)
-    axs1.plot_joint(sns.scatterplot, s=25 * df["r_rc"], alpha=alpha)
-    axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale)
+    axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
+    # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
+    #                     bins=bins, stat="density", common_norm=True, common_bins=True, fill=True,
+    #                     linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
+    sns.histplot(data=df, x=x, bins=bins[0], ax=axs1.ax_marg_x, legend=False, color=color,
+                 alpha=alpha, kde=True, log_scale=x_log_scale, stat="density", common_norm=True,
+                 common_bins=True, fill=True, linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
+    sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
+                 alpha=alpha, kde=True, log_scale=y_log_scale, stat="density", common_norm=True,
+                 common_bins=True, fill=True, linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
     # hue='delta_beta', hue_norm=hue_norm, bins=20, kde=True, stat='density', common_norm=False, common_bins=False, multiple='stack', shrink=.8, alpha=0.8)
     #axs1.plot(sns.scatterplot, sns.histplot)
 
@@ -81,20 +77,29 @@ def kde_plots(
         for handle in lgnd.legendHandles:
             handle.size = [1]
 
+    if dark_mode:
+        text_color = "white"
+        face_color = "black"
+        edge_color = "white"
+    else:
+        text_color = "black"
+        face_color = "white"
+        edge_color = "black"
     if spearman is not None:
         x_spearman = np.linspace(0, 25, 100)
         y_spearman = spearman * x_spearman + np.mean(df[y]) - spearman*np.mean(df[x])
-        axs1.fig.axes[0].plot(x_spearman, y_spearman, c="w", ls="--", lw=2)
+        axs1.fig.axes[0].plot(x_spearman, y_spearman, c=color, ls="--", lw=5)
         axs1.fig.axes[0].text(0.02, 0.02, f"$\\rho_{{\\rm {'s'}}}$ = {spearman:.2f}\n"
                                           f"$\\rho_{{\\rm {'p'}}}$ = {pearson:.2f}",
-                              transform=plt.gca().transAxes, va="bottom", ha="left",
-                              bbox=dict(facecolor='k', alpha=1, edgecolor='k',
-                              boxstyle='round,pad=0.2'))
+                              transform=axs1.fig.axes[0].transAxes, va="bottom", ha="left",
+                              bbox=dict(facecolor=face_color, alpha=1, edgecolor=edge_color,
+                              boxstyle='round,pad=0.2'), fontsize= 1.3 * clabelsize,
+                              color=text_color)
 
-    if ~log_scale and x_scale == "log":
+    if ~log_scale and x_log_scale:
         axs1.fig.axes[0].set_xscale('log')
     
-    if ~log_scale and y_scale == "log":
+    if ~log_scale and y_log_scale:
         axs1.fig.axes[0].set_yscale('log')
 
     pos_joint_ax = axs1.ax_joint.get_position()
@@ -130,18 +135,14 @@ def kde_plots(
                                  bottom=False, labelleft=False, left=False, width=1.5,
                                  length=ticklength, labelsize=ticklabelsize, labelrotation=0)
 
-    #axs1.fig.axes[3].tick_params(axis='y', which='major', direction='in', labelbottom=False,
-    #                             bottom=False, labelleft=False, left=False, labelright=True,
-    #                             right=True, width=1.5, length=ticklength, labelsize=clabelsize,
-    #                             labelrotation=0)
-
     axs1.set_axis_labels(x_label, y_label, fontsize=labelsize)
-
-
+    axs1.fig.axes[0].text(1, 0.02, f"{data_type}", transform=axs1.fig.axes[0].transAxes,
+                          va="bottom", ha="right", bbox=dict(facecolor=face_color, alpha=1,
+                          edgecolor=edge_color, boxstyle='round,pad=0.2'),
+                          fontsize=1.3 * clabelsize, color=text_color)
     if (fig_save) :
-        fname = f'../figures/{x}_vs_{y}.png'
+        fname = f'../figures/{x}_vs_{y}_{data_type}.png'
         axs1.savefig(fname, format='png', dpi=400)
-    #plt.show()
     plt.close('all')
     return axs1
 
@@ -149,12 +150,20 @@ def kde_plots(
 def seaborn_subplots(
                      df_list=None,
                      keys=[],
-                     figsize=(40, 80),
+                     figsize=(20, 20),
                      labels=[],
+                     data_type=[],
                      color_list=[],
-                     y_scale="log",
-                     x_scale="log",
+                     y_log_scale=False,
+                     x_log_scale=False,
                      log_scale=True,
+                     fig_name=None,
+                     fig_format="png",
+                     bins=None,
+                     nbins=[20, 20],
+                     x_lim=None,
+                     y_lim=None,
+                     dark_mode=False,
                      ):
 
     axs_list = []
@@ -162,24 +171,65 @@ def seaborn_subplots(
         # Find the spearman and pearson correlation between key and "r_rc"
         spearman = df[keys[1]].corr(df["r_rc"], method="spearman")
         pearson = df[keys[1]].corr(df["r_rc"], method="pearson")
-        
-        x_lim = [df[keys[0]].min(), df[keys[0]].max()]
-        y_lim = [df[keys[1]].min(), df[keys[1]].max()]
+
+        if x_lim is None:
+            x_lim = (df[keys[0]].min(), df[keys[0]].max())
+            if x_log_scale and x_lim[0] <= 0:
+                # Set the minimum to minimum value greater than 0
+                x_lim = (df[df[keys[0]] > 0][keys[0]].min(), x_lim[1])
+                # Raise a warning saying that the minimum value was changed
+                warnings.warn(f"\033[91m The minimum value of {keys[0]} was changed from "
+                             f"{df[keys[0]].min():0.3f} to {x_lim[0]:0.3f} to avoid a log scale "
+                             "error.\033[0m")
+
+        if y_lim is None:            
+            y_lim = [df[keys[1]].min(), df[keys[1]].max()]
+            if y_log_scale and y_lim[0] <= 0:
+                # Set the minimum to minimum value greater than 0
+                y_lim = (df[df[keys[1]] > 0][keys[1]].min(), y_lim[1])
+                # Raise a warning saying that the minimum value was changed
+                warnings.warn(f"\033[91m The minimum value of {keys[1]} was changed from "
+                             f"{df[keys[1]].min():0.3f} to {y_lim[0]:0.3f} to avoid a log scale "
+                             "error.\033[0m")
+
+        if bins is None and (x_log_scale or y_log_scale):
+            if x_log_scale and y_log_scale:
+                bins = [np.logspace(np.log10(x_lim[0]), np.log10(x_lim[1]), nbins[0]),
+                        np.logspace(np.log10(y_lim[0]), np.log10(y_lim[1]), nbins[1])]
+            elif x_log_scale and not y_log_scale:
+                bins = [np.logspace(np.log10(x_lim[0]), np.log10(x_lim[1]), nbins[0]),
+                        np.linspace(y_lim[0], y_lim[1], nbins[1])]
+            elif not x_log_scale and not y_log_scale:
+                bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
+                        np.logspace(np.log10(y_lim[0]), np.log10(y_lim[1]), nbins[1])]
+        elif bins is None and not (x_log_scale or y_log_scale):
+            bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
+                    np.linspace(y_lim[0], y_lim[1], nbins[1])]
+
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
-                        y_label=labels[1], log_scale=log_scale, x_scale=x_scale, y_scale=y_scale,
-                        xlim=x_lim, ylim=y_lim, color=color_list[i],
-                        spearman=spearman, pearson=pearson, fig_save=False)
+                        y_label=labels[1], data_type=data_type[i], log_scale=log_scale, x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
+                        xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
+                        pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
 
     fig = plt.figure(figsize=(figsize[0], figsize[1]))
+    # fig.subplots_adjust(hspace=0.01, wspace=0.01, left=0.03, right=1.5, top=0.65, bottom=0.03)
     gs = gridspec.GridSpec(2, 2)
 
-    mg0 = sfg.SeabornFig2Grid(axs_list[0] fig, gs[0])
-    mg1 = sfg.SeabornFig2Grid(axs_list[1] fig, gs[1])
-    mg2 = sfg.SeabornFig2Grid(axs_list[2] fig, gs[2])
-    mg3 = sfg.SeabornFig2Grid(axs_list[3] fig, gs[3])
+    mg0 = sfg.SeabornFig2Grid(axs_list[0], fig, gs[0])
+    mg1 = sfg.SeabornFig2Grid(axs_list[1], fig, gs[1])
+    mg2 = sfg.SeabornFig2Grid(axs_list[2], fig, gs[2])
+    mg3 = sfg.SeabornFig2Grid(axs_list[3], fig, gs[3])
 
     gs.tight_layout(fig)
-    #gs.update(top=0.7)
-    plt.savefig("../figures/test.png", dpi=300, bbox_inches='tight', pad_inches=0.1)
+    gs.update(top=1, bottom=0.05, left=0.08, right=1, hspace=0.01, wspace=0.20)
+    if fig_name is None:
+        fig_name = f"../figures/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}.{fig_format}"
+    else:
+        fig_name = f"../figures/{fig_name}_{dark_mode}.{fig_format}"
+    fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
+    print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
+    #plt.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.1, format=fig_format)
+    #print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
     #plt.show()
+    return axs_list

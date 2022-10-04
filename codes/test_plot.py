@@ -10,6 +10,7 @@ import SeabornFig2Grid as sfg
 
 importlib.reload(rxmf)
 importlib.reload(sp)
+importlib.reload(sfg)
 
 file_name = "../data/rx_d/reconnection_line_data_mms3_20220927.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
@@ -119,6 +120,9 @@ key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} 
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
              "$Tp_{\\parallel} (K)$", "$Tp_{\\perp} (K)$"]
 
+x_scale_list = [False, False, False, False, False, False, False, False]
+y_scale_list = [False, False, False, False, True, False, True, True]
+
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 dark_mode = True
 
@@ -142,102 +146,14 @@ plt.rc('text', usetex=True)
 
 label_fontsize = 15
 tick_fontsize = 12
+data_type = ["shear", "rx_en", "va_cs", "bisec"]
+for i, (key, key2) in enumerate(zip(key_list[1:], key2_list[1:])):
+    axs_list =  sp.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
+                                   labels=["Reconnection Distance $(R_\oplus)$", key2],
+                                   data_type=data_type, color_list=color_list, log_scale=False,
+                                   x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
+                                   fig_name=None, fig_format="pdf", nbins=[20, 20],
+                                   dark_mode=dark_mode)
 
-for key, key2 in zip(key_list, key2_list):
-    plt.figure(figsize=(8,8))
-    for i, df in enumerate(df_list):
-        # Find the spearman and pearson correlation between key and "r_rc"
-        spearman = df[key].corr(df["r_rc"], method="spearman")
-        pearson = df[key].corr(df["r_rc"], method="pearson")
-
-        plt.subplot(2, 2, i+1)
-        plt.plot(df.r_rc, df[key], c=color_list[i], marker=".", ls=None, lw=0, label=label[i])
-        # Make a line with slope of spearman correlation coefficient
-        x = np.linspace(0, 25, 100)
-        y = spearman*x + np.mean(df[key]) - spearman*np.mean(df.r_rc)
-        plt.plot(x, y, c="w", ls="--", lw=2)
-
-        # Get the r^2 value
-        r2 = pearson**2
-
-        # Print the correlation coefficient on the plot in a box
-        plt.text(0.02, 0.02, f"$\\rho_{{\\rm {'s'}}}$ = {spearman:.2f}\n"
-                             f"$\\rho_{{\\rm {'p'}}}$ = {pearson:.2f}",
-                 transform=plt.gca().transAxes, va="bottom", ha="left",
-                 bbox=dict(facecolor='k', alpha=1, edgecolor='k', boxstyle='round,pad=0.2'))
-        plt.legend(loc=4, frameon=False, fontsize=10, ncol=1, handlelength=0.1)
-        plt.ylabel(f"{key2}")
-        plt.xlabel("Reconnection Distance $(R_\oplus)$")
-        if key == "beta_msh_mean" or key=="tp_para_msp_median" or key=="tp_perp_msp_median":
-            plt.yscale("log")
-        # if key == "b_imf_z":
-        #     plt.xlim(-5, 5)
-        plt.xlim(0, 20)
-        # Reverse the x-axis
-        if key == "imf_clock_angle":
-            plt.gca().invert_yaxis()
-    plt.suptitle(f"Reconnection Distance vs {key2}")
-    plt.tight_layout()
-
-#plt.plot(df_shear.imf_clock_angle, df_shear.r_rc, c='b', marker=".", ls=None, lw=0, label="Shear")
-#plt.plot(df_rx_en.imf_clock_angle, df_rx_en.r_rc, c='orange', marker=".", ls=None, lw=0)
-#plt.plot(df_va_cs.imf_clock_angle, df_va_cs.r_rc, c='g', marker=".", ls=None, lw=0)
-#plt.plot(df_bisec_imfz.imf_clock_angle, df_bisec_imfz.r_rc, c='r', marker=".", ls=None, lw=0, ms=5, alpha=0.5)
-#plt.plot(df_bisec.beta_msh_mean, df_bisec.r_rc, c='w', marker=".", ls=None, lw=0, ms=5, alpha=0.5)
-#plt.xscale('log')
-    plt.savefig(f"../figures/rc_v_{key}.png")
-
-shear_angle_theory = np.logspace(-1, np.log10(180), 100)
-delta_beta_theory_half = np.tan(np.deg2rad(shear_angle_theory/2))
-delta_beta_theory_one = 2 * np.tan(np.deg2rad(shear_angle_theory/2))
-delta_beta_theory_two = 4 * np.tan(np.deg2rad(shear_angle_theory/2))
-
-# Plot the delta beta vs shear angle
-plt.figure(figsize=(8,8))
-plt.scatter(df_shear.delta_beta, df_shear.msh_msp_shear, c=color_list[1], marker=".",
-            s=25*df_shear.r_rc.values, alpha=0.7)
-plt.plot(delta_beta_theory_half, shear_angle_theory, marker='.', c="w", ls=None, lw=0, label="Half")
-plt.plot(delta_beta_theory_one, shear_angle_theory, marker='.', c="b", ls=None, lw=0, label="One")
-plt.plot(delta_beta_theory_two, shear_angle_theory, marker='.', c="g", ls=None, lw=0, label="Two")
-
-lgnd = plt.legend(loc=4, frameon=False, fontsize=10, ncol=1, handlelength=0.1)
-for handle in lgnd.legendHandles:
-    handle.size = [1]
-
-plt.xlabel("$\\Delta \\beta$", fontsize=label_fontsize)
-plt.ylabel("Shear Angle (${~}^{0}$)", fontsize=label_fontsize)
-plt.title("Shear Angle vs $\\Delta \\beta$", fontsize=1.2 * label_fontsize)
-plt.tick_params(axis='both', which='major', labelsize=tick_fontsize)
-plt.xlim(1e-3, 2e1)
-plt.ylim(1e-1, 2e2)
-plt.xscale('log')
-plt.yscale('log')
-plt.savefig("../figures/delta_beta_v_shear_angle_mean.png")
-
-plt.close('all')
-
-# sp.kde_plots(df_shear.delta_beta.values, df_shear.msh_msp_shear.values)
-
-
-axs1 = sp.kde_plots(df=df_shear, x="delta_beta", y="msh_msp_shear",
-                    x_label=r"$\Delta \beta_{\rm msh - msp}$", y_label=r"Shear Angle (${~}^{0}$)",
-                    log_scale=True)
-
-axs2 = sp.kde_plots(df=df_shear, x="delta_beta", y="msh_msp_shear",
-                    x_label=r"$\Delta \beta_{\rm msh - msp}$", y_label=r"Shear Angle (${~}^{0}$)",
-                    log_scale=True)
-
-
-fig = plt.figure(figsize=(40,80))
-gs = gridspec.GridSpec(2, 1)
-
-mg0 = sfg.SeabornFig2Grid(axs1, fig, gs[0])
-mg1 = sfg.SeabornFig2Grid(axs2, fig, gs[1])
-#mg2 = sfg.SeabornFig2Grid(g2, fig, gs[3])
-#mg3 = sfg.SeabornFig2Grid(g3, fig, gs[2])
-
-gs.tight_layout(fig)
-#gs.update(top=0.7)
-
-plt.savefig("../figures/test.png", dpi=300, bbox_inches='tight', pad_inches=0.1)
+# plt.show()
 plt.close('all')
