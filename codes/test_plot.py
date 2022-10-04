@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import rx_model_funcs as rxmf
 import seaborn_plots as sp
+import matplotlib.gridspec as gridspec
+import seaborn as sns; sns.set()
+import SeabornFig2Grid as sfg
 
 importlib.reload(rxmf)
 importlib.reload(sp)
@@ -117,7 +120,7 @@ key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} 
              "$Tp_{\\parallel} (K)$", "$Tp_{\\perp} (K)$"]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-dark_mode = False
+dark_mode = True
 
 if dark_mode:
     plt.style.use('dark_background')
@@ -139,7 +142,7 @@ plt.rc('text', usetex=True)
 
 label_fontsize = 15
 tick_fontsize = 12
-"""
+
 for key, key2 in zip(key_list, key2_list):
     plt.figure(figsize=(8,8))
     for i, df in enumerate(df_list):
@@ -212,5 +215,29 @@ plt.yscale('log')
 plt.savefig("../figures/delta_beta_v_shear_angle_mean.png")
 
 plt.close('all')
-"""
-sp.kde_plots(df_shear.delta_beta.values, df_shear.msh_msp_shear.values)
+
+# sp.kde_plots(df_shear.delta_beta.values, df_shear.msh_msp_shear.values)
+
+
+axs1 = sp.kde_plots(df=df_shear, x="delta_beta", y="msh_msp_shear",
+                    x_label=r"$\Delta \beta_{\rm msh - msp}$", y_label=r"Shear Angle (${~}^{0}$)",
+                    log_scale=True)
+
+axs2 = sp.kde_plots(df=df_shear, x="delta_beta", y="msh_msp_shear",
+                    x_label=r"$\Delta \beta_{\rm msh - msp}$", y_label=r"Shear Angle (${~}^{0}$)",
+                    log_scale=True)
+
+
+fig = plt.figure(figsize=(40,80))
+gs = gridspec.GridSpec(2, 1)
+
+mg0 = sfg.SeabornFig2Grid(axs1, fig, gs[0])
+mg1 = sfg.SeabornFig2Grid(axs2, fig, gs[1])
+#mg2 = sfg.SeabornFig2Grid(g2, fig, gs[3])
+#mg3 = sfg.SeabornFig2Grid(g3, fig, gs[2])
+
+gs.tight_layout(fig)
+#gs.update(top=0.7)
+
+plt.savefig("../figures/test.png", dpi=300, bbox_inches='tight', pad_inches=0.1)
+plt.close('all')
