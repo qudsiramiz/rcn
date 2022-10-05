@@ -111,15 +111,26 @@ df_shear["msh_msp_shear"] = msh_msp_shear
 df_shear["delta_beta"] = delta_beta
 
 df_list = [df_shear, df_rx_en, df_va_cs, df_bisec]
+
+# For each dataframe in the list, divide the temperature by 1e6
+for df in df_list:
+    df["tp_para_msh_mean"] = df["tp_para_msh_mean"] / 1e6
+    df["tp_para_msh_median"] = df["tp_para_msh_median"] / 1e6
+    df["tp_para_msp_mean"] = df["tp_para_msp_mean"] / 1e6
+    df["tp_para_msp_median"] = df["tp_para_msp_median"] / 1e6
+    df["tp_perp_msh_mean"] = df["tp_perp_msh_mean"] / 1e6
+    df["tp_perp_msh_median"] = df["tp_perp_msh_median"] / 1e6
+    df["tp_perp_msp_mean"] = df["tp_perp_msp_mean"] / 1e6
+    df["tp_perp_msp_median"] = df["tp_perp_msp_median"] / 1e6
 label = ["Shear", "Rx En", "Va Cs", "Bisec"]
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median"]
 key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
-             "$Tp_{\\parallel} (K)$", "$Tp_{\\perp} (K)$"]
+             "$Tp_{\\parallel} (10^6 K)$", "$Tp_{\\perp} (10^6 K)$"]
 
 x_scale_list = [False, False, False, False, False, False, False, False]
-y_scale_list = [False, False, False, False, True, False, True, True]
+y_scale_list = [False, False, False, False, True, True, True, True]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 dark_mode = True
@@ -145,7 +156,9 @@ plt.rc('text', usetex=True)
 label_fontsize = 15
 tick_fontsize = 12
 data_type = ["shear", "rx_en", "va_cs", "bisec"]
-for i, (key, key2) in enumerate(zip(key_list[1:], key2_list[1:])):
+ind1 = 0
+ind2 = -1
+for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     axs_list = sp.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
                                    labels=[r"Reconnection Distance $(R_\oplus)$", key2],
                                    data_type=data_type, color_list=color_list, log_scale=False,

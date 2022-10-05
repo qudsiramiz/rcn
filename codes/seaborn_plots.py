@@ -52,15 +52,21 @@ def kde_plots(
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
     #                     bins=bins, stat="density", common_norm=True, common_bins=True, fill=True,
     #                     linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
-    sns.histplot(data=df, x=x, bins=bins[0], ax=axs1.ax_marg_x, legend=False, color=color,
+    axs2 = sns.histplot(data=df, x=x, bins=bins[0], ax=axs1.ax_marg_x, legend=False, color=color,
                  alpha=alpha, kde=True, log_scale=x_log_scale, stat="density", common_norm=True,
                  common_bins=True, fill=True, linewidth=2, edgecolor=color,
                  line_kws={"linewidth": 5, "color": color})
-    sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
+
+    axs1.ax_marg_x.set_xlim(xlim)
+    axs1.ax_marg_y.set_ylim(ylim)
+    axs1.ax_marg_x.set_yscale("linear")
+    axs1.ax_marg_y.set_xscale("log")
+    axs3 = sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
                  alpha=alpha, kde=True, log_scale=y_log_scale, stat="density", common_norm=True,
-                 common_bins=True, fill=True, linewidth=2, edgecolor=color,
+                 common_bins=False, fill=True, linewidth=2, edgecolor=color,
                  line_kws={"linewidth": 5, "color": color})
 
+    # print(f"The y bins are {bins[1]}")
     if y == "msh_msp_shear":
         shear_angle_theory = np.logspace(-1, np.log10(180), 100)
         delta_beta_theory_half = np.tan(np.deg2rad(shear_angle_theory/2))
@@ -95,12 +101,6 @@ def kde_plots(
                               bbox=dict(facecolor=face_color, alpha=1, edgecolor=edge_color,
                                         boxstyle='round,pad=0.2'), fontsize=1.3 * clabelsize,
                               color=text_color)
-
-    if ~log_scale and x_log_scale:
-        axs1.fig.axes[0].set_xscale('log')
-
-    if ~log_scale and y_log_scale:
-        axs1.fig.axes[0].set_yscale('log')
 
     pos_joint_ax = axs1.ax_joint.get_position()
     pos_marg_x_ax = axs1.ax_marg_x.get_position()
@@ -164,24 +164,24 @@ def seaborn_subplots(
 
         if x_lim is None:
             x_lim = (df[keys[0]].min(), df[keys[0]].max())
-            if x_log_scale and x_lim[0] <= 0:
-                # Set the minimum to minimum value greater than 0
-                x_lim = (df[df[keys[0]] > 0][keys[0]].min(), x_lim[1])
-                # Raise a warning saying that the minimum value was changed
-                warnings.warn(f"\033[91m The minimum value of {keys[0]} was changed from "
-                              f"{df[keys[0]].min():0.3f} to {x_lim[0]:0.3f} to avoid a log scale "
-                              "error.\033[0m")
+        if x_log_scale and x_lim[0] <= 0:
+            # Raise a warning saying that the minimum value was changed
+            warnings.warn(f"\033[91m The minimum value of {keys[0]} was changed from "
+                            f"{df[keys[0]].min():0.3f} to {x_lim[0]:0.3f} to avoid a log scale "
+                            "error.\033[0m")
+            # Set the minimum to minimum value greater than 0
+            x_lim = (df[df[keys[0]] > 0][keys[0]].min(), x_lim[1])
 
         if y_lim is None:
             y_lim = [df[keys[1]].min(), df[keys[1]].max()]
-            if y_log_scale and y_lim[0] <= 0:
-                # Set the minimum to minimum value greater than 0
-                y_lim = (df[df[keys[1]] > 0][keys[1]].min(), y_lim[1])
-                # Raise a warning saying that the minimum value was changed
-                warnings.warn(f"\033[91m The minimum value of {keys[1]} was changed from "
-                              f"{df[keys[1]].min():0.3f} to {y_lim[0]:0.3f} to avoid a log scale "
-                              "error.\033[0m")
+        if y_log_scale and y_lim[0] <= 0:
+            # Raise a warning saying that the minimum value was changed
+            warnings.warn(f"\033[91m The minimum value of {keys[1]} was changed from "
+                            f"{df[keys[1]].min():0.3f} to {y_lim[0]:0.3f} to avoid a log scale "
+                            "error.\033[0m")
 
+            # Set the minimum to minimum value greater than 0
+            y_lim = (df[df[keys[1]] > 0][keys[1]].min(), y_lim[1])
         if bins is None and (x_log_scale or y_log_scale):
             if x_log_scale and y_log_scale:
                 bins = [np.logspace(np.log10(x_lim[0]), np.log10(x_lim[1]), nbins[0]),
@@ -189,18 +189,18 @@ def seaborn_subplots(
             elif x_log_scale and not y_log_scale:
                 bins = [np.logspace(np.log10(x_lim[0]), np.log10(x_lim[1]), nbins[0]),
                         np.linspace(y_lim[0], y_lim[1], nbins[1])]
-            elif not x_log_scale and not y_log_scale:
+            elif not x_log_scale and y_log_scale:
                 bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
                         np.logspace(np.log10(y_lim[0]), np.log10(y_lim[1]), nbins[1])]
         elif bins is None and not (x_log_scale or y_log_scale):
             bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
                     np.linspace(y_lim[0], y_lim[1], nbins[1])]
-
+        # print(bins)
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
                         xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
-                        pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
+                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
 
     fig = plt.figure(figsize=(figsize[0], figsize[1]))
