@@ -126,7 +126,7 @@ figure_inputs = {
     "fig_name" : f'all_ridge_plots_v2',
     #"fig_format" : 'png',
     "c_label" : ['Shear', 'Reconnection Energy', 'Exhaust Velocity', 'Bisection Field'],
-    "c_unit" : [r'${}^\circ$', 'nPa', 'km/s', 'nT'],
+    "c_unit" : [r'${}^\\circ$', 'nPa', 'km/s', 'nT'],
     "wspace" : 0.0,
     "hspace" : 0.17,
     "fig_size" : (8.775, 10),

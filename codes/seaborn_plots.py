@@ -1,4 +1,4 @@
-import seaborn as sns; sns.set()
+import seaborn as sns
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
@@ -54,12 +54,12 @@ def kde_plots(
     #                     linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
     sns.histplot(data=df, x=x, bins=bins[0], ax=axs1.ax_marg_x, legend=False, color=color,
                  alpha=alpha, kde=True, log_scale=x_log_scale, stat="density", common_norm=True,
-                 common_bins=True, fill=True, linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
+                 common_bins=True, fill=True, linewidth=2, edgecolor=color,
+                 line_kws={"linewidth": 5, "color": color})
     sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
                  alpha=alpha, kde=True, log_scale=y_log_scale, stat="density", common_norm=True,
-                 common_bins=True, fill=True, linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
-    # hue='delta_beta', hue_norm=hue_norm, bins=20, kde=True, stat='density', common_norm=False, common_bins=False, multiple='stack', shrink=.8, alpha=0.8)
-    #axs1.plot(sns.scatterplot, sns.histplot)
+                 common_bins=True, fill=True, linewidth=2, edgecolor=color,
+                 line_kws={"linewidth": 5, "color": color})
 
     if y == "msh_msp_shear":
         shear_angle_theory = np.logspace(-1, np.log10(180), 100)
@@ -93,12 +93,12 @@ def kde_plots(
                                           f"$\\rho_{{\\rm {'p'}}}$ = {pearson:.2f}",
                               transform=axs1.fig.axes[0].transAxes, va="bottom", ha="left",
                               bbox=dict(facecolor=face_color, alpha=1, edgecolor=edge_color,
-                              boxstyle='round,pad=0.2'), fontsize= 1.3 * clabelsize,
+                                        boxstyle='round,pad=0.2'), fontsize=1.3 * clabelsize,
                               color=text_color)
 
     if ~log_scale and x_log_scale:
         axs1.fig.axes[0].set_xscale('log')
-    
+
     if ~log_scale and y_log_scale:
         axs1.fig.axes[0].set_yscale('log')
 
@@ -107,16 +107,6 @@ def kde_plots(
     axs1.ax_joint.set_position([pos_joint_ax.x0, pos_joint_ax.y0, pos_marg_x_ax.width,
                                 pos_joint_ax.height])
     axs1.fig.axes[-1].set_position([1, pos_joint_ax.y0, .07, pos_joint_ax.height])
-
-    # get the current colorbar ticks
-    cbar_ticks = axs1.fig.axes[-1].get_yticks()
-    # get the maximum value of the colorbar
-    _, cbar_max = axs1.fig.axes[-1].get_ylim()
-    # change the labels (not the ticks themselves) to a percentage
-    #axs1.fig.axes[-1].set_yticklabels([f'{t / cbar_max * 1:.3f} %' for t in cbar_ticks], size=clabelsize)
-
-
-    # axs1.fig.axes[-1].set_xlabel('Density', fontsize=clabelsize, labelpad=10)
 
     axs1.fig.axes[0].tick_params(axis='both', which='major', direction='in', labelbottom=True,
                                  bottom=True, labeltop=False, top=True, labelleft=True, left=True,
@@ -140,7 +130,7 @@ def kde_plots(
                           va="bottom", ha="right", bbox=dict(facecolor=face_color, alpha=1,
                           edgecolor=edge_color, boxstyle='round,pad=0.2'),
                           fontsize=1.3 * clabelsize, color=text_color)
-    if (fig_save) :
+    if (fig_save):
         fname = f'../figures/{x}_vs_{y}_{data_type}.png'
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
@@ -179,18 +169,18 @@ def seaborn_subplots(
                 x_lim = (df[df[keys[0]] > 0][keys[0]].min(), x_lim[1])
                 # Raise a warning saying that the minimum value was changed
                 warnings.warn(f"\033[91m The minimum value of {keys[0]} was changed from "
-                             f"{df[keys[0]].min():0.3f} to {x_lim[0]:0.3f} to avoid a log scale "
-                             "error.\033[0m")
+                              f"{df[keys[0]].min():0.3f} to {x_lim[0]:0.3f} to avoid a log scale "
+                              "error.\033[0m")
 
-        if y_lim is None:            
+        if y_lim is None:
             y_lim = [df[keys[1]].min(), df[keys[1]].max()]
             if y_log_scale and y_lim[0] <= 0:
                 # Set the minimum to minimum value greater than 0
                 y_lim = (df[df[keys[1]] > 0][keys[1]].min(), y_lim[1])
                 # Raise a warning saying that the minimum value was changed
                 warnings.warn(f"\033[91m The minimum value of {keys[1]} was changed from "
-                             f"{df[keys[1]].min():0.3f} to {y_lim[0]:0.3f} to avoid a log scale "
-                             "error.\033[0m")
+                              f"{df[keys[1]].min():0.3f} to {y_lim[0]:0.3f} to avoid a log scale "
+                              "error.\033[0m")
 
         if bins is None and (x_log_scale or y_log_scale):
             if x_log_scale and y_log_scale:
@@ -207,7 +197,8 @@ def seaborn_subplots(
                     np.linspace(y_lim[0], y_lim[1], nbins[1])]
 
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
-                        y_label=labels[1], data_type=data_type[i], log_scale=log_scale, x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
+                        y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
+                        x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
                         xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
                         pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
@@ -216,10 +207,10 @@ def seaborn_subplots(
     # fig.subplots_adjust(hspace=0.01, wspace=0.01, left=0.03, right=1.5, top=0.65, bottom=0.03)
     gs = gridspec.GridSpec(2, 2)
 
-    mg0 = sfg.SeabornFig2Grid(axs_list[0], fig, gs[0])
-    mg1 = sfg.SeabornFig2Grid(axs_list[1], fig, gs[1])
-    mg2 = sfg.SeabornFig2Grid(axs_list[2], fig, gs[2])
-    mg3 = sfg.SeabornFig2Grid(axs_list[3], fig, gs[3])
+    _ = sfg.SeabornFig2Grid(axs_list[0], fig, gs[0])
+    _ = sfg.SeabornFig2Grid(axs_list[1], fig, gs[1])
+    _ = sfg.SeabornFig2Grid(axs_list[2], fig, gs[2])
+    _ = sfg.SeabornFig2Grid(axs_list[3], fig, gs[3])
 
     gs.tight_layout(fig)
     gs.update(top=1, bottom=0.05, left=0.08, right=1, hspace=0.01, wspace=0.20)
@@ -229,7 +220,5 @@ def seaborn_subplots(
         fig_name = f"../figures/{fig_name}_{dark_mode}.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
     print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
-    #plt.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.1, format=fig_format)
-    #print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
-    #plt.show()
+
     return axs_list

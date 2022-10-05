@@ -1,7 +1,6 @@
 import importlib
 import glob
 import numpy as np
-import matplotlib.pyplot as plt
 
 import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
@@ -13,7 +12,7 @@ for file_name in fnames:
     for cut_type in cut_type_list[:]:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
-        fig_inputs ={
+        fig_inputs = {
             'bins': np.linspace(0, 15, 20),
             'file_name': file_name,
             'dark_mode': True,
@@ -29,4 +28,3 @@ for file_name in fnames:
         }
 
         df_shear, df_rx_en, df_va_cs, df_bisec = rcsf.plot_hist(**fig_inputs)
-

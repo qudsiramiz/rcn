@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import rx_model_funcs as rxmf
 import seaborn_plots as sp
-import matplotlib.gridspec as gridspec
-import seaborn as sns; sns.set()
 import SeabornFig2Grid as sfg
 
 importlib.reload(rxmf)
@@ -17,10 +15,10 @@ cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
 
-df_shear = df[df.method_used=="shear"]
-df_rx_en = df[df.method_used=="rx_en"]
-df_va_cs = df[df.method_used=="va_cs"]
-df_bisec = df[df.method_used=="bisection"]
+df_shear = df[df.method_used == "shear"]
+df_rx_en = df[df.method_used == "rx_en"]
+df_va_cs = df[df.method_used == "va_cs"]
+df_bisec = df[df.method_used == "bisection"]
 
 df_shear_imfz = df_shear[df_shear["b_imf_z"] < 0]
 df_rx_en_imfz = df_rx_en[df_rx_en["b_imf_z"] < 0]
@@ -78,9 +76,9 @@ b_lmn_vec_msp[:, 1] = df_shear["b_lmn_vec_msp_median_m"]
 b_lmn_vec_msp[:, 2] = df_shear["b_lmn_vec_msp_median_n"]
 
 msh_msp_shear = []
-for xx,yy in zip(b_lmn_vec_msh, b_lmn_vec_msp):
+for xx, yy in zip(b_lmn_vec_msh, b_lmn_vec_msp):
     try:
-        msh_msp_shear.append(rxmf.get_shear(xx,yy, angle_unit="degrees"))
+        msh_msp_shear.append(rxmf.get_shear(xx, yy, angle_unit="degrees"))
     except Exception:
         pass
 
@@ -99,12 +97,12 @@ b_mag_msp = np.sqrt(df_shear["b_lmn_vec_msp_mean_l"]**2 + df_shear["b_lmn_vec_ms
                     df_shear["b_lmn_vec_msp_mean_n"]**2)
 
 # Compute the magnetosheath beta value
-beta_msp_mean = 2 * mu_0 * df_shear.np_msp_mean.values * 1e6 * k_B * (2 *
-                df_shear.tp_para_msp_mean.values +
+beta_msp_mean = 2 * mu_0 * df_shear.np_msp_mean.values * 1e6 * k_B * (
+                2 * df_shear.tp_para_msp_mean.values +
                 df_shear.tp_perp_msp_mean.values) / (3 * b_mag_msp ** 2 * 1e-18)
 
-beta_msh_mean = 2 * mu_0 * df_shear.np_msh_mean.values * 1e6 * k_B * (2 *
-                df_shear.tp_para_msh_mean.values +
+beta_msh_mean = 2 * mu_0 * df_shear.np_msh_mean.values * 1e6 * k_B * (
+                2 * df_shear.tp_para_msh_mean.values +
                 df_shear.tp_perp_msh_mean.values) / (3 * b_mag_msh ** 2 * 1e-18)
 
 delta_beta = beta_msh_mean - beta_msp_mean
@@ -128,16 +126,16 @@ dark_mode = True
 
 if dark_mode:
     plt.style.use('dark_background')
-    tick_color = 'w' # color of the tick lines
-    mtick_color = 'w' # color of the minor tick lines
-    label_color = 'w' # color of the tick labels
-    clabel_color = 'w' # color of the colorbar label
+    tick_color = 'w'  # color of the tick lines
+    mtick_color = 'w'  # color of the minor tick lines
+    label_color = 'w'  # color of the tick labels
+    clabel_color = 'w'  # color of the colorbar label
 else:
     plt.style.use('default')
-    tick_color = 'k' # color of the tick lines
-    mtick_color = 'k' # color of the minor tick lines
-    label_color = 'k' # color of the tick labels
-    clabel_color = 'k' # color of the colorbar label
+    tick_color = 'k'  # color of the tick lines
+    mtick_color = 'k'  # color of the minor tick lines
+    label_color = 'k'  # color of the tick labels
+    clabel_color = 'k'  # color of the colorbar label
 
 # Set the fontstyle to Times New Roman
 font = {'family': 'serif', 'weight': 'normal', 'size': 10}
@@ -148,8 +146,8 @@ label_fontsize = 15
 tick_fontsize = 12
 data_type = ["shear", "rx_en", "va_cs", "bisec"]
 for i, (key, key2) in enumerate(zip(key_list[1:], key2_list[1:])):
-    axs_list =  sp.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
-                                   labels=["Reconnection Distance $(R_\oplus)$", key2],
+    axs_list = sp.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
+                                   labels=[r"Reconnection Distance $(R_\oplus)$", key2],
                                    data_type=data_type, color_list=color_list, log_scale=False,
                                    x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
                                    fig_name=None, fig_format="pdf", nbins=[20, 20],

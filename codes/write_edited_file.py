@@ -1,13 +1,14 @@
 import h5py as hf
- 
-#dat_idl = hf.File('../data/total_fields_idl_0.501_15_15_[5,0,1,1,0,0,0,0,0,0]_2021-10-14.h5')
+import numpy as np
+
+# dat_idl = hf.File('../data/total_fields_idl_0.501_15_15_[5,0,1,1,0,0,0,0,0,0]_2021-10-14.h5')
 dat_idl = hf.File('../data/total_fields_ipy_0.5_15_15_[5, -100, 1, 1, 0, 0, 0, 0, 0, 0]_2021-10-19_v01.h5')
 
 dat_new = {}
 for key in list(dat_idl.keys()):
-    temp_data = dat_idl[key][:,:]
-    temp_data[temp_data<-1000] = np.nan
-    temp_data[temp_data>1000] = np.nan
+    temp_data = dat_idl[key][:, :]
+    temp_data[temp_data < -1000] = np.nan
+    temp_data[temp_data > 1000] = np.nan
     dat_new[key] = temp_data
 
 fn = '../data/total_fields_ipy_0.5_15_15_[5, -100, 1, 1, 0, 0, 0, 0, 0, 0]_2021-10-19_edited.h5'

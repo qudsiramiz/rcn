@@ -1,9 +1,7 @@
-import glob
 import importlib
 import os
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -26,106 +24,105 @@ mtick_width = 0.7  # minor tick width in points
 label_pad = 5  # padding between label and axis
 
 
-def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../figures",
+def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="../figures",
               fig_name="new", fig_format="pdf", histtype="step", linewidth=1, cut_type="jet",
               r_lim=[0, 15], density=False):
 
     df = pd.read_csv(file_name, index_col=False)
 
-    df_shear = df[df.method_used=="shear"]
-    df_rx_en = df[df.method_used=="rx_en"]
-    df_va_cs = df[df.method_used=="va_cs"]
-    df_bisec = df[df.method_used=="bisection"]
+    df_shear = df[df.method_used == "shear"]
+    df_rx_en = df[df.method_used == "rx_en"]
+    df_va_cs = df[df.method_used == "va_cs"]
+    df_bisec = df[df.method_used == "bisection"]
 
     if cut_type == "jet":
         # Remove all data points where the value of 'r_rc' is greater than 12
-        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.jet_detection)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.jet_detection)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.jet_detection)]
-        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.jet_detection)]
+        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.jet_detection)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.jet_detection)]
+        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.jet_detection)]
     elif cut_type == "walen1":
-        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.walen1)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.walen1)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.walen1)]
-        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.walen1)]
+        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.walen1)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.walen1)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.walen1)]
+        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.walen1)]
     elif cut_type == "walen2":
-        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.walen2)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.walen2)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.walen2)]
-        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.walen2)]
+        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.walen2)]
+        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.walen2)]
+        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.walen2)]
+        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.walen2)]
     elif cut_type == "walen_jet":
-        df_shear = df_shear[(df_shear.r_rc<r_lim[1]) & (df_shear.jet_detection)
+        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)
                             & ((df_shear.walen1) | (df_shear.walen2))]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc<r_lim[1]) & (df_rx_en.jet_detection)
+        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.jet_detection)
                             & ((df_rx_en.walen1) | (df_rx_en.walen2))]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc<r_lim[1]) & (df_va_cs.jet_detection)
+        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.jet_detection)
                             & ((df_va_cs.walen1) | (df_va_cs.walen2))]
-        df_bisec = df_bisec[(df_bisec.r_rc<r_lim[1]) & (df_bisec.jet_detection)
+        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.jet_detection)
                             & ((df_bisec.walen1) | (df_bisec.walen2))]
 
-    ## Check the sw_params to see if the conditions of b_imf
-    #for i in range(len(df_shear)):
-    #    trange = [df_shear.date_from.values[i], df_shear.date_to.values[i]]
-    #    print(f"Trange is {trange}\n\n\n\n")
-    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-    #    try:
-    #        if sw_params["b_imf"][2] > 0:
-    #            df_shear.iloc[i] = np.nan
-    #        print(f"Done for {i}/{len(df_shear)}")
-    #    except:
-    #        print(f"Error for {i}/{len(df_shear)}")
-    #        df_shear.iloc[i] = np.nan
-    #for i in range(len(df_rx_en)):
-    #    trange = [df_rx_en.date_from.values[i], df_rx_en.date_to.values[i]]
-    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-    #    try:
-    #        if sw_params["b_imf"][2] > 0:
-    #            df_rx_en.iloc[i] = np.nan
-    #        print(f"Done for {i}/{len(df_rx_en)}")
-    #    except:
-    #        print(f"Error for {i}/{len(df_rx_en)}")
-    #        df_rx_en.iloc[i] = np.nan
-#
-    #for i in range(len(df_va_cs)):
-    #    trange = [df_va_cs.date_from.values[i], df_va_cs.date_to.values[i]]
-    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-    #    try:
-    #        if sw_params["b_imf"][2] > 0:
-    #            df_va_cs.iloc[i] = np.nan
-    #        print(f"Done for {i}/{len(df_va_cs)}")
-    #    except:
-    #        print(f"Error for {i}/{len(df_va_cs)}")
-    #        df_va_cs.iloc[i] = np.nan
-#
-    #for i in range(len(df_bisec)):
-    #    trange = [df_bisec.date_from.values[i], df_bisec.date_to.values[i]]
-    #    sw_params = rmf.get_sw_params(trange=trange, verbose=False)
-    #    try:
-    #        if sw_params["b_imf"][2] > 0:
-    #            df_bisec.iloc[i] = np.nan
-    #        print(f"Done for {i}/{len(df_bisec)}")
-    #    except:
-    #        print(f"Error for {i}/{len(df_bisec)}")
-    #        df_bisec.iloc[i] = np.nan
+    # # Check the sw_params to see if the conditions of b_imf
+    # for i in range(len(df_shear)):
+    #     trange = [df_shear.date_from.values[i], df_shear.date_to.values[i]]
+    #     print(f"Trange is {trange}\n\n\n\n")
+    #     sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #     try:
+    #         if sw_params["b_imf"][2] > 0:
+    #             df_shear.iloc[i] = np.nan
+    #         print(f"Done for {i}/{len(df_shear)}")
+    #     except:
+    #         print(f"Error for {i}/{len(df_shear)}")
+    #         df_shear.iloc[i] = np.nan
+    # for i in range(len(df_rx_en)):
+    #     trange = [df_rx_en.date_from.values[i], df_rx_en.date_to.values[i]]
+    #     sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #     try:
+    #         if sw_params["b_imf"][2] > 0:
+    #             df_rx_en.iloc[i] = np.nan
+    #         print(f"Done for {i}/{len(df_rx_en)}")
+    #     except:
+    #         print(f"Error for {i}/{len(df_rx_en)}")
+    #         df_rx_en.iloc[i] = np.nan
+
+    # for i in range(len(df_va_cs)):
+    #     trange = [df_va_cs.date_from.values[i], df_va_cs.date_to.values[i]]
+    #     sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #     try:
+    #         if sw_params["b_imf"][2] > 0:
+    #             df_va_cs.iloc[i] = np.nan
+    #         print(f"Done for {i}/{len(df_va_cs)}")
+    #     except:
+    #         print(f"Error for {i}/{len(df_va_cs)}")
+    #         df_va_cs.iloc[i] = np.nan
+
+    # for i in range(len(df_bisec)):
+    #     trange = [df_bisec.date_from.values[i], df_bisec.date_to.values[i]]
+    #     sw_params = rmf.get_sw_params(trange=trange, verbose=False)
+    #     try:
+    #         if sw_params["b_imf"][2] > 0:
+    #             df_bisec.iloc[i] = np.nan
+    #         print(f"Done for {i}/{len(df_bisec)}")
+    #     except:
+    #         print(f"Error for {i}/{len(df_bisec)}")
+    #         df_bisec.iloc[i] = np.nan
 
     if dark_mode:
         plt.style.use('dark_background')
-        tick_color = 'w' # color of the tick lines
-        mtick_color = 'w' # color of the minor tick lines
-        label_color = 'w' # color of the tick labels
-        clabel_color = 'w' # color of the colorbar label
+        # tick_color = 'w'  # color of the tick lines
+        mtick_color = 'w'  # color of the minor tick lines
+        label_color = 'w'  # color of the tick labels
+        # clabel_color = 'w'  # color of the colorbar label
     else:
         plt.style.use('default')
-        tick_color = 'k' # color of the tick lines
-        mtick_color = 'k' # color of the minor tick lines
-        label_color = 'k' # color of the tick labels
-        clabel_color = 'k' # color of the colorbar label
+        # tick_color = 'k'  # color of the tick lines
+        mtick_color = 'k'  # color of the minor tick lines
+        label_color = 'k'  # color of the tick labels
+        # clabel_color = 'k'  # color of the colorbar label
 
     # Set the fontstyle to Times New Roman
     font = {'family': 'serif', 'weight': 'normal', 'size': 10}
     plt.rc('font', **font)
     plt.rc('text', usetex=True)
-
 
     plt.close("all")
 
@@ -135,8 +132,8 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
 
     # Plot the histogram of the shear data
     axs1 = plt.subplot(gs[0, 0])
-    axs1.hist(df_shear.r_rc, bins=bins, range=(0, 15),color='#1f77b4', alpha=0.5, density=density,
-             histtype=histtype, linewidth=linewidth)
+    axs1.hist(df_shear.r_rc, bins=bins, range=(0, 15), color='#1f77b4', alpha=0.5, density=density,
+              histtype=histtype, linewidth=linewidth)
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(df_shear.r_rc.mean(), color='#1f77b4', linestyle='--', linewidth=2)
     axs1.text(df_shear.r_rc.mean()+0.2, axs1.get_ylim()[1]*0.2,
@@ -145,13 +142,13 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
 
     axs1.set_xlim(r_lim[0], r_lim[1])
     axs1.set_xscale('linear')
-    #axs1.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
+    # axs1.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs1.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
 
     # Plot the histogram of the rx_en data
     axs2 = plt.subplot(gs[0, 1])
     axs2.hist(df_rx_en.r_rc, bins=bins, range=(0, 15), color='#ff7f0e', alpha=0.5, density=density,
-             histtype=histtype, linewidth=linewidth)
+              histtype=histtype, linewidth=linewidth)
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(df_rx_en.r_rc.mean(), color='#ff7f0e', linestyle='--', linewidth=2)
     axs2.text(df_rx_en.r_rc.mean()+0.2, axs2.get_ylim()[1]*0.2,
@@ -159,18 +156,18 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
               fontsize=0.8*t_label_size, color=label_color)
     axs2.set_xlim(r_lim[0], r_lim[1])
     axs2.set_xscale('linear')
-    #axs2.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
+    # axs2.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.yaxis.set_label_position("right")
 
     # Plot the histogram of the va_cs data
     axs3 = plt.subplot(gs[1, 0])
     axs3.hist(df_va_cs.r_rc, bins=bins, range=(0, 15), color='#2ca02c', alpha=0.5, density=density,
-             histtype=histtype, linewidth=linewidth)
+              histtype=histtype, linewidth=linewidth)
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(df_va_cs.r_rc.mean(), color='#2ca02c', linestyle='--', linewidth=2)
     axs3.text(df_va_cs.r_rc.mean()+0.2, axs3.get_ylim()[1]*0.2,
-             "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_va_cs.r_rc.mean()),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_va_cs.r_rc.mean()),
               fontsize=0.8*t_label_size, color=label_color)
     axs3.set_xlim(r_lim[0], r_lim[1])
     axs3.set_xscale('linear')
@@ -181,11 +178,11 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
     # Plot the histogram of the bisection data
     axs4 = plt.subplot(gs[1, 1])
     axs4.hist(df_bisec.r_rc, bins=bins, range=(0, 15), color='#d62728', alpha=0.5, density=density,
-             histtype=histtype, linewidth=linewidth)
+              histtype=histtype, linewidth=linewidth)
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(df_bisec.r_rc.mean(), color='#d62728', linestyle='--', linewidth=2)
     axs4.text(df_bisec.r_rc.mean()+0.2, axs4.get_ylim()[1]*0.2,
-             "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_bisec.r_rc.mean()),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_bisec.r_rc.mean()),
               fontsize=0.8*t_label_size, color=label_color)
     axs4.set_xlim(r_lim[0], r_lim[1])
     axs4.set_xscale('linear')
@@ -200,29 +197,29 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
                      labeltop=False, labelbottom=False, labelsize=t_label_size,
                      length=tick_len, width=tick_width, labelcolor=label_color)
 
-    axs2.tick_params(axis='both', direction='in', which='major', left=True, right=True,
-                top=True, bottom=True, labelleft=False, labelright=True,
-                labeltop=False, labelbottom=False, labelsize=t_label_size,
-                length=tick_len, width=tick_width, labelcolor=label_color)
+    axs2.tick_params(axis='both', direction='in', which='major', left=True, right=True, top=True,
+                     bottom=True, labelleft=False, labelright=True, labeltop=False,
+                     labelbottom=False, labelsize=t_label_size, length=tick_len, width=tick_width,
+                     labelcolor=label_color)
 
-    axs3.tick_params(axis='both', direction='in', which='major', left=True, right=True,
-                    top=True, bottom=True, labelleft=True, labelright=False,
-                    labeltop=False, labelbottom=True, labelsize=t_label_size,
-                    length=tick_len, width=tick_width, labelcolor=label_color)
+    axs3.tick_params(axis='both', direction='in', which='major', left=True, right=True, top=True,
+                     bottom=True, labelleft=True, labelright=False, labeltop=False,
+                     labelbottom=True, labelsize=t_label_size, length=tick_len, width=tick_width,
+                     labelcolor=label_color)
 
-    axs4.tick_params(axis='both', direction='in', which='major', left=True, right=True,
-                top=True, bottom=True, labelleft=False, labelright=True,
-                labeltop=False, labelbottom=True, labelsize=t_label_size,
-                length=tick_len, width=tick_width, labelcolor=label_color)
+    axs4.tick_params(axis='both', direction='in', which='major', left=True, right=True, top=True,
+                     bottom=True, labelleft=False, labelright=True, labeltop=False,
+                     labelbottom=True, labelsize=t_label_size, length=tick_len,
+                     width=tick_width, labelcolor=label_color)
 
     axs1.text(0.95, .95, 'Shear', ha='right', va='top',
-                transform=axs1.transAxes, fontsize=c_label_size, color=label_color)
+              transform=axs1.transAxes, fontsize=c_label_size, color=label_color)
     axs2.text(0.95, .95, 'Reconnection\n Energy', ha='right', va='top',
-                transform=axs2.transAxes, fontsize=c_label_size, color=label_color)
+              transform=axs2.transAxes, fontsize=c_label_size, color=label_color)
     axs3.text(0.95, .95, 'Exhaust\n Velocity', ha='right', va='top',
-                transform=axs3.transAxes, fontsize=c_label_size, color=label_color)
+              transform=axs3.transAxes, fontsize=c_label_size, color=label_color)
     axs4.text(0.95, .95, 'Bisection', ha='right', va='top',
-                transform=axs4.transAxes, fontsize=c_label_size, color=label_color)
+              transform=axs4.transAxes, fontsize=c_label_size, color=label_color)
 
     # Show minor ticks
     axs1.minorticks_on()
@@ -255,16 +252,16 @@ def plot_hist(file_name, fig_size=(6,6), dark_mode=True, bins=8, fig_folder="../
     title_y_pos = 1.03
 
     if dark_mode:
-        fig.suptitle(f'Histogram of the distance of reconnection site from spacecraft location',
+        fig.suptitle('Histogram of the distance of reconnection site from spacecraft location',
                      fontsize=label_size, color='w', y=title_y_pos, alpha=0.65)
     else:
-        fig.suptitle(f'Histogram of the distance of reconnection site from spacecraft location',
+        fig.suptitle('Histogram of the distance of reconnection site from spacecraft location',
                      fontsize=label_size, color='crimson', y=title_y_pos, alpha=1)
 
     if dark_mode:
-        transparent=False
+        transparent = False
     else:
-        transparent=True
+        transparent = True
 
     # Save the figure
     if not os.path.exists(fig_folder):

@@ -5,7 +5,6 @@ import multiprocessing as mp
 import time
 import warnings
 
-import geopack
 import geopack.geopack as gp
 import h5py as hf
 import numpy as np
@@ -109,8 +108,9 @@ try:
             f"in which model is valid (0.5 nPa < p_dyn < 8.5 nPa)",
         )
     param = [p_dyn, sym_h_imf, b_imf_y, b_imf_z, 0, 0, 0, 0, 0, 0]
-except:
-    print("OMNI data not found, setting IMF parameters to default values")
+except Exception as e:
+    print(f"OMNI data not found because of following exception: {e}, setting IMF parameters to "
+          "default values")
     param = [5, -30, -1, -1, 0, 0, 0, 0, 0, 0]
 
 # Compute the dipole tilt angle

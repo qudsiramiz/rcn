@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-#from rx_model_funcs import rx_model, ridge_finder_multiple
+# from rx_model_funcs import rx_model, ridge_finder_multiple
 import rx_model_funcs as rmf
 
 importlib.reload(rmf)
@@ -86,10 +86,11 @@ df_jet_reversal.sort_index(inplace=True)
 df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 
 trange_list = df_jet_reversal.index.tolist()
-#trange_list_new = trange_list[trange_ind_list]
+# trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = 0
 ind_max = -1
+
 
 @contextmanager
 def suppress_stdout_stderr():
@@ -97,6 +98,7 @@ def suppress_stdout_stderr():
     with open(os.devnull, 'w') as fnull:
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
+
 
 for mms_probe_num in mms_probe_num_list[2:3]:
     for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
@@ -132,8 +134,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "save_data": False,
                     "nprocesses": None,
                 }
-                (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu,
-                 b_msx, b_msy, b_msz) = rmf.rx_model(**model_inputs)
+                (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu,
+                 z_shu, b_msx, b_msy, b_msz) = rmf.rx_model(**model_inputs)
 
                 # mask = shear > 175
                 # shear[mask] = 0
@@ -141,7 +143,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 shear_norm = (shear - np.nanmin(shear)) / (np.nanmax(shear) - np.nanmin(shear))
                 rx_en_norm = (rx_en - np.nanmin(rx_en)) / (np.nanmax(rx_en) - np.nanmin(rx_en))
                 va_cs_norm = (va_cs - np.nanmin(va_cs)) / (np.nanmax(va_cs) - np.nanmin(va_cs))
-                bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.nanmax(bisec_msp) - 
+                bisec_msp_norm = (bisec_msp - np.nanmin(bisec_msp)) / (np.nanmax(bisec_msp) -
                                                                        np.nanmin(bisec_msp))
 
                 # shear_norm = (shear - np.nanmin(shear)) / (np.std(shear))
@@ -175,8 +177,9 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "save_fig": True,
                     "fig_name": "crossing_all_ridge_plots",
                     # "fig_format": "png",
-                    "c_label": ["Shear", "Reconnection Energy", "Exhaust Velocity", "Bisection Field"],
-                    #"c_unit": [r"${}^\circ$", "nPa", "km/s", "nT"],
+                    "c_label": ["Shear", "Reconnection Energy", "Exhaust Velocity",
+                                "Bisection Field"],
+                    # "c_unit": [r"${}^\circ$", "nPa", "km/s", "nT"],
                     "c_unit": ["", "nPa", "km/s", "nT"],
                     "wspace": 0.0,
                     "hspace": 0.17,
@@ -196,7 +199,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "fig_version": "v09",
                     "r_W": df_jet_reversal["r_W"][ind_range],
                     "theta_W": df_jet_reversal["theta_w"][ind_range],
-                    #"jet_time": df_jet_reversal["jet_time"][ind_range],
+                    # "jet_time": df_jet_reversal["jet_time"][ind_range],
                     "np_median_msp": df_jet_reversal["np_msp_median"][ind_range],
                     "np_median_msh": df_jet_reversal["np_msh_median"][ind_range],
                     "df_jet_reversal": df_jet_reversal.iloc[ind_range],
@@ -206,11 +209,12 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                                                             **figure_inputs, fig_format="png")
                 print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
             except Exception as e:
-                print(f"\033[91m \n Figure not plotted for time range {trange} \n because of following exception: {e} \n \033[0m")
-        #except Exception as e:
-        #    # Print the error in green
-        #    print("\033[92m", f"Figure not plotted for {trange} and index value of {ind_range}\n",
-        #          "\033[0m")
-        #    continue
+                print(f"\033[91m \n Figure not plotted for time range {trange} \n because of"
+                      f"following exception: {e} \n \033[0m")
+        # except Exception as e:
+        #     # Print the error in green
+        #     print("\033[92m", f"Figure not plotted for {trange} and index value of {ind_range}\n",
+        #           "\033[0m")
+        #     continue
 
 print(f"Took {round(time.time() - start, 3)} seconds")

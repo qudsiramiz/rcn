@@ -1,15 +1,18 @@
-import geopack.geopack as gp
-import PyGeopack as gpp
-import numpy as np
 # from geopack import geopack
 # from geopack.geopack import igrf_gsm
 # from geopack.t96 import t96
 # from geopack.t01 import t01
 # from geopack.t04 import t04
 import datetime
-from dateutil import parser
+import multiprocessing as mp
 import time
-#from func_t01 import func_t01
+
+import geopack.geopack as gp
+import h5py as hf
+import numpy as np
+import PyGeopack as gpp
+
+# from func_t01 import func_t01
 now = time.time()
 
 today_date = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -25,7 +28,8 @@ x_gsm = np.linspace(-15.1, 15, v)
 y_gsm = np.linspace(-15.1, 15, v)
 z_gsm = np.linspace(-15.1, 15, v)
 
-def func_all(*args) :
+
+def func_all(*args):
 
     i = args[0][0]
     j = args[0][1]
@@ -40,9 +44,9 @@ def func_all(*args) :
     Bx_t01, By_t01, Bz_t01 = gpp.ModelField(x_gsm, y_gsm, z_gsm, 20150101, 0, Model='T01',
                                             CoordIn='GSM', CoordOut='GSM', parmod=par)
 
-    return i, j, k, bx_t96, by_t96, bz_t96, bx_t01, by_t01, bz_t01, bx_igrf, by_igrf, bz_igrf, Bx_t96[0], By_t96[0], Bz_t96[0], Bx_t01[0], By_t01[0], Bz_t01[0]
+    return (i, j, k, bx_t96, by_t96, bz_t96, bx_t01, by_t01, bz_t01, bx_igrf, by_igrf, bz_igrf,
+            Bx_t96[0], By_t96[0], Bz_t96[0], Bx_t01[0], By_t01[0], Bz_t01[0])
 
-import multiprocessing as mp
 
 p = mp.Pool()
 
@@ -50,8 +54,8 @@ dim1, dim2, dim3 = v, v, v
 
 import itertools
 
-#input = ((i, j, k) for i,j,k in itertools.combinations_with_replacement(range(dim3), 3))
-input = ((i, j, k) for i,j,k in itertools.product(range(dim3), repeat=3))
+# input = ((i, j, k) for i,j,k in itertools.combinations_with_replacement(range(dim3), 3))
+input = ((i, j, k) for i, j, k in itertools.product(range(dim3), repeat=3))
 
 res = p.map(func_all, input)
 
