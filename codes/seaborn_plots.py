@@ -63,7 +63,7 @@ def kde_plots(
     axs1.ax_marg_y.set_xscale("log")
     axs3 = sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
                  alpha=alpha, kde=True, log_scale=y_log_scale, stat="density", common_norm=True,
-                 common_bins=False, fill=True, linewidth=2, edgecolor=color,
+                 common_bins=True, fill=True, linewidth=2, edgecolor=color,
                  line_kws={"linewidth": 5, "color": color})
 
     # print(f"The y bins are {bins[1]}")
