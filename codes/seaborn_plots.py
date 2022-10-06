@@ -52,17 +52,17 @@ def kde_plots(
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
     #                     bins=bins, stat="density", common_norm=True, common_bins=True, fill=True,
     #                     linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
-    axs2 = sns.histplot(data=df, x=x, bins=bins[0], ax=axs1.ax_marg_x, legend=False, color=color,
-                 alpha=alpha, kde=True, log_scale=x_log_scale, stat="density", common_norm=True,
+    _ = sns.histplot(data=df, x=x, bins=bins[0], ax=axs1.ax_marg_x, legend=False, color=color,
+                 alpha=alpha, kde=True, log_scale=x_log_scale, stat="frequency", common_norm=True,
                  common_bins=True, fill=True, linewidth=2, edgecolor=color,
                  line_kws={"linewidth": 5, "color": color})
 
-    axs1.ax_marg_x.set_xlim(xlim)
-    axs1.ax_marg_y.set_ylim(ylim)
-    axs1.ax_marg_x.set_yscale("linear")
-    axs1.ax_marg_y.set_xscale("log")
-    axs3 = sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
-                 alpha=alpha, kde=True, log_scale=y_log_scale, stat="density", common_norm=True,
+    # axs1.ax_marg_x.set_xlim(xlim)
+    # axs1.ax_marg_y.set_ylim(ylim)
+    # axs1.ax_marg_x.set_yscale("linear")
+    # axs1.ax_marg_y.set_xscale("log")
+    _ = sns.histplot(data=df, y=y, bins=bins[1], ax=axs1.ax_marg_y, legend=False, color=color,
+                 alpha=alpha, kde=True, log_scale=y_log_scale, stat="frequency", common_norm=True,
                  common_bins=True, fill=True, linewidth=2, edgecolor=color,
                  line_kws={"linewidth": 5, "color": color})
 
@@ -130,8 +130,12 @@ def kde_plots(
                           va="bottom", ha="right", bbox=dict(facecolor=face_color, alpha=1,
                           edgecolor=edge_color, boxstyle='round,pad=0.2'),
                           fontsize=1.3 * clabelsize, color=text_color)
+
+    # Set the tight layout
+    axs1.fig.tight_layout()
+
     if (fig_save):
-        fname = f'../figures/{x}_vs_{y}_{data_type}.png'
+        fname = f'../figures/{x}_vs_{y}_{data_type}_dm_{dark_mode}.png'
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
     return axs1
@@ -213,7 +217,7 @@ def seaborn_subplots(
     _ = sfg.SeabornFig2Grid(axs_list[3], fig, gs[3])
 
     gs.tight_layout(fig)
-    gs.update(top=1, bottom=0.05, left=0.08, right=1, hspace=0.01, wspace=0.20)
+    gs.update(top=1, bottom=0.05, left=0.06, right=1, hspace=0.01, wspace=0.20)
     if fig_name is None:
         fig_name = f"../figures/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}.{fig_format}"
     else:
