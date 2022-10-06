@@ -29,7 +29,7 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 120,
+              'dt': 300,
               'probe': 3,
               'jet_len': 3,
               'level': 'l2',
@@ -38,9 +38,9 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20220922_beta.csv',
+              'fname': '../data/mms_jet_reversal_times_list_20221006_beta.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922_beta.csv",
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221006_beta.csv",
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
@@ -64,7 +64,7 @@ def check_jet_reversal(crossing_time):
         else:
             # If it exists, append to it
             df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
-            if not np.any(df_added_list['Date'].values == str(crossing_time)):
+            if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
                 with open(inputs["error_file_log_name"], 'a') as f:
                     f.write(f"{crossing_time},{e}\n")
             f.close()
@@ -81,18 +81,18 @@ def suppress_stdout_stderr():
 
 use_parallel = True
 
-with suppress_stdout_stderr():
-    # for foo in range(1):
+# with suppress_stdout_stderr():
+for foo in range(1):
     if use_parallel:
         # Set the number of processes to use
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 240
+        indx_min = 179
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = -1
+        indx_max = indx_min + 1
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run

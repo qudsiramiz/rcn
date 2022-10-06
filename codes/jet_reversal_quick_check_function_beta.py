@@ -173,8 +173,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             df_mms_fpi['vp_diff_z'] == df_mms_fpi['vp_diff_z'].max()]
 
         # Set a time window of +/- 60 seconds around the maximum value
-        time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=0.25),
-                            ind_max_z_diff[0] + pd.Timedelta(minutes=0.25)]
+        time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=0.5),
+                            ind_max_z_diff[0] + pd.Timedelta(minutes=0.5)]
 
         # Define a velocity which might refer to a jet
         vp_jet = df_mms_fpi['vp_diff_z'].loc[time_check_range[0]:time_check_range[1]]
@@ -277,8 +277,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Get the time check range centered around jet location
         time_check_center = vp_jet.index[ind_jet[0]] + (
                             vp_jet.index[ind_jet[-1]] - vp_jet.index[ind_jet[0]]) / 2
-        time_check_range = [time_check_center - pd.Timedelta(10, unit='s'),
-                            time_check_center + pd.Timedelta(10, unit='s')]
+        time_check_range = [time_check_center - pd.Timedelta(30, unit='s'),
+                            time_check_center + pd.Timedelta(30, unit='s')]
 
         # Find out where np is minimum in a time range around the jet location
         np_check = df_mms['np'].loc[time_check_range[0]:time_check_range[-1]]
@@ -286,7 +286,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         np_min_time = np_check[np_check == np_check.min()].index[0]
         # Get the index of the minimum np time in that range
         ind_min_np = np.where(df_mms.index == np_min_time)[0][0]
-        print(f"ind_min_np: {ind_min_np}")
+        if verbose:
+            print(f"ind_min_np: {ind_min_np}")
     else:
         ind_min_np = np.where(df_mms['np'] == df_mms['np'].min())[0][0]
 
@@ -297,6 +298,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # sides of the minimum value
     # TODO: Check if threshold value of 3 is fine or if we need to decrease/increase it
     n_thresh = 3
+    n_thresh_msp = 2
+    n_thresh_msh = 5
 
     try:
         ind_min_np_gt_05_right = np.where(
@@ -332,6 +335,28 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         print(f"diff_left: {diff_left}")
 
     n_points_walen = n_points * 3
+    n_points_msp_msh = int(10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+
+    # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
+    # on both sides of the minimum value
+    np_msp_bool_array = df_mms['np'] < n_thresh_msp
+    np_msh_bool_array = df_mms['np'] > n_thresh_msh
+
+    ind_np_msp_vals = np.flatnonzero(np.convolve(np_msp_bool_array > 0,
+                                    np.ones(n_points_msp_msh, dtype=int),
+                                    'valid') >= n_points_msp_msh)
+    ind_np_msh_vals = np.flatnonzero(np.convolve(np_msh_bool_array > 0,
+                                    np.ones(n_points_msp_msh, dtype=int),
+                                    'valid') >= n_points_msp_msh)
+
+    if verbose:
+        print(f"ind_walen_vals: {ind_walen_vals}")
+        print(f"ind_np_msp_vals: {ind_np_msp_vals}")
+        print(f"ind_np_msh_vals: {ind_np_msh_vals}")
+
+    # Find the index value closest to 'ind_min_np' where 'np' is greater than 'n_thresh' on both
+    # sides of the minimum value
+
     # Set the index value of magnetosheath to whichever one is closer to the minimum value.
     # 'ind_msp' is the index value of magnetosphere and 'ind_msh' is the index value of
     # magnetosheath.)
@@ -356,12 +381,42 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     elif diff_right <= diff_left:
         ind_max_msp = ind_min_np_gt_05_right - 10
         ind_min_msh = ind_min_np_gt_05_right + 10
-        ind_min_msp = max(0, ind_min_np_gt_05_left, ind_max_msp - n_points_walen)
-        ind_max_msh = min(len(df_mms.index) - 1, ind_min_msh + n_points_walen)
+        ind_min_msp = ind_min_np_gt_05_right - n_points_msp_msh
+        ind_max_msh = ind_min_np_gt_05_right + n_points_msp_msh
+        # ind_min_msp = max(0, ind_min_np_gt_05_left, ind_max_msp - n_points_walen)
+        # ind_max_msh = min(len(df_mms.index) - 1, ind_min_msh + n_points_walen)
 
         ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
         ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
 
+        # Ensure that the mean density in msp is less than 2 and mean density in msh is greater than
+        # 5
+        while np.nanmean(df_mms['np'][ind_range_msp]) > 2 or np.nanmean(
+                         df_mms['np'][ind_range_msh]) < 5:
+            if np.nanmean(df_mms['np'][ind_range_msp]) > 2:
+                # If ind_min_msp is less than 0, then we have reached the beginning of the dataframe
+                # and break out of the loop
+                if ind_min_msp < 0:
+                    ind_min_msp = np.nan
+                    ind_max_msp = np.nan
+                    ind_range_msp = np.nan
+                    break
+                else:
+                    ind_min_msp -= 1
+                    ind_max_msp -= 1
+                    ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+            if np.nanmean(df_mms['np'][ind_range_msh]) < 5:
+                # If ind_max_msh is greater than the length of the dataframe, then we have reached
+                # the end of the dataframe and break out of the loop
+                if ind_max_msh > len(df_mms.index) - 1:
+                    ind_min_msh = np.nan1
+                    ind_max_msh = np.nan
+                    ind_range_msh = np.nan
+                    break
+                else:
+                    ind_min_msh += 1
+                    ind_max_msh += 1
+                    ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
         # Compare the length of the two ranges. If one is larger than the other, then starting at
         # their starting point, set their length to be the same.
         if len(ind_range_msp) > len(ind_range_msh):
@@ -691,7 +746,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      }
 
         if x > -5 and x < 12 and r_yz < 12:
-            # Check if the file exists, if nto then create it
+            # Check if the file exists, if not then create it
             if not os.path.isfile(fname):
                 with open(fname, 'w') as f:
                     f.write(var_list + '\n')
@@ -724,9 +779,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     if coord_type == 'lmn':
         # Make a figure with the B, np, and vp in L, M, N coordinates
-        lw = 0.5
-        fig, axs = plt.subplots(4, 1, figsize=(12, 8), sharex=True)
-        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0)
+        lw = 0.75
+        # Set the tickmark location inside the plot for all subplots
+        plt.rcParams['xtick.direction'] = 'in'
+        plt.rcParams['ytick.direction'] = 'in'
+
+        fig, axs = plt.subplots(4, 1, figsize=(6, 8), sharex=True)
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0.04)
         axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=lw)
         axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='b', lw=lw)
         axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='g', lw=lw)
@@ -760,18 +819,21 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
                            alpha=0.2, label='Jet Location')
             # Plot a vertical line at the jet time center
-            axs[3].axvline(vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] -
-                                                       vp_jet.index[ind_jet[0]]) / 2,
-                           color='k', lw=0.5, label='Jet Center')
+            jet_center = vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] -
+                                                       vp_jet.index[ind_jet[0]]) / 2
+            axs[3].axvline(jet_center, color='k', lw=0.5, label='Jet Center')
             axs[3].legend(loc=1)
         # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
         # Draw a dashed line at +/- v_thres
         axs[3].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
         axs[3].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
         axs[3].set_ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
-        axs[3].set_ylim(-200, 200)
+        axs[3].set_ylim(-300, 300)
         axs[3].set_xlabel('Time (UTC)')
-        axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
+        #axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
+
+        # Set the x-axis limits to 2 minutes before and after the jet
+        axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center + pd.Timedelta(minutes=2))
 
         # Make a shaded region for all three plots where the magnetopause and magnetosheath
         # are
