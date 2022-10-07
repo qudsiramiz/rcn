@@ -70,3 +70,32 @@ DateStart,Error
 2015-09-06 12:15:44.176000+00:00,index 0 is out of bounds for axis 0 with size 0
 2015-09-06 11:32:04.092000+00:00,local variable 'vp_jet' referenced before assignment
 2015-09-06 12:21:54.081000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-06 12:54:54.106000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-06 13:00:24.111000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-06 13:10:54.119000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-06 13:27:44.082000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-06 13:37:34.190000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-06 13:35:34.188000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-06 13:46:24.147000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-06 18:50:03.987000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-07 13:11:04.101000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-06 20:11:54.153000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-07 13:15:44.155000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 13:36:34.122000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 13:44:34.129000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 13:49:14.182000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 13:59:34.141000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 13:55:54.088000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 14:02:24.093000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 14:03:34.144000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 14:13:24.102000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 14:18:54.107000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 15:16:34.204000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 15:45:14.127000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 17:07:34.144000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-07 15:39:54.173000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 15:29:54.165000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 19:52:14.178000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 20:03:34.137000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-07 17:01:24.089000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 18:04:14.090000+00:00,index 0 is out of bounds for axis 0 with size 0
