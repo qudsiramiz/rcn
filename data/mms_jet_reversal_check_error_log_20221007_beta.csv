@@ -2598,3 +2598,10 @@ DateStart,Error
 2016-01-07 02:34:24.164000+00:00,local variable 'ind_range_msp' referenced before assignment
 2016-01-07 02:36:04.215000+00:00,local variable 'ind_range_msp' referenced before assignment
 2016-01-07 06:13:14.160000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-07 06:15:24.212000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-07 08:56:14.157000+00:00,local variable 'ind_range_msp' referenced before assignment
+2016-01-07 08:58:14.159000+00:00,local variable 'ind_range_msp' referenced before assignment
+2016-01-07 09:02:24.213000+00:00,local variable 'ind_range_msp' referenced before assignment
+2016-01-07 09:00:14.161000+00:00,local variable 'ind_range_msp' referenced before assignment
+2016-01-07 09:04:24.215000+00:00,local variable 'ind_range_msp' referenced before assignment
+2016-01-07 09:24:24.083000+00:00,index 0 is out of bounds for axis 0 with size 0
