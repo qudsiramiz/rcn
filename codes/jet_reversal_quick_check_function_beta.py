@@ -606,7 +606,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                             df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * 1160 / (1e-18 * (
                                 df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
                                 df_mms['b_lmn_l'][xx] ** 2))
-            print(df_mms.index[xx])
             b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
                                      df_mms['b_lmn_l'][xx]]) * 1e-9
             for j in range(3):
@@ -652,15 +651,19 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     #         else:
     #             delta_v_th[i] = - delta_v_th[i]
 
+    vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
+                                 df_mms['vp_lmn_m'][ind_walen_check],
+                                 df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s
+
     if coord_type == 'lmn':
-        delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_msp
+        delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
     else:
         delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
     # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
 
     # Compute the angle between the observed and the theoretical velocity jumps
     theta_w = np.full(len(ind_walen_check), np.nan)
-    for i in range(len(ind_msp)):
+    for i in range(len(ind_walen_check)):
         theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
                                np.linalg.norm(delta_v_th[i, :]) *
                                np.linalg.norm(delta_v_obs[i, :])
