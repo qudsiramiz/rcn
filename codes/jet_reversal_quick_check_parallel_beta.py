@@ -44,7 +44,7 @@ def check_jet_reversal(crossing_time):
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
-    #df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    # df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
     try:
         try:
             inputs["data_rate"] = 'brst'
@@ -82,7 +82,7 @@ def suppress_stdout_stderr():
 use_parallel = True
 
 with suppress_stdout_stderr():
-# for foo in range(1):
+    # for foo in range(1):
     if use_parallel:
         # Set the number of processes to use
         # num_processes = 20

@@ -368,7 +368,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             print(f"ind_max_msp: {ind_max_msp}")
             print(f"ind_min_msh: {ind_min_msh}")
             print(f"ind_max_msh: {ind_max_msh}")
-        except:
+        except Exception:
             pass
 
     """
