@@ -299,15 +299,15 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # sides of the minimum value
     # TODO: Check if threshold value of 3 is fine or if we need to decrease/increase it
     # n_thresh = 3
-    n_thresh_msp = 2
+    n_thresh_msp = 3
     n_thresh_msh = 5
 
     # TODO: Instead of one difference between indices, use the median value of differences between
     # all the indices
     n_points_msp = int(
-        10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+        3 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
     n_points_msh = int(
-        10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+        3 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
     n_points_walen = n_points * 3
 
     # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
@@ -885,7 +885,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         #axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
 
         # Set the x-axis limits to 2 minutes before and after the jet
-        axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center + pd.Timedelta(minutes=2))
+        #axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center + pd.Timedelta(minutes=2))
+        axs[3].set_xlim(df_mms.index.min(), df_mms.index.max())
 
         # Make a shaded region for all three plots where the magnetopause and magnetosheath
         # are
