@@ -941,13 +941,26 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             transform=axs[0].transAxes, ha='right',  va='bottom', color='r')
         if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
             folder_name = "../figures/jet_reversal_checks_beta/jet_walen"
+            # If the folder doesn't exist, create it
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
         elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
             folder_name = "../figures/jet_reversal_checks_beta/walen"
+            # If the folder doesn't exist, create it
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
         elif (not walen_relation_satisfied) & (
                 not walen_relation_satisfied_v2) & jet_detection:
             folder_name = "../figures/jet_reversal_checks_beta/jet"
+            # If the folder doesn't exist, create it
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
         else:
             folder_name = "../figures/jet_reversal_checks_beta/no_jet_no_walen"
+            # If the folder doesn't exist, create it
+            if not os.path.exists(folder_name):
+                os.makedirs(folder_name)
+
         ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
         fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}_lmn_rolling_median.png"
         plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
