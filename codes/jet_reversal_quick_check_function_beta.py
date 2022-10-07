@@ -358,8 +358,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Check if the longest subsequence is greater than the threshold
     if max_true_count_msh >= n_points_msh:
-        ind_min_msh = elems_before_idx_msh + (max_true_count_msh - n_points_msh) / 2
-        ind_max_msh = elems_before_idx_msh + (max_true_count_msh + n_points_msh) / 2
+        ind_min_msh = int(elems_before_idx_msh + (max_true_count_msh - n_points_msh) / 2)
+        ind_max_msh = int(elems_before_idx_msh + (max_true_count_msh + n_points_msh) / 2)
         ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
 
     if verbose:
@@ -600,12 +600,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         for i in range(len(ind_msp)):
             alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
                 np.linalg.norm(b_lmn_vec_msp[i, :])**2)
-            alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                np.linalg.norm(b_lmn_vec_msh[i, :])**2)
             for j in range(3):
                 v_th_msp[i, j] = b_lmn_vec_msp[i, j] * (1 - alpha_msp[i]) / (
                     mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
                 )**0.5
+        for i in range(len(ind_msh)):
+            alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
+                np.linalg.norm(b_lmn_vec_msh[i, :])**2)
+            for j in range(3):
                 v_th_msh[i, j] = b_lmn_vec_msh[i, j] * (1 - alpha_msh[i]) / (
                     mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
                 )**0.5
