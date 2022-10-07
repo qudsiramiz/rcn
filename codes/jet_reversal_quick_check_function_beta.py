@@ -498,8 +498,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     """
     # Set the index values to the full range where we have decided magnetosphere and magnetosheath
     # are.
-    # ind_msp = ind_range_msp
-    ind_msp = ind_jet
+    ind_msp = ind_range_msp
+    ind_jet_df_min = np.where(df_mms.index == vp_jet.index[ind_jet[0]])
+    ind_jet_df_max = np.where(df_mms.index == vp_jet.index[ind_jet[-1]])
+    print(f"ind_jet_df_min: {ind_jet_df_min}, \n ind_jet_df_max: {ind_jet_df_max}")
+    # Print times corresponding to the indices
+    print(f"Time of magnetopause: {df_mms.index[ind_jet_df_min]} \n Time of magnetosheath: {df_mms.index[ind_jet_df_max]}")
     ind_msh = ind_range_msh
 
     # Get different parameters for magnetosphere and magnetosheath
@@ -652,7 +656,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Compute the angle between the observed and the theoretical velocity jumps
     theta_w = np.full(len(ind_jet), np.nan)
-    for i in range(len(ind_jet)):
+    for i in range(len(ind_msp)):
         theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
                                np.linalg.norm(delta_v_th[i, :]) *
                                np.linalg.norm(delta_v_obs[i, :])
