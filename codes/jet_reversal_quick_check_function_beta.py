@@ -305,9 +305,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # TODO: Instead of one difference between indices, use the median value of differences between
     # all the indices
     n_points_msp = int(
-        3 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+        5 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
     n_points_msh = int(
-        3 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+        10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+
     n_points_walen = n_points * 3
 
     # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
@@ -357,8 +358,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Check if the longest subsequence is greater than the threshold
     if max_true_count_msh >= n_points_msh:
-        ind_min_msh = elems_before_idx_msh
-        ind_max_msh = elems_before_idx_msh + max_true_count_msh
+        ind_min_msh = elems_before_idx_msh + (max_true_count_msh - n_points_msh) / 2
+        ind_max_msh = elems_before_idx_msh + (max_true_count_msh + n_points_msh) / 2
         ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
 
     if verbose:
@@ -872,7 +873,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                            alpha=0.2, label='Jet Location')
             # Plot a vertical line at the jet time center
             jet_center = vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] -
-                                                       vp_jet.index[ind_jet[0]]) / 2
+                                                     vp_jet.index[ind_jet[0]]) / 2
             axs[3].axvline(jet_center, color='k', lw=0.5, label='Jet Center')
             axs[3].legend(loc=1)
         # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
@@ -882,10 +883,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[3].set_ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
         axs[3].set_ylim(-300, 300)
         axs[3].set_xlabel('Time (UTC)')
-        #axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
+        # axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
 
         # Set the x-axis limits to 2 minutes before and after the jet
-        #axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center + pd.Timedelta(minutes=2))
+        # axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center + 
+        # pd.Timedelta(minutes=2))
         axs[3].set_xlim(df_mms.index.min(), df_mms.index.max())
 
         # Make a shaded region for all three plots where the magnetopause and magnetosheath
