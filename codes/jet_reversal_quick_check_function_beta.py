@@ -363,10 +363,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
 
     if verbose:
-        print(f"ind_min_msp: {ind_min_msp}")
-        print(f"ind_max_msp: {ind_max_msp}")
-        print(f"ind_min_msh: {ind_min_msh}")
-        print(f"ind_max_msh: {ind_max_msh}")
+        try:
+            print(f"ind_min_msp: {ind_min_msp}")
+            print(f"ind_max_msp: {ind_max_msp}")
+            print(f"ind_min_msh: {ind_min_msh}")
+            print(f"ind_max_msh: {ind_max_msh}")
+        except:
+            pass
 
     """
     try:
