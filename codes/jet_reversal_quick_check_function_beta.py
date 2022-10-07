@@ -601,14 +601,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     v_th_msh = np.full((len(ind_msh), 3), np.nan)
 
     if coord_type == 'lmn':
-        for i in ind_walen_check:
-            alpha_msp[i] = (mu_0 * df_mms['np'][i] * 1e6 * k_B) * (
-                            df_mms['tp_para'][i] - df_mms['tp_perp'][i]) * 1160 / (1e-18 * (
-                                df_mms['b_lmn_n'][i] ** 2 + df_mms['b_lmn_m'][i] ** 2 +
-                                df_mms['b_lmn_l'][i] ** 2))
-            print(df_mms.index[i])
-            b_lmn_vec_msp = np.array(df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
-                                     df_mms['b_lmn_l'][i]) * 1e-9
+        for i, xx in enumerate(ind_walen_check):
+            alpha_msp[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
+                            df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * 1160 / (1e-18 * (
+                                df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
+                                df_mms['b_lmn_l'][xx] ** 2))
+            print(df_mms.index[xx])
+            b_lmn_vec_msp = np.array(df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
+                                     df_mms['b_lmn_l'][xx]) * 1e-9
             for j in range(3):
                 v_th_msp[i, j] = b_lmn_vec_msp[j] * (1 - alpha_msp[i]) / (
                     mu_0 * df_mms['np'][i] * 1e6 * m_p * (1 - alpha_msp[i])
