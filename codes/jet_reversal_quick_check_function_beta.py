@@ -335,8 +335,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Check if the longest subsequence is greater than the threshold
     if max_true_count_msp >= n_points_msp:
-        ind_min_msp = elems_before_idx_msp
-        ind_max_msp = elems_before_idx_msp + max_true_count_msp
+        ind_min_msp = int(elems_before_idx_msp + (max_true_count_msp - n_points_msp) / 2)
+        ind_max_msp = int(elems_before_idx_msp + (max_true_count_msp + n_points_msp) / 2)
         ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
 
     # ind_np_msh_vals = np.flatnonzero(np.convolve(np_msh_bool_array > 0,
