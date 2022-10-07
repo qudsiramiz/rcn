@@ -659,7 +659,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
 
     # Compute the angle between the observed and the theoretical velocity jumps
-    theta_w = np.full(len(ind_jet), np.nan)
+    theta_w = np.full(len(ind_walen_check), np.nan)
     for i in range(len(ind_msp)):
         theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
                                np.linalg.norm(delta_v_th[i, :]) *
