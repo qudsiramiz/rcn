@@ -498,7 +498,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     """
     # Set the index values to the full range where we have decided magnetosphere and magnetosheath
     # are.
-    ind_msp = ind_range_msp
+    # ind_msp = ind_range_msp
+    ind_msp = ind_jet
     ind_msh = ind_range_msh
 
     # Get different parameters for magnetosphere and magnetosheath
