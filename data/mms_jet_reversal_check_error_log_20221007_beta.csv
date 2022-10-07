@@ -2637,3 +2637,18 @@ DateStart,Error
 2016-01-08 09:21:34.188000+00:00,local variable 'vp_jet' referenced before assignment
 2016-01-08 09:22:44.089000+00:00,local variable 'vp_jet' referenced before assignment
 2016-01-08 21:58:44.203000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-08 22:18:44.220000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-08 22:20:24.121000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 21:11:14.151000+00:00,local variable 'vp_jet' referenced before assignment
+2016-01-08 22:25:04.175000+00:00,local variable 'ind_range_msp' referenced before assignment
+2016-01-09 08:32:34.112000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:38:14.167000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:39:34.118000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:40:44.169000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:43:04.121000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:55:54.083000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:43:54.222000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:45:44.174000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 08:58:04.135000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-09 20:35:04.220000+00:00,local variable 'vp_jet' referenced before assignment
+2016-01-09 20:56:04.088000+00:00,local variable 'vp_jet' referenced before assignment
