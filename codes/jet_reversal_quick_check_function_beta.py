@@ -607,8 +607,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                 df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
                                 df_mms['b_lmn_l'][xx] ** 2))
             print(df_mms.index[xx])
-            b_lmn_vec_msp = np.array(df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
-                                     df_mms['b_lmn_l'][xx]) * 1e-9
+            b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
+                                     df_mms['b_lmn_l'][xx]]) * 1e-9
             for j in range(3):
                 v_th_msp[i, j] = b_lmn_vec_msp[j] * (1 - alpha_msp[i]) / (
                     mu_0 * df_mms['np'][i] * 1e6 * m_p * (1 - alpha_msp[i])
