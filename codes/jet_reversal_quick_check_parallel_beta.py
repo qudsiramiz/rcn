@@ -38,37 +38,37 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20221006_beta.csv',
+              'fname': '../data/mms_jet_reversal_times_list_20221007_beta.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221006_beta.csv",
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221007_beta.csv",
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
-    # df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    try:
-        try:
-            inputs["data_rate"] = 'brst'
-            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-        except Exception:
-            inputs["data_rate"] = 'fast'
-            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    except Exception as e:
-        # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-        # Save the crossing time to a file
-        # Check if the file exists
-        if not os.path.isfile(inputs["error_file_log_name"]):
-            # If it doesn't exist, create it
-            with open(inputs["error_file_log_name"], 'w') as f:
-                f.write("DateStart,Error\n")
-                f.write(f"{crossing_time},{e}\n")
-        else:
-            # If it exists, append to it
-            df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
-            if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
-                with open(inputs["error_file_log_name"], 'a') as f:
-                    f.write(f"{crossing_time},{e}\n")
-            f.close()
-        pass
+    df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    #try:
+    #    try:
+    #        inputs["data_rate"] = 'brst'
+    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    #    except Exception:
+    #        inputs["data_rate"] = 'fast'
+    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    #except Exception as e:
+    #    # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+    #    # Save the crossing time to a file
+    #    # Check if the file exists
+    #    if not os.path.isfile(inputs["error_file_log_name"]):
+    #        # If it doesn't exist, create it
+    #        with open(inputs["error_file_log_name"], 'w') as f:
+    #            f.write("DateStart,Error\n")
+    #            f.write(f"{crossing_time},{e}\n")
+    #    else:
+    #        # If it exists, append to it
+    #        df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
+    #        if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
+    #            with open(inputs["error_file_log_name"], 'a') as f:
+    #                f.write(f"{crossing_time},{e}\n")
+    #        f.close()
+    #    pass
 
 
 @contextmanager
