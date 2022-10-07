@@ -592,9 +592,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                             b_lmn_vec_msp_mean) ** 2)
 
     alpha_msp = np.full(len(ind_msp), np.nan)
-    alpha_msh = np.full(len(ind_msp), np.nan)
+    alpha_msh = np.full(len(ind_msh), np.nan)
     v_th_msp = np.full((len(ind_msp), 3), np.nan)
-    v_th_msh = np.full((len(ind_msp), 3), np.nan)
+    v_th_msh = np.full((len(ind_msh), 3), np.nan)
 
     if coord_type == 'lmn':
         for i in range(len(ind_msp)):
