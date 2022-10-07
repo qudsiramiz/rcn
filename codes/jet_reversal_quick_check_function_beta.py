@@ -2,6 +2,7 @@ import datetime
 import os
 
 import matplotlib.pyplot as plt
+import more_itertools as mit
 import numpy as np
 import pandas as pd
 import pyspedas as spd
@@ -297,10 +298,76 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Find the index value closest to 'ind_min_np' where 'np' is greater than 'n_thresh' on both
     # sides of the minimum value
     # TODO: Check if threshold value of 3 is fine or if we need to decrease/increase it
-    n_thresh = 3
+    # n_thresh = 3
     n_thresh_msp = 2
     n_thresh_msh = 5
 
+    # TODO: Instead of one difference between indices, use the median value of differences between
+    # all the indices
+    n_points_msp = int(
+        10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+    n_points_msh = int(
+        10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
+    n_points_walen = n_points * 3
+
+    # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
+    # on both sides of the minimum value
+    np_msp_bool_array = df_mms['np'] < n_thresh_msp
+    np_msh_bool_array = df_mms['np'] > n_thresh_msh
+
+    # ind_np_msp_vals = np.flatnonzero(np.convolve(np_msp_bool_array > 0,
+    #                                              np.ones(
+    #                                                  n_points_msp, dtype=int),
+    #                                              'valid') >= n_points_msp)
+
+    result_msp = list(mit.run_length.encode(np_msp_bool_array))
+    # Find the length of longest subsequence of True, and the location if that index in result
+    max_true_count_msp = -1
+    max_true_idx_msp = -1
+    for idx, (val, count) in enumerate(result_msp):
+        if val and max_true_count_msp < count:
+            max_true_count_msp = count
+            max_true_idx_msp = idx
+    # Find total elements before and after the longest subsequence tuple
+    elems_before_idx_msp = sum((idx[1] for idx in result_msp[:max_true_idx_msp]))
+    # elems_after_idx_msp = sum((idx[1] for idx in result_msp[max_true_idx_msp + 1:]))
+
+    # Check if the longest subsequence is greater than the threshold
+    if max_true_count_msp >= n_points_msp:
+        ind_min_msp = elems_before_idx_msp
+        ind_max_msp = elems_before_idx_msp + max_true_count_msp
+        ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+
+    # ind_np_msh_vals = np.flatnonzero(np.convolve(np_msh_bool_array > 0,
+    #                                  np.ones(n_points_msh, dtype=int),
+    #                                  'valid') >= n_points_msh)
+
+    result_msh = list(mit.run_length.encode(np_msh_bool_array))
+    # Find the length of longest subsequence of True, and the location if that index in result
+    max_true_count_msh = -1
+    max_true_idx_msh = -1
+    for idx, (val, count) in enumerate(result_msh):
+        if val and max_true_count_msh < count:
+            max_true_count_msh = count
+            max_true_idx_msh = idx
+    # Find total elements before and after the longest subsequence tuple
+    elems_before_idx_msh = sum((idx[1]
+                               for idx in result_msh[:max_true_idx_msh]))
+    # elems_after_idx_msh = sum((idx[1] for idx in result_msh[max_true_idx_msh + 1:]))
+
+    # Check if the longest subsequence is greater than the threshold
+    if max_true_count_msh >= n_points_msh:
+        ind_min_msh = elems_before_idx_msh
+        ind_max_msh = elems_before_idx_msh + max_true_count_msh
+        ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
+
+    if verbose:
+        print(f"ind_min_msp: {ind_min_msp}")
+        print(f"ind_max_msp: {ind_max_msp}")
+        print(f"ind_min_msh: {ind_min_msh}")
+        print(f"ind_max_msh: {ind_max_msh}")
+
+    """
     try:
         ind_min_np_gt_05_right = np.where(
             df_mms['np'][ind_min_np:] > n_thresh)[0][0] + ind_min_np
@@ -333,26 +400,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         print(f"ind_min_np_gt_05_left: {ind_min_np_gt_05_left}")
         print(f"diff_right: {diff_right}")
         print(f"diff_left: {diff_left}")
-
-    n_points_walen = n_points * 3
-    n_points_msp_msh = int(10 / (df_mms_fpi.index[1] - df_mms_fpi.index[0]).total_seconds())
-
-    # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
-    # on both sides of the minimum value
-    np_msp_bool_array = df_mms['np'] < n_thresh_msp
-    np_msh_bool_array = df_mms['np'] > n_thresh_msh
-
-    ind_np_msp_vals = np.flatnonzero(np.convolve(np_msp_bool_array > 0,
-                                    np.ones(n_points_msp_msh, dtype=int),
-                                    'valid') >= n_points_msp_msh)
-    ind_np_msh_vals = np.flatnonzero(np.convolve(np_msh_bool_array > 0,
-                                    np.ones(n_points_msp_msh, dtype=int),
-                                    'valid') >= n_points_msp_msh)
-
-    if verbose:
-        print(f"ind_walen_vals: {ind_walen_vals}")
-        print(f"ind_np_msp_vals: {ind_np_msp_vals}")
-        print(f"ind_np_msh_vals: {ind_np_msh_vals}")
 
     # Find the index value closest to 'ind_min_np' where 'np' is greater than 'n_thresh' on both
     # sides of the minimum value
@@ -409,7 +456,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                 # If ind_max_msh is greater than the length of the dataframe, then we have reached
                 # the end of the dataframe and break out of the loop
                 if ind_max_msh > len(df_mms.index) - 1:
-                    ind_min_msh = np.nan1
+                    ind_min_msh = np.nan
                     ind_max_msh = np.nan
                     ind_range_msh = np.nan
                     break
@@ -447,7 +494,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             print("Magnetopause is on the right and Magnetosheath is on the left")
             print(f"ind_min_max_msp: {ind_min_msp, ind_max_msp}")
             print(f"ind_min_max_msh: {ind_min_msh, ind_max_msh}")
-
+    """
     # Set the index values to the full range where we have decided magnetosphere and magnetosheath
     # are.
     ind_msp = ind_range_msp
@@ -539,6 +586,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     beta_msh_mean = 2 * mu_0 * np_msh_mean * 1e6 * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean
                                                           ) / (3 * np.linalg.norm(
                                                             b_lmn_vec_msh_mean) ** 2)
+    beta_msp_mean = 2 * mu_0 * np_msp_mean * 1e6 * k_B * (2 * tp_para_msp_mean + tp_perp_msp_mean
+                                                          ) / (3 * np.linalg.norm(
+                                                            b_lmn_vec_msp_mean) ** 2)
 
     alpha_msp = np.full(len(ind_msp), np.nan)
     alpha_msh = np.full(len(ind_msp), np.nan)
@@ -687,7 +737,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                    'vp_lmn_vec_msh_median_n,vp_lmn_vec_msh_median_m,vp_lmn_vec_msh_median_l,'\
                    'tp_para_msp_median,tp_para_msh_median,tp_para_msp_mean,tp_para_msh_mean,'\
                    'tp_perp_msp_median,tp_perp_msh_median,tp_perp_msp_mean,tp_perp_msh_mean,'\
-                   'beta_msh_mean'
+                   'beta_msh_mean,beta_msp_mean'
 
         data_dict = {'Date': crossing_time,
                      'Probe': probe,
@@ -742,7 +792,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'tp_perp_msh_median': np.round(tp_perp_msh_median, 3),
                      'tp_perp_msp_mean': np.round(tp_perp_msp_mean, 3),
                      'tp_perp_msh_mean': np.round(tp_perp_msh_mean, 3),
-                     'beta_msh_mean': np.round(beta_msh_mean, 3)
+                     'beta_msh_mean': np.round(beta_msh_mean, 3),
+                     'beta_msp_mean': np.round(beta_msp_mean, 3)
                      }
 
         if x > -5 and x < 12 and r_yz < 12:
@@ -784,6 +835,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         plt.rcParams['xtick.direction'] = 'in'
         plt.rcParams['ytick.direction'] = 'in'
 
+        # TODO: Consider adding time series of R_w and Theta_w to the plot
         fig, axs = plt.subplots(4, 1, figsize=(6, 8), sharex=True)
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0.04)
         axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=lw)
