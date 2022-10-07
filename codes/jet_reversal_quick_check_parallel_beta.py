@@ -29,7 +29,7 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 120,
+              'dt': 300,
               'probe': 3,
               'jet_len': 3,
               'level': 'l2',
@@ -44,31 +44,31 @@ def check_jet_reversal(crossing_time):
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
-    df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    #try:
-    #    try:
-    #        inputs["data_rate"] = 'brst'
-    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    #    except Exception:
-    #        inputs["data_rate"] = 'fast'
-    #        df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
-    #except Exception as e:
-    #    # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-    #    # Save the crossing time to a file
-    #    # Check if the file exists
-    #    if not os.path.isfile(inputs["error_file_log_name"]):
-    #        # If it doesn't exist, create it
-    #        with open(inputs["error_file_log_name"], 'w') as f:
-    #            f.write("DateStart,Error\n")
-    #            f.write(f"{crossing_time},{e}\n")
-    #    else:
-    #        # If it exists, append to it
-    #        df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
-    #        if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
-    #            with open(inputs["error_file_log_name"], 'a') as f:
-    #                f.write(f"{crossing_time},{e}\n")
-    #        f.close()
-    #    pass
+    #df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    try:
+        try:
+            inputs["data_rate"] = 'brst'
+            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+        except Exception:
+            inputs["data_rate"] = 'fast'
+            df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    except Exception as e:
+        # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+        # Save the crossing time to a file
+        # Check if the file exists
+        if not os.path.isfile(inputs["error_file_log_name"]):
+            # If it doesn't exist, create it
+            with open(inputs["error_file_log_name"], 'w') as f:
+                f.write("DateStart,Error\n")
+                f.write(f"{crossing_time},{e}\n")
+        else:
+            # If it exists, append to it
+            df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
+            if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
+                with open(inputs["error_file_log_name"], 'a') as f:
+                    f.write(f"{crossing_time},{e}\n")
+            f.close()
+        pass
 
 
 @contextmanager
@@ -81,18 +81,18 @@ def suppress_stdout_stderr():
 
 use_parallel = True
 
-# with suppress_stdout_stderr():
-for foo in range(1):
+with suppress_stdout_stderr():
+# for foo in range(1):
     if use_parallel:
         # Set the number of processes to use
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 62 
+        indx_min = 10 
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 1
+        indx_max = indx_min + 10
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run

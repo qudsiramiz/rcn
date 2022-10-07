@@ -1,0 +1,11 @@
+DateStart,Error
+2015-09-02 13:39:04.097000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-01 12:11:14.077000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-01 21:51:34.162000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-01 12:20:54.135000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-02 13:45:34.102000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-01 12:30:44.092000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-01 21:16:54.084000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-01 21:24:44.190000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-01 21:59:24.118000+00:00,local variable 'vp_jet' referenced before assignment
+2015-09-01 21:09:14.178000+00:00,local variable 'vp_jet' referenced before assignment
