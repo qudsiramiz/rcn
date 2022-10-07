@@ -99,3 +99,67 @@ DateStart,Error
 2015-09-07 20:03:34.137000+00:00,local variable 'vp_jet' referenced before assignment
 2015-09-07 17:01:24.089000+00:00,local variable 'ind_range_msp' referenced before assignment
 2015-09-07 18:04:14.090000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 10:09:04.129000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 10:07:04.127000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 10:28:34.144000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 20:30:04.159000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:30:34.145000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:32:24.097000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 21:22:54.151000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 10:16:54.085000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:18:54.086000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 21:00:44.083000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 10:26:34.142000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:22:34.139000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:20:44.188000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:12:54.082000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:14:54.083000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:11:04.130000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:24:34.141000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-07 21:06:44.088000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 10:36:34.150000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:34:34.148000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:40:24.103000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:38:24.101000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:42:24.105000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:44:24.106000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:46:24.108000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:02:04.170000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:58:04.167000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:48:14.209000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:50:14.211000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:52:14.212000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:00:04.168000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:54:14.214000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:07:54.124000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:04:04.171000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:13:54.129000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 10:56:14.215000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:11:54.127000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:05:54.123000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:09:54.126000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:15:44.080000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 17:35:44.080000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 13:40:34.144000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:52:54.159000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 16:07:04.109000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 17:19:24.117000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 17:41:44.084000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:17:44.082000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:19:44.084000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 17:56:34.196000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 17:02:04.153000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:23:34.187000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:21:44.085000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 11:25:34.188000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 16:42:04.137000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-08 14:53:04.201000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-09 08:28:14.183000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-08 18:15:04.211000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-09 09:01:04.158000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-09 08:55:24.104000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-09 08:50:24.100000+00:00,local variable 'ind_range_msp' referenced before assignment
+2015-09-09 12:37:04.179000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-09 12:58:14.096000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-09 13:42:44.132000+00:00,index 0 is out of bounds for axis 0 with size 0
+2015-09-09 14:21:24.214000+00:00,index 0 is out of bounds for axis 0 with size 0
