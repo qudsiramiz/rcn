@@ -2940,3 +2940,7 @@ DateStart,Error
 2016-01-24 05:57:54.076000+00:00,index 0 is out of bounds for axis 0 with size 0
 2016-01-24 06:03:24.081000+00:00,index 0 is out of bounds for axis 0 with size 0
 2016-01-24 06:00:54.079000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-24 06:09:04.136000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-24 06:22:04.147000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-24 06:40:44.213000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-01-24 22:09:24.114000+00:00,local variable 'ind_range_msp' referenced before assignment
