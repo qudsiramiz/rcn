@@ -591,13 +591,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                           ) / (3 * np.linalg.norm(
                                                             b_lmn_vec_msp_mean) ** 2)
 
-    alpha_msp = np.full(len(ind_msp), np.nan)
+    alpha_msp = np.full(len(ind_jet), np.nan)
     alpha_msh = np.full(len(ind_msh), np.nan)
-    v_th_msp = np.full((len(ind_msp), 3), np.nan)
+    v_th_msp = np.full((len(ind_jet), 3), np.nan)
     v_th_msh = np.full((len(ind_msh), 3), np.nan)
 
     if coord_type == 'lmn':
-        for i in range(len(ind_msp)):
+        for i in range(len(ind_jet)):
             alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
                 np.linalg.norm(b_lmn_vec_msp[i, :])**2)
             for j in range(3):
@@ -612,7 +612,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
                 )**0.5
     else:
-        for i in range(len(ind_msp)):
+        for i in range(len(ind_jet)):
             alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
                 np.linalg.norm(b_gse_vec_msp[i, :])**2)
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
@@ -650,8 +650,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
 
     # Compute the angle between the observed and the theoretical velocity jumps
-    theta_w = np.full(len(ind_msp), np.nan)
-    for i in range(len(ind_msp)):
+    theta_w = np.full(len(ind_jet), np.nan)
+    for i in range(len(ind_jet)):
         theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
                                np.linalg.norm(delta_v_th[i, :]) *
                                np.linalg.norm(delta_v_obs[i, :])
