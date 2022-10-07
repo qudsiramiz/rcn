@@ -499,11 +499,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Set the index values to the full range where we have decided magnetosphere and magnetosheath
     # are.
     ind_msp = ind_range_msp
-    ind_jet_df_min = np.where(df_mms.index == vp_jet.index[ind_jet[0]])
-    ind_jet_df_max = np.where(df_mms.index == vp_jet.index[ind_jet[-1]])
-    print(f"ind_jet_df_min: {ind_jet_df_min}, \n ind_jet_df_max: {ind_jet_df_max}")
-    # Print times corresponding to the indices
-    print(f"Time of magnetopause: {df_mms.index[ind_jet_df_min]} \n Time of magnetosheath: {df_mms.index[ind_jet_df_max]}")
+    ind_walen_check_min = np.where(df_mms.index == vp_jet.index[ind_jet[0]])[0][0]
+    ind_walen_check_max = np.where(df_mms.index == vp_jet.index[ind_jet[-1]])[0][0]
+    ind_walen_check = np.arange(ind_walen_check_min, ind_walen_check_max)
+
     ind_msh = ind_range_msh
 
     # Get different parameters for magnetosphere and magnetosheath
@@ -596,18 +595,23 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                           ) / (3 * np.linalg.norm(
                                                             b_lmn_vec_msp_mean) ** 2)
 
-    alpha_msp = np.full(len(ind_jet), np.nan)
+    alpha_msp = np.full(len(ind_walen_check), np.nan)
     alpha_msh = np.full(len(ind_msh), np.nan)
-    v_th_msp = np.full((len(ind_jet), 3), np.nan)
+    v_th_msp = np.full((len(ind_walen_check), 3), np.nan)
     v_th_msh = np.full((len(ind_msh), 3), np.nan)
 
     if coord_type == 'lmn':
-        for i in range(len(ind_jet)):
-            alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
-                np.linalg.norm(b_lmn_vec_msp[i, :])**2)
+        for i in ind_walen_check:
+            alpha_msp[i] = (mu_0 * df_mms['np'][i] * 1e6 * k_B) * (
+                            df_mms['tp_para'][i] - df_mms['tp_perp'][i]) * 1160 / (1e-18 * (
+                                df_mms['b_lmn_n'][i] ** 2 + df_mms['b_lmn_m'][i] ** 2 +
+                                df_mms['b_lmn_l'][i] ** 2))
+            print(df_mms.index[i])
+            b_lmn_vec_msp = np.array(df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
+                                     df_mms['b_lmn_l'][i]) * 1e-9
             for j in range(3):
-                v_th_msp[i, j] = b_lmn_vec_msp[i, j] * (1 - alpha_msp[i]) / (
-                    mu_0 * np_msp[i] * m_p * (1 - alpha_msp[i])
+                v_th_msp[i, j] = b_lmn_vec_msp[j] * (1 - alpha_msp[i]) / (
+                    mu_0 * df_mms['np'][i] * 1e6 * m_p * (1 - alpha_msp[i])
                 )**0.5
         for i in range(len(ind_msh)):
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
@@ -893,7 +897,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
 
         # Set the x-axis limits to 2 minutes before and after the jet
-        # axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center + 
+        # axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center +
         # pd.Timedelta(minutes=2))
         axs[3].set_xlim(df_mms.index.min(), df_mms.index.max())
 
