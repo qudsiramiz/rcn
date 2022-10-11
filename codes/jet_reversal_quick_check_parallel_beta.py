@@ -38,9 +38,9 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20221007_beta.csv',
+              'fname': '../data/mms_jet_reversal_times_list_20221011_beta.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221007_beta.csv",
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221011_beta.csv",
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
@@ -88,11 +88,11 @@ with suppress_stdout_stderr():
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 1000
+        indx_min = 0
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = -1
+        indx_max = 1000
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run

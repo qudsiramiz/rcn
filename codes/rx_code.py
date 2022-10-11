@@ -77,7 +77,14 @@ today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 # trange_list.sort(key=lambda x: x[0])
 # trange_ind_list = np.array([10]) #, 70, 75, 104, 2263, 2259, 2257, 2142, 2052, 2053])
 
-df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20220922_beta.csv")
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221007_beta.csv",
+                              index_col=False)
+
+# If nay column has NaN, drop that row
+df_jet_reversal = df_jet_reversal.dropna()
+
+# Drop rows which has same 'jet_time' within 1 minute of each other
+df_jet_reversal = df_jet_reversal.drop_duplicates(subset="jet_time", keep="first")
 # Set the index to Date in UTC
 df_jet_reversal.set_index("jet_time", inplace=True)
 # Sort the dataframe by the index
@@ -190,13 +197,13 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "interpolation": "None",
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20220927.csv",
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221007.csv",
                     "rc_folder": "../data/rx_d/",
                     "save_rc_file": True,
                     "walen1": df_jet_reversal["walen1"][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal["jet_detection"][ind_range],
-                    "fig_version": "v09",
+                    "fig_version": "v10",
                     "r_W": df_jet_reversal["r_W"][ind_range],
                     "theta_W": df_jet_reversal["theta_w"][ind_range],
                     # "jet_time": df_jet_reversal["jet_time"][ind_range],
