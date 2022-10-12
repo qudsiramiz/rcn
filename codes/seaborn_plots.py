@@ -219,7 +219,7 @@ def seaborn_subplots(
     gs.tight_layout(fig)
     gs.update(top=1, bottom=0.05, left=0.06, right=1, hspace=0.01, wspace=0.20)
     if fig_name is None:
-        fig_name = f"../figures/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}.{fig_format}"
+        fig_name = f"../figures/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}_20221012.{fig_format}"
     else:
         fig_name = f"../figures/{fig_name}_{dark_mode}.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)

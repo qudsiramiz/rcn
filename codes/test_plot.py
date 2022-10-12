@@ -10,7 +10,7 @@ importlib.reload(rxmf)
 importlib.reload(sp)
 importlib.reload(sfg)
 
-file_name = "../data/rx_d/reconnection_line_data_mms3_20220927.csv"
+file_name = "../data/rx_d/reconnection_line_data_mms3_20221007.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
