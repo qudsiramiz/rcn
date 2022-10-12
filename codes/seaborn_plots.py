@@ -204,7 +204,7 @@ def seaborn_subplots(
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
                         xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
-                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode)
+                        pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
 
     fig = plt.figure(figsize=(figsize[0], figsize[1]))
