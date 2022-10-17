@@ -1,3 +1,4 @@
+from cProfile import label
 import datetime
 import os
 
@@ -854,7 +855,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         plt.rcParams['ytick.direction'] = 'in'
 
         # TODO: Consider adding time series of R_w and Theta_w to the plot
-        fig, axs = plt.subplots(4, 1, figsize=(6, 8), sharex=True)
+        fig, axs = plt.subplots(5, 1, figsize=(6, 10), sharex=True)
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0.04)
         axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=lw)
         axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='b', lw=lw)
@@ -863,49 +864,57 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[0].legend(loc='upper right', fontsize=10)
         axs[0].grid(True)
 
-        axs[1].plot(df_mms.index, df_mms['np'], color='b', lw=lw)
-        axs[1].set_ylabel(r'$n_p$ (cm$^{-3}$)')
+        # MMS temperature plots
+        axs[1].plot(df_mms.index, df_mms['tp_para'], label=r'$T_{||}$', color='r', lw=lw)
+        axs[1].plot(df_mms.index, df_mms['tp_perp'], label=r'$T_{\perp}$', color='b', lw=lw)
+        axs[1].plot(df_mms.index, (2 * df_mms['tp_para'] + df_mms['tp_perp']) / 3, label='T',
+                    color='k', lw=lw)
+        axs[1].set_ylabel(r'$T$ (K)')
+        axs[1].legend(loc='upper right', fontsize=10)
         axs[1].grid(True)
         axs[1].set_yscale('log')
 
-        # axs1 = axs[1].twinx()
-        # axs1.plot(R_w, color='r', lw=lw)
-
-        axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=lw)
-        axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=lw)
-        axs[2].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='g', lw=lw)
-        axs[2].set_ylabel(r'$V_p$ (km/s)')
-        axs[2].legend(loc='upper right', fontsize=10)
+        # MMS Density plots
+        axs[2].plot(df_mms.index, df_mms['np'], color='b', lw=lw)
+        axs[2].set_ylabel(r'$n_p$ (cm$^{-3}$)')
         axs[2].grid(True)
+        axs[2].set_yscale('log')
+
+        axs[3].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=lw)
+        axs[3].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=lw)
+        axs[3].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='g', lw=lw)
+        axs[3].set_ylabel(r'$V_p$ (km/s)')
+        axs[3].legend(loc='upper right', fontsize=10)
+        axs[3].grid(True)
 
         if walen_relation_satisfied:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=lw)
+            axs[4].plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=lw)
         elif walen_relation_satisfied_v2:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=lw)
+            axs[4].plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=lw)
         else:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'r-', lw=lw)
+            axs[4].plot(df_mms.index, df_mms.vp_diff_z, 'r-', lw=lw)
         if jet_detection:
             # Make a box around the jet
-            axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
+            axs[4].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
                            alpha=0.2, label='Jet Location')
             # Plot a vertical line at the jet time center
             jet_center = vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] -
                                                      vp_jet.index[ind_jet[0]]) / 2
-            axs[3].axvline(jet_center, color='k', lw=0.5, label='Jet Center')
-            axs[3].legend(loc=1)
+            axs[4].axvline(jet_center, color='k', lw=0.5, label='Jet Center')
+            axs[4].legend(loc=1)
         # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
         # Draw a dashed line at +/- v_thres
-        axs[3].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
-        axs[3].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
-        axs[3].set_ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
-        axs[3].set_ylim(-300, 300)
-        axs[3].set_xlabel('Time (UTC)')
-        # axs[3].set_xlim(df_mms.index[0], df_mms.index[-1])
+        axs[4].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
+        axs[4].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
+        axs[4].set_ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
+        axs[4].set_ylim(-300, 300)
+        axs[4].set_xlabel('Time (UTC)')
+        # axs[4].set_xlim(df_mms.index[0], df_mms.index[-1])
 
         # Set the x-axis limits to 2 minutes before and after the jet
         # axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center +
         # pd.Timedelta(minutes=2))
-        axs[3].set_xlim(df_mms.index.min(), df_mms.index.max())
+        axs[4].set_xlim(df_mms.index.min(), df_mms.index.max())
 
         # Make a shaded region for all three plots where the magnetopause and magnetosheath
         # are
@@ -922,6 +931,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[2].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
                        alpha=0.2, label="Magnetosphere")
         axs[2].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
+                       alpha=0.2, label="Magnetosheath")
+        axs[3].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
+                       alpha=0.2, label="Magnetosphere")
+        axs[3].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
                        alpha=0.2, label="Magnetosheath")
 
         temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -956,7 +969,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         else:
-            folder_name = "../figures/jet_reversal_checks_beta/no_jet_no_walen"
+            folder_name = "../figures/jet_reversal_checks/temp/no_jet_no_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)

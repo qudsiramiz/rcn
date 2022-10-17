@@ -133,7 +133,7 @@ x_scale_list = [False, False, False, False, False, False, False, False]
 y_scale_list = [False, False, False, False, True, True, True, True]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-dark_mode = False
+dark_mode = True
 
 if dark_mode:
     plt.style.use('dark_background')
