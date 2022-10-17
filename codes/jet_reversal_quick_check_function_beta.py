@@ -1,9 +1,12 @@
-from cProfile import label
 import datetime
 import os
+from turtle import color
 
 import matplotlib.pyplot as plt
+from matplotlib.transforms import Transform
 import more_itertools as mit
+
+# from matplotlib import rc
 import numpy as np
 import pandas as pd
 import pyspedas as spd
@@ -60,6 +63,19 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     df_mms : pandas.DataFrame
         The merged dataframe containing the data from the FPI and FGM.
     """
+
+    # Define the mass of proton in kg
+    m_p = 1.6726219e-27
+
+    # Define the absolute permeability of free space in m^2 kg^-1 s^-1
+    mu_0 = 4 * np.pi * 1e-7
+
+    # Define the Boltzmann constant in J K^-1
+    k_B = 1.38064852e-23
+
+    # Define the conversion factor for converting temperature from ev to K
+    ev_to_K = 11604.525
+
     crossing_time_min = crossing_time - datetime.timedelta(seconds=dt)
     crossing_time_max = crossing_time + datetime.timedelta(seconds=dt)
     trange = [crossing_time_min, crossing_time_max]
@@ -93,10 +109,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     mms_fpi_bulkv_gse = ptt.get_data(f'mms{probe}_dis_bulkv_gse_{data_rate}')[1:4][0]
 
     if coord_type == 'lmn':
-        # Convert gse to lmn
+        # Convert gsm to lmn
         _ = mms_cotrans_lmn.mms_cotrans_lmn(name_in=f'mms{probe}_dis_bulkv_gsm_{data_rate}',
                                             name_out=f'mms{probe}_dis_bulkv_lmn_{data_rate}',
-                                            gse=True, probe=str(probe), data_rate=data_rate)
+                                            gsm=True, probe=str(probe), data_rate=data_rate)
 
         mms_fpi_bulkv_lmn = ptt.get_data(f'mms{probe}_dis_bulkv_lmn_{data_rate}')[1:4][0]
 
@@ -567,10 +583,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                   df_mms['b_gse_z'][ind_msh]]) * 1e-9  # Convert to T from nT
         b_gse_vec_msh = b_gse_vec_msh.T
 
-    tp_para_msp = df_mms['tp_para'][ind_msp] * 1160  # Convert to K from ev
-    tp_para_msh = df_mms['tp_para'][ind_msh] * 1160  # Convert to K from ev
-    tp_perp_msp = df_mms['tp_perp'][ind_msp] * 1160  # Convert to K from ev
-    tp_perp_msh = df_mms['tp_perp'][ind_msh] * 1160  # Convert to K from ev
+    tp_para_msp = df_mms['tp_para'][ind_msp] * ev_to_K  # Convert to K from ev
+    tp_para_msh = df_mms['tp_para'][ind_msh] * ev_to_K  # Convert to K from ev
+    tp_perp_msp = df_mms['tp_perp'][ind_msp] * ev_to_K  # Convert to K from ev
+    tp_perp_msh = df_mms['tp_perp'][ind_msh] * ev_to_K  # Convert to K from ev
 
     # Get the mean and median values of temperature for the magnetosphere and magnetosheath
     tp_para_msp_median = np.nanmedian(tp_para_msp)
@@ -581,15 +597,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     tp_perp_msh_median = np.nanmedian(tp_perp_msh)
     tp_perp_msp_mean = np.nanmean(tp_perp_msp)
     tp_perp_msh_mean = np.nanmean(tp_perp_msh)
-
-    # Define the mass of proton in kg
-    m_p = 1.6726219e-27
-
-    # Define the absolute permeability of free space in m^2 kg^-1 s^-1
-    mu_0 = 4 * np.pi * 1e-7
-
-    # Define the Boltzmann constant in J K^-1
-    k_B = 1.38064852e-23
 
     # Compute the magnetosheath beta value
     beta_msh_mean = 2 * mu_0 * np_msh_mean * 1e6 * k_B * (2 * tp_para_msh_mean + tp_perp_msh_mean
@@ -607,22 +614,20 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     if coord_type == 'lmn':
         for i, xx in enumerate(ind_walen_check):
             alpha_msp[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
-                            df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * 1160 / (1e-18 * (
+                            df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
                                 df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
                                 df_mms['b_lmn_l'][xx] ** 2))
             b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
                                      df_mms['b_lmn_l'][xx]]) * 1e-9
             for j in range(3):
-                v_th_msp[i, j] = b_lmn_vec_msp[j] * (1 - alpha_msp[i]) / (
-                    mu_0 * df_mms['np'][i] * 1e6 * m_p * (1 - alpha_msp[i])
-                )**0.5
+                v_th_msp[i, j] = b_lmn_vec_msp[j] * ((1 - alpha_msp[i]) / (mu_0 * df_mms['np'][i]
+                                                      * 1e6 * m_p))**0.5
         for i in range(len(ind_msh)):
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
                 np.linalg.norm(b_lmn_vec_msh[i, :])**2)
             for j in range(3):
-                v_th_msh[i, j] = b_lmn_vec_msh[i, j] * (1 - alpha_msh[i]) / (
-                    mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
-                )**0.5
+                v_th_msh[i, j] = b_lmn_vec_msh[i, j] * ((1 - alpha_msh[i]) / (
+                                                         mu_0 * np_msh[i] * m_p))**0.5
     else:
         for i in range(len(ind_jet)):
             alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
@@ -637,7 +642,19 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
                 )**0.5
 
+    alpha_all = mu_0 * df_mms['np'] * 1e6 * k_B * (df_mms['tp_para'] - df_mms['tp_perp']
+                ) * ev_to_K / (1e-18 * (df_mms['b_lmn_n'] ** 2 + df_mms['b_lmn_m'] ** 2
+                + df_mms['b_lmn_l'] ** 2))
+
+    v_th_all = np.full((len(df_mms['tp_para']), 3), np.nan)
+    for i in range(len(df_mms['tp_para'])):
+        v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
+                                          df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
+                                                                     mu_0 * df_mms['np'][i] * 1e6
+                                                                     * m_p))**0.5
     delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_msp
+    delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
+
     # delta_v_th_mag = np.linalg.norm(delta_v_th, axis=1)
 
     # Check on which side the density is smaller and assign it to be magnetopause
@@ -657,10 +674,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
                                  df_mms['vp_lmn_m'][ind_walen_check],
-                                 df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s
+                                 df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s to m/s
+    vp_lmn_vec_all = np.array([df_mms['vp_lmn_n'], df_mms['vp_lmn_m'], df_mms['vp_lmn_l']]).T * 1e3
 
     if coord_type == 'lmn':
         delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
+        delta_v_obs_all = vp_lmn_vec_msh_mean - vp_lmn_vec_all
     else:
         delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
     # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
@@ -674,11 +693,21 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                )
                                )
 
+    theta_all = np.full(len(df_mms['tp_para']), np.nan)
+    for i in range(len(df_mms['tp_para'])):
+        theta_all[i] = np.arccos(np.dot(delta_v_th_all[i, :], delta_v_obs_all[i, :]) / (
+                               np.linalg.norm(delta_v_th_all[i, :]) *
+                               np.linalg.norm(delta_v_obs_all[i, :])
+                               )
+                               )
+
     # Convert angle to degrees
     theta_w_deg = theta_w * 180 / np.pi
+    theta_all_deg = theta_all * 180 / np.pi
 
     # Compute the ratio of the observed and the theoretical velocity jumps
     R_w = np.linalg.norm(delta_v_th, axis=1) / np.linalg.norm(delta_v_obs, axis=1)
+    R_all = np.linalg.norm(delta_v_th_all, axis=1) / np.linalg.norm(delta_v_obs_all, axis=1)
 
     # print(f"Values of theta_w_deg: {theta_w_deg}")
     # print(f"Values of R_w: {R_w}")
@@ -841,9 +870,26 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
 
     # Set the fontstyle to Times New Roman
-    font = {'family': 'serif', 'weight': 'normal', 'size': 10}
+    font = {'family': 'serif', 'weight': 'normal', 'size': 16 }
     plt.rc('font', **font)
-    plt.rc('text', usetex=False)
+    plt.rc('text', usetex=True)
+    # Set tick parameters such that ticks are visible on all sides
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+    plt.rcParams['xtick.top'] = True
+    plt.rcParams['ytick.right'] = True
+
+    # Set the tick length and widths
+    plt.rcParams['xtick.major.size'] = 5
+    plt.rcParams['xtick.major.width'] = 1
+    plt.rcParams['ytick.major.size'] = 5
+    plt.rcParams['ytick.major.width'] = 1
+    plt.rcParams['xtick.minor.size'] = 3
+    plt.rcParams['xtick.minor.width'] = 1
+    plt.rcParams['ytick.minor.size'] = 3
+    plt.rcParams['ytick.minor.width'] = 1
+
+    # plt.style.use('dark_background')
 
     plt.close("all")
 
@@ -855,64 +901,128 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         plt.rcParams['ytick.direction'] = 'in'
 
         # TODO: Consider adding time series of R_w and Theta_w to the plot
-        fig, axs = plt.subplots(5, 1, figsize=(6, 10), sharex=True)
-        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0.04)
-        axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='r', lw=lw)
-        axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='b', lw=lw)
-        axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='g', lw=lw)
+        fig, axs = plt.subplots(5, 1, figsize=(10, 12), sharex=True)
+        fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0.0)
+        axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='b', lw=lw)
+        axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='g', lw=lw)
+        axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='r', lw=lw)
         axs[0].set_ylabel(r'$B$ (nT)')
-        axs[0].legend(loc='upper right', fontsize=10)
+        # axs[0].legend(loc='upper right')
+        # Write a text box with B_l and B_m and B_n in different colors rotated by 0 degrees
+        axs[0].text(1.01, 0.80, r'$B_L$', color='b', transform=axs[0].transAxes, rotation=0, 
+                    ha='left', va='center')
+        axs[0].text(1.01, 0.50, r'$B_M$', color='g', transform=axs[0].transAxes, rotation=0, 
+                    ha='left', va='center')
+        axs[0].text(1.01, 0.2, r'$B_N$', color='r', transform=axs[0].transAxes, rotation=0, 
+                    ha='left', va='center')
+
         axs[0].grid(True)
 
-        # MMS temperature plots
-        axs[1].plot(df_mms.index, df_mms['tp_para'], label=r'$T_{||}$', color='r', lw=lw)
-        axs[1].plot(df_mms.index, df_mms['tp_perp'], label=r'$T_{\perp}$', color='b', lw=lw)
-        axs[1].plot(df_mms.index, (2 * df_mms['tp_para'] + df_mms['tp_perp']) / 3, label='T',
-                    color='k', lw=lw)
-        axs[1].set_ylabel(r'$T$ (K)')
-        axs[1].legend(loc='upper right', fontsize=10)
+        # MMS Density plots
+        axs[1].plot(df_mms.index, df_mms['np'], color='b', lw=lw)
+        axs[1].set_ylabel(r'$n_p$ (cm$^{-3}$)', color='b')
+        axs[1].spines['left'].set_color('blue')
+        axs[1].tick_params(which="both", axis='y', colors='b')
         axs[1].grid(True)
         axs[1].set_yscale('log')
 
-        # MMS Density plots
-        axs[2].plot(df_mms.index, df_mms['np'], color='b', lw=lw)
-        axs[2].set_ylabel(r'$n_p$ (cm$^{-3}$)')
-        axs[2].grid(True)
-        axs[2].set_yscale('log')
+        # MMS temperature plots
+        axs_t = axs[1].twinx()
+        axs_t.plot(df_mms.index, df_mms['tp_para'], label=r'$T_{\parallel}$', color='r', lw=lw)
+        axs_t.plot(df_mms.index, df_mms['tp_perp'], label=r'$T_{\perp}$', color='g', lw=lw)
+        # axs_t.plot(df_mms.index, (2 * df_mms['tp_para'] + df_mms['tp_perp']) / 3, label='T', 
+        #            color='k', lw=lw)
+        axs_t.set_ylabel(r'$T$ (K)', color='r')
+        # Write a text box with T_para and T_perp in different colors rotated by 0 degrees
+        axs_t.text(0.99, 0.55, r'$T_{\parallel}$', color='r', transform=axs_t.transAxes, rotation=0,
+                   ha='right', va='bottom')
+        axs_t.text(0.99, 0.45, r'$T_{\perp}$', color='g', transform=axs_t.transAxes, rotation=0,
+                   ha='right', va='top')
+        axs_t.spines['right'].set_color('red')
+        axs_t.spines['left'].set_visible(False)
+        axs_t.tick_params(which='both', axis='y', colors='r')
+        # axs_t.legend(loc='upper right')
 
-        axs[3].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='r', lw=lw)
-        axs[3].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='b', lw=lw)
-        axs[3].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='g', lw=lw)
-        axs[3].set_ylabel(r'$V_p$ (km/s)')
-        axs[3].legend(loc='upper right', fontsize=10)
-        axs[3].grid(True)
+        axs_t.grid(True)
+        axs_t.set_yscale('log')
+
+        axs[1].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
+                       alpha=0.2, label="Magnetosphere")
+        axs[1].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
+                       alpha=0.2, label="Magnetosheath")
+        # axs[1].legend(loc=2)
+        axs[1].text(0.01, 0.55, 'Magnetosphere', color='r', transform=axs[1].transAxes, ha='left',
+                    va='bottom')
+        axs[1].text(0.01, 0.45, 'Magnetosheath', color='b', transform=axs[1].transAxes, ha='left',
+                    va='top')
+
+        axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='b', lw=lw)
+        axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='g', lw=lw)
+        axs[2].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='r', lw=lw)
+        axs[2].set_ylabel(r'$V_p$ (km/s)')
+        # Wrtie a text box with V_L, V_M and V_N in different colors rotated by 0 degrees
+        axs[2].text(1.01, 0.80, r'$V_L$', color='b', transform=axs[2].transAxes, rotation=0,
+                    ha='left', va='center')
+        axs[2].text(1.01, 0.50, r'$V_M$', color='g', transform=axs[2].transAxes, rotation=0,
+                    ha='left', va='center')
+        axs[2].text(1.01, 0.2, r'$V_N$', color='r', transform=axs[2].transAxes, rotation=0,
+                    ha='left', va='center')
+        # axs[2].legend(loc='upper right')
+        axs[2].grid(True)
 
         if walen_relation_satisfied:
-            axs[4].plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=lw)
         elif walen_relation_satisfied_v2:
-            axs[4].plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=lw)
         else:
-            axs[4].plot(df_mms.index, df_mms.vp_diff_z, 'r-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'r-', lw=lw)
         if jet_detection:
             # Make a box around the jet
+            axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
+                           alpha=0.2)
             axs[4].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
                            alpha=0.2, label='Jet Location')
             # Plot a vertical line at the jet time center
             jet_center = vp_jet.index[ind_jet[0]] + (vp_jet.index[ind_jet[-1]] -
                                                      vp_jet.index[ind_jet[0]]) / 2
-            axs[4].axvline(jet_center, color='k', lw=0.5, label='Jet Center')
-            axs[4].legend(loc=1)
+            axs[3].axvline(jet_center, color='k', lw=0.5, label='Jet Center')
+            axs[3].legend(loc=1)
+            axs[3].text(0.01, 0.8, 'Jet Location', color='c', transform=axs[3].transAxes,
+                        ha='left', va='center')
         # plt.plot(vp_jet, 'r.', ms=2, lw=1, label="jet")
         # Draw a dashed line at +/- v_thres
-        axs[4].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
-        axs[4].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
-        axs[4].set_ylabel("$v_p - <v_p>$ \n $(km/s, LMN, L)$")
-        axs[4].set_ylim(-300, 300)
+        axs[3].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
+        axs[3].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
+        axs[3].set_ylabel(r'$\Delta V_L$ (km/s)')
+        axs[3].set_ylim(-300, 300)
+
+        # Make the theta_all_deg and R_all plot
+        axs[4].plot(df_mms.index, theta_all_deg, 'b-', lw=lw, label=r'$\theta$', alpha=0.5)
+        axs[4].set_ylabel(r'$\theta_{\rm W}$ (deg)', color='b')
+        axs[4].tick_params(which='both', axis='y', labelcolor='b')
+        # Draw a horizontal line at theta = 0, 30, 150 and 180
+        axs[4].axhline(y=30, color='b', linestyle='--', lw=lw)
+        axs[4].axhline(y=150, color='b', linestyle='--', lw=lw)
+        axs[4].set_ylim(0, 180)
+
+        axs_r = axs[4].twinx()
+        axs_r.plot(df_mms.index, R_all, 'r-', lw=lw, label=r'$R_{\rm W}$', alpha=0.5)
+        axs_r.set_ylabel(r'$R_{\rm W}$', color='r')
+        # Draw a horizontal line at R = 0.4 and 3
+        axs_r.axhline(y=0.4, color='r', linestyle='--', lw=lw)
+        axs_r.axhline(y=3, color='r', linestyle='--', lw=lw)
+        # Set the color of y-axis spine to red
+        axs_r.spines['right'].set_color('red')
+        # Set the color of the tick labels to red
+        axs_r.tick_params(which='both', axis='y', colors='red')
+        axs_r.set_yscale('log')
+
+
         axs[4].set_xlabel('Time (UTC)')
         # axs[4].set_xlim(df_mms.index[0], df_mms.index[-1])
 
         # Set the x-axis limits to 2 minutes before and after the jet
-        # axs[3].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center +
+        # axs[2].set_xlim(jet_center - pd.Timedelta(minutes=2), jet_center +
         # pd.Timedelta(minutes=2))
         axs[4].set_xlim(df_mms.index.min(), df_mms.index.max())
 
@@ -927,14 +1037,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                        alpha=0.2, label="Magnetosphere")
         axs[1].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
                        alpha=0.2, label="Magnetosheath")
-        axs[1].legend(loc=1)
         axs[2].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
                        alpha=0.2, label="Magnetosphere")
         axs[2].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
                        alpha=0.2, label="Magnetosheath")
-        axs[3].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
+        axs[4].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
                        alpha=0.2, label="Magnetosphere")
-        axs[3].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
+        axs[4].axvspan(df_mms.index[ind_msh[0]], df_mms.index[ind_msh[-1]], color="b",
                        alpha=0.2, label="Magnetosheath")
 
         temp3 = crossing_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -943,28 +1052,28 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Add text to the plot
         text = f"$R_w$ = {np.nanmedian(R_w):.2f}\n" +\
                f"$\\Theta_w$ = {np.nanmedian(theta_w_deg):.2f}"
-        axs[3].text(0.02, 0.98, text, transform=axs[3].transAxes, ha='left', va='top')
+        axs[4].text(0.02, 1, text, transform=axs[4].transAxes, ha='left', va='top')
 
         # Add the index of crossing time to the top of the first axis
         axs[0].text(-0.05, 1.07, f"{ind_crossing}", transform=axs[0].transAxes, ha='left',
                     va='top', color='r')
 
         axs[0].text(
-            1, 1.0, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh_median:.3f}",
-            transform=axs[0].transAxes, ha='right',  va='bottom', color='r')
+            1.0, 1.01, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh_median:.0f}",
+            transform=axs[0].transAxes, ha='center',  va='bottom', color='r')
         if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks_beta/jet_walen"
+            folder_name = "../figures/jet_reversal_checks/temp_20221017/jet_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
-            folder_name = "../figures/jet_reversal_checks_beta/walen"
+            folder_name = "../figures/jet_reversal_checks/temp_20221017/walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         elif (not walen_relation_satisfied) & (
                 not walen_relation_satisfied_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks_beta/jet"
+            folder_name = "../figures/jet_reversal_checks/temp_20221017/jet"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
