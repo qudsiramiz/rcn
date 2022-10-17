@@ -969,7 +969,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         else:
-            folder_name = "../figures/jet_reversal_checks/temp/no_jet_no_walen"
+            folder_name = "../figures/jet_reversal_checks/temp_20221017/no_jet_no_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
