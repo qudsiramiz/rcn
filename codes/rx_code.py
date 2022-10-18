@@ -40,8 +40,8 @@ df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 0
-ind_max = 10
+ind_min = 11
+ind_max = -1
 
 
 @contextmanager
