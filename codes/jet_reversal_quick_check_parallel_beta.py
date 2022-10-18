@@ -92,7 +92,7 @@ with suppress_stdout_stderr():
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 100
+        indx_max = -1
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run

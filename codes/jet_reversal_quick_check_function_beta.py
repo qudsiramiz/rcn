@@ -903,47 +903,50 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # TODO: Consider adding time series of R_w and Theta_w to the plot
         fig, axs = plt.subplots(5, 1, figsize=(10, 12), sharex=True)
         fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0, hspace=0.0)
-        axs[0].plot(df_mms.index, df_mms['b_lmn_l'], label=r'$B_L$', color='b', lw=lw)
-        axs[0].plot(df_mms.index, df_mms['b_lmn_m'], label=r'$B_M$', color='g', lw=lw)
-        axs[0].plot(df_mms.index, df_mms['b_lmn_n'], label=r'$B_N$', color='r', lw=lw)
+        axs[0].plot(df_mms.index, df_mms['b_lmn_l'].rolling(10).mean(), label=r'$B_L$', color='b',
+                    lw=lw)
+        axs[0].plot(df_mms.index, df_mms['b_lmn_m'].rolling(10).mean(), label=r'$B_M$', color='g',
+                    lw=lw)
+        axs[0].plot(df_mms.index, df_mms['b_lmn_n'].rolling(10).mean(), label=r'$B_N$', color='r',
+                    lw=lw)
         axs[0].set_ylabel(r'$B$ (nT)')
         # axs[0].legend(loc='upper right')
         # Write a text box with B_l and B_m and B_n in different colors rotated by 0 degrees
-        axs[0].text(1.01, 0.80, r'$B_L$', color='b', transform=axs[0].transAxes, rotation=0, 
+        axs[0].text(1.01, 0.80, r'$B_{\rm L}$', color='b', transform=axs[0].transAxes, rotation=0, 
                     ha='left', va='center')
-        axs[0].text(1.01, 0.50, r'$B_M$', color='g', transform=axs[0].transAxes, rotation=0, 
+        axs[0].text(1.01, 0.50, r'$B_{\rm M}$', color='g', transform=axs[0].transAxes, rotation=0, 
                     ha='left', va='center')
-        axs[0].text(1.01, 0.2, r'$B_N$', color='r', transform=axs[0].transAxes, rotation=0, 
+        axs[0].text(1.01, 0.2, r'$B_{\rm N}$', color='r', transform=axs[0].transAxes, rotation=0, 
                     ha='left', va='center')
 
-        axs[0].grid(True)
+        # axs[0].grid(True)
 
         # MMS Density plots
-        axs[1].plot(df_mms.index, df_mms['np'], color='b', lw=lw)
-        axs[1].set_ylabel(r'$n_p$ (cm$^{-3}$)', color='b')
+        axs[1].plot(df_mms.index, df_mms['np'].rolling(10).mean(), color='b', lw=lw)
+        axs[1].set_ylabel(r'$n_{\rm p}$ (cm$^{-3}$)', color='b')
         axs[1].spines['left'].set_color('blue')
         axs[1].tick_params(which="both", axis='y', colors='b')
-        axs[1].grid(True)
+        # axs[1].grid(True)
         axs[1].set_yscale('log')
 
         # MMS temperature plots
         axs_t = axs[1].twinx()
-        axs_t.plot(df_mms.index, df_mms['tp_para'], label=r'$T_{\parallel}$', color='r', lw=lw)
-        axs_t.plot(df_mms.index, df_mms['tp_perp'], label=r'$T_{\perp}$', color='g', lw=lw)
+        axs_t.plot(df_mms.index, df_mms['tp_para'].rolling(10).mean(), color='r', lw=lw)
+        axs_t.plot(df_mms.index, df_mms['tp_perp'].rolling(10).mean(), color='g', lw=lw)
         # axs_t.plot(df_mms.index, (2 * df_mms['tp_para'] + df_mms['tp_perp']) / 3, label='T', 
         #            color='k', lw=lw)
-        axs_t.set_ylabel(r'$T$ (K)', color='r')
+        axs_t.set_ylabel(r'$T_{\rm p}$ (K)', color='r')
         # Write a text box with T_para and T_perp in different colors rotated by 0 degrees
-        axs_t.text(0.99, 0.55, r'$T_{\parallel}$', color='r', transform=axs_t.transAxes, rotation=0,
-                   ha='right', va='bottom')
-        axs_t.text(0.99, 0.45, r'$T_{\perp}$', color='g', transform=axs_t.transAxes, rotation=0,
-                   ha='right', va='top')
+        axs_t.text(0.99, 0.55, r'$T_{\rm p \parallel}$', color='r', transform=axs_t.transAxes,
+                   rotation=0, ha='right', va='bottom')
+        axs_t.text(0.99, 0.45, r'$T_{\rm p \perp}$', color='g', transform=axs_t.transAxes,
+                   rotation=0, ha='right', va='top')
         axs_t.spines['right'].set_color('red')
         axs_t.spines['left'].set_visible(False)
         axs_t.tick_params(which='both', axis='y', colors='r')
         # axs_t.legend(loc='upper right')
 
-        axs_t.grid(True)
+        # axs_t.grid(True)
         axs_t.set_yscale('log')
 
         axs[1].axvspan(df_mms.index[ind_msp[0]], df_mms.index[ind_msp[-1]], color="r",
@@ -956,26 +959,29 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[1].text(0.01, 0.45, 'Magnetosheath', color='b', transform=axs[1].transAxes, ha='left',
                     va='top')
 
-        axs[2].plot(df_mms.index, df_mms['vp_lmn_l'], label=r'$V_L$', color='b', lw=lw)
-        axs[2].plot(df_mms.index, df_mms['vp_lmn_m'], label=r'$V_M$', color='g', lw=lw)
-        axs[2].plot(df_mms.index, df_mms['vp_lmn_n'], label=r'$V_N$', color='r', lw=lw)
-        axs[2].set_ylabel(r'$V_p$ (km/s)')
+        axs[2].plot(df_mms.index, df_mms['vp_lmn_l'].rolling(10).mean(), label=r'$V_L$', color='b',
+                    lw=lw)
+        axs[2].plot(df_mms.index, df_mms['vp_lmn_m'].rolling(10).mean(), label=r'$V_M$', color='g',
+                    lw=lw)
+        axs[2].plot(df_mms.index, df_mms['vp_lmn_n'].rolling(10).mean(), label=r'$V_N$', color='r',
+                    lw=lw)
+        axs[2].set_ylabel(r'$V_{\rm p}$ (km/s)')
         # Wrtie a text box with V_L, V_M and V_N in different colors rotated by 0 degrees
-        axs[2].text(1.01, 0.80, r'$V_L$', color='b', transform=axs[2].transAxes, rotation=0,
+        axs[2].text(1.01, 0.80, r'$V_{\rm L}$', color='b', transform=axs[2].transAxes, rotation=0,
                     ha='left', va='center')
-        axs[2].text(1.01, 0.50, r'$V_M$', color='g', transform=axs[2].transAxes, rotation=0,
+        axs[2].text(1.01, 0.50, r'$V_{\rm M}$', color='g', transform=axs[2].transAxes, rotation=0,
                     ha='left', va='center')
-        axs[2].text(1.01, 0.2, r'$V_N$', color='r', transform=axs[2].transAxes, rotation=0,
+        axs[2].text(1.01, 0.2, r'$V_{\rm N}$', color='r', transform=axs[2].transAxes, rotation=0,
                     ha='left', va='center')
         # axs[2].legend(loc='upper right')
-        axs[2].grid(True)
+        # axs[2].grid(True)
 
         if walen_relation_satisfied:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'g-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_z.rolling(10).mean(), 'g-', lw=lw)
         elif walen_relation_satisfied_v2:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'b-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_z.rolling(10).mean(), 'b-', lw=lw)
         else:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z, 'r-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_z.rolling(10).mean(), 'r-', lw=lw)
         if jet_detection:
             # Make a box around the jet
             axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
@@ -993,11 +999,19 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Draw a dashed line at +/- v_thres
         axs[3].axhline(y=v_thresh, color='k', linestyle='--', lw=lw)
         axs[3].axhline(y=-v_thresh, color='k', linestyle='--', lw=lw)
-        axs[3].set_ylabel(r'$\Delta V_L$ (km/s)')
+        axs[3].set_ylabel(r'$\Delta V_{\rm L}$ (km/s)')
         axs[3].set_ylim(-300, 300)
 
+        df_mms["theta_all_deg"] = theta_all_deg
+        df_mms['r_all'] = R_all
+
+        # Get a 10 seconds rolling mean of theta_all_deg
+        theta_all_deg_rolling = df_mms["theta_all_deg"].rolling(10).mean()
+        # Get a 10 seconds rolling mean of r_all
+        r_all_rolling = df_mms['r_all'].rolling(10).mean()
+
         # Make the theta_all_deg and R_all plot
-        axs[4].plot(df_mms.index, theta_all_deg, 'b-', lw=lw, label=r'$\theta$', alpha=0.5)
+        axs[4].plot(df_mms.index, theta_all_deg_rolling, 'b-', lw=lw, label=r'$\theta$', alpha=0.5)
         axs[4].set_ylabel(r'$\theta_{\rm W}$ (deg)', color='b')
         axs[4].tick_params(which='both', axis='y', labelcolor='b')
         # Draw a horizontal line at theta = 0, 30, 150 and 180
@@ -1006,7 +1020,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[4].set_ylim(0, 180)
 
         axs_r = axs[4].twinx()
-        axs_r.plot(df_mms.index, R_all, 'r-', lw=lw, label=r'$R_{\rm W}$', alpha=0.5)
+        axs_r.plot(df_mms.index, r_all_rolling, 'r-', lw=lw, label=r'$R_{\rm W}$', alpha=0.5)
         axs_r.set_ylabel(r'$R_{\rm W}$', color='r')
         # Draw a horizontal line at R = 0.4 and 3
         axs_r.axhline(y=0.4, color='r', linestyle='--', lw=lw)
@@ -1083,8 +1097,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
 
-        ttt = str(crossing_time.strftime('%Y%m%d_%H%M%S'))
-        fig_name = f"{folder_name}/mms{probe}_jet_reversal_check_{ttt}_lmn_rolling_median.png"
+        ttt = str(crossing_time.strftime('%Y%m%d_%H%M'))
+        fig_name = f"{folder_name}/mms{probe}_jet_reversal_{ttt}.png"
         plt.savefig(f"{fig_name}", dpi=150, bbox_inches='tight', pad_inches=0.1)
         # plt.savefig(f"{fig_name.replace('.png', '.pdf')}", dpi=300, bbox_inches='tight',
         #             pad_inches=0.1)
