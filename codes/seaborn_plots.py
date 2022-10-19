@@ -1,4 +1,5 @@
 import importlib
+from tkinter.tix import Tree
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -107,10 +108,20 @@ beta_msh_mean = 2 * mu_0 * df_shear.np_msh_mean.values * 1e6 * k_B * (
 
 delta_beta = beta_msh_mean - beta_msp_mean
 
-df_shear["msh_msp_shear"] = msh_msp_shear
-df_shear["delta_beta"] = delta_beta
+# df_shear["msh_msp_shear"] = msh_msp_shear
+# df_shear["delta_beta"] = delta_beta
 
 df_list = [df_shear, df_rx_en, df_va_cs, df_bisec]
+for dfn in df_list:
+    dfn["msh_msp_shear"] = msh_msp_shear
+    dfn["delta_beta"] = delta_beta.values
+    # Set values of beta_shear to nan if it is smaller than 0 or larger than 100
+    dfn.loc[dfn["delta_beta"] < 0, "delta_beta"] = np.nan
+    dfn.loc[dfn["delta_beta"] > 100, "delta_beta"] = np.nan
+    # Multiply the delta_beta by 10
+    dfn["delta_beta"] = dfn["delta_beta"] * 10
+
+
 
 # For each dataframe in the list, divide the temperature by 1e6
 for df in df_list:
@@ -124,14 +135,13 @@ for df in df_list:
     df["tp_perp_msp_median"] = df["tp_perp_msp_median"] / 1e6
 label = ["Shear", "Rx En", "Va Cs", "Bisec"]
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
-            "tp_para_msp_median", "tp_perp_msp_median"]
+            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear"]
 key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
-             "$Tp_{\\parallel} (10^6 K)$", "$Tp_{\\perp} (10^6 K)$"]
+             "$Tp_{\\parallel} (10^6 K)$", "$Tp_{\\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)"]
 
-"""
-x_scale_list = [False, False, False, False, False, False, False, False]
-y_scale_list = [False, False, False, False, True, True, True, True]
+x_scale_list = [True, False, False, False, False, False, False, False, False]
+y_scale_list = [False, False, False, False, True, True, True, True, True]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 dark_mode = True
@@ -157,16 +167,23 @@ plt.rc('text', usetex=True)
 label_fontsize = 15
 tick_fontsize = 12
 data_type = ["shear", "rx_en", "va_cs", "bisec"]
-ind1 = 0
-ind2 = 8
+ind1 = 8
+ind2 = 9
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
-    axs_list = spf.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
-                                   labels=[r"Reconnection Distance $(R_\oplus)$", key2],
-                                   data_type=data_type, color_list=color_list, log_scale=False,
-                                   x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
-                                   fig_name=None, fig_format="pdf", nbins=[20, 20],
-                                   dark_mode=dark_mode)
+    if key == "msh_msp_shear":
+        axs_list = spf.seaborn_subplots(df_list=df_list, keys=["delta_beta", "msh_msp_shear"],
+                                        labels=[r"Reconnection Distance $(R_\oplus)$", key2],
+                                        data_type=data_type, color_list=color_list, log_scale=False,
+                                        x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
+                                        fig_name=None, fig_format="pdf", nbins=[20, 20],
+                                        dark_mode=dark_mode)
+    else:
+        axs_list = spf.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
+                                       labels=[r"Reconnection Distance $(R_\oplus)$", key2],
+                                       data_type=data_type, color_list=color_list, log_scale=False,
+                                       x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
+                                       fig_name=None, fig_format="pdf", nbins=[20, 20],
+                                       dark_mode=dark_mode)
 
 # plt.show()
 plt.close('all')
-"""
