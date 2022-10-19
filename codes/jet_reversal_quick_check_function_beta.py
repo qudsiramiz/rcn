@@ -1076,23 +1076,23 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             1.0, 1.01, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh_median:.0f}",
             transform=axs[0].transAxes, ha='center',  va='bottom', color='r')
         if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks/temp_20221017/jet_walen"
+            folder_name = "../figures/jet_reversal_checks/temp_20221019/jet_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
-            folder_name = "../figures/jet_reversal_checks/temp_20221017/walen"
+            folder_name = "../figures/jet_reversal_checks/temp_20221019/walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         elif (not walen_relation_satisfied) & (
                 not walen_relation_satisfied_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks/temp_20221017/jet"
+            folder_name = "../figures/jet_reversal_checks/temp_20221019/jet"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
         else:
-            folder_name = "../figures/jet_reversal_checks/temp_20221017/no_jet_no_walen"
+            folder_name = "../figures/jet_reversal_checks/temp_20221019/no_jet_no_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)

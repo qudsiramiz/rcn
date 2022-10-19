@@ -11,7 +11,7 @@ importlib.reload(rxmf)
 importlib.reload(spf)
 importlib.reload(sfg)
 
-file_name = "../data/rx_d/reconnection_line_data_mms3_20221007.csv"
+file_name = "../data/rx_d/reconnection_line_data_mms3_20221018.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
@@ -97,6 +97,10 @@ b_mag_msh = np.sqrt(df_shear["b_lmn_vec_msh_mean_l"]**2 + df_shear["b_lmn_vec_ms
 b_mag_msp = np.sqrt(df_shear["b_lmn_vec_msp_mean_l"]**2 + df_shear["b_lmn_vec_msp_mean_m"]**2 +
                     df_shear["b_lmn_vec_msp_mean_n"]**2)
 
+# Compute the cone angle
+cone_angle = np.arccos(df_shear.b_imf_x / np.sqrt(
+                       df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
+
 # Compute the magnetosheath beta value
 beta_msp_mean = 2 * mu_0 * df_shear.np_msp_mean.values * 1e6 * k_B * (
                 2 * df_shear.tp_para_msp_mean.values +
@@ -119,7 +123,8 @@ for dfn in df_list:
     dfn.loc[dfn["delta_beta"] < 0, "delta_beta"] = np.nan
     dfn.loc[dfn["delta_beta"] > 100, "delta_beta"] = np.nan
     # Multiply the delta_beta by 10
-    dfn["delta_beta"] = dfn["delta_beta"] * 10
+    dfn["delta_beta"] = dfn["delta_beta"]
+    dfn["cone_angle"] = cone_angle.values
 
 
 
@@ -135,13 +140,13 @@ for df in df_list:
     df["tp_perp_msp_median"] = df["tp_perp_msp_median"] / 1e6
 label = ["Shear", "Rx En", "Va Cs", "Bisec"]
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
-            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear"]
+            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle", "delta_beta"]
 key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
-             "$Tp_{\\parallel} (10^6 K)$", "$Tp_{\\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)"]
+             "$Tp_{\\parallel} (10^6 K)$", "$Tp_{\\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($B_x/|B|$) (${~}^{0}$)", "$\\Delta \\beta$"]
 
-x_scale_list = [True, False, False, False, False, False, False, False, False]
-y_scale_list = [False, False, False, False, True, True, True, True, True]
+x_scale_list = [False, False, False, False, False, False, False, False, True, False, False]
+y_scale_list = [False, False, False, False, True, True, True, True, False, False, True]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 dark_mode = True
@@ -172,9 +177,9 @@ ind2 = 9
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     if key == "msh_msp_shear":
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["delta_beta", "msh_msp_shear"],
-                                        labels=[r"Reconnection Distance $(R_\oplus)$", key2],
+                                        labels=[r"$\Delta \beta$", key2],
                                         data_type=data_type, color_list=color_list, log_scale=False,
-                                        x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
+                                        x_log_scale=True, y_log_scale=False,
                                         fig_name=None, fig_format="pdf", nbins=[20, 20],
                                         dark_mode=dark_mode)
     else:

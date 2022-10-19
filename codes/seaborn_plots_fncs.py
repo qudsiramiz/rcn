@@ -48,7 +48,10 @@ def kde_plots(
 
     axs1 = sns.JointGrid(x=x, y=y, data=df, xlim=xlim, ylim=ylim, height=height, ratio=ratio,
                          space=space, hue_norm=hue_norm)
-    axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
+    if y == "msh_msp_shear":
+        axs1.plot_joint(sns.scatterplot, s=np.array(df.r_rc.values), alpha=alpha, color=color)
+    else:
+        axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
     #                     bins=bins, stat="density", common_norm=True, common_bins=True, fill=True,
     #                     linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
@@ -68,18 +71,18 @@ def kde_plots(
 
     # print(f"The y bins are {bins[1]}")
     if y == "msh_msp_shear":
-        shear_angle_theory = np.logspace(-1, np.log10(180), 100)
+        shear_angle_theory = np.linspace(0, 180, 100)
         delta_beta_theory_half = np.tan(np.deg2rad(shear_angle_theory/2))
         delta_beta_theory_one = 2 * np.tan(np.deg2rad(shear_angle_theory/2))
         delta_beta_theory_two = 4 * np.tan(np.deg2rad(shear_angle_theory/2))
 
-        axs1.fig.axes[0].plot(delta_beta_theory_half, shear_angle_theory, marker='.', c="w",
+        axs1.fig.axes[0].plot(delta_beta_theory_half, shear_angle_theory, marker='.', ms=10, c="w",
                               ls=None, lw=0, label=r"$\lambda$ = 0.5")
-        axs1.fig.axes[0].plot(delta_beta_theory_one, shear_angle_theory, marker='.', c="b",
+        axs1.fig.axes[0].plot(delta_beta_theory_one, shear_angle_theory, marker='.', ms=10, c="b",
                               ls=None, lw=0, label=r"$\lambda$ = 1")
-        axs1.fig.axes[0].plot(delta_beta_theory_two, shear_angle_theory, marker='.', c="g",
+        axs1.fig.axes[0].plot(delta_beta_theory_two, shear_angle_theory, marker='.', ms=10, c="g",
                               ls=None, lw=0, label=r"$\lambda$ = 2")
-        lgnd = axs1.fig.axes[0].legend(loc=4, fontsize=30, frameon=False)
+        lgnd = axs1.fig.axes[0].legend(loc=2, fontsize=30, frameon=False)
         for handle in lgnd.legendHandles:
             handle.size = [1]
 
@@ -91,6 +94,8 @@ def kde_plots(
         text_color = "black"
         face_color = "white"
         edge_color = "black"
+    if y == "msh_msp_shear":
+        spearman = None
     if spearman is not None:
         x_spearman = np.linspace(0, 25, 100)
         y_spearman = spearman * x_spearman + np.mean(df[y]) - spearman*np.mean(df[x])
@@ -135,7 +140,7 @@ def kde_plots(
     axs1.fig.tight_layout()
 
     if (fig_save):
-        fname = f'../figures/{x}_vs_{y}_{data_type}_dm_{dark_mode}.png'
+        fname = f'../figures/seaborn_plots/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221018.png'
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
     return axs1
@@ -204,7 +209,7 @@ def seaborn_subplots(
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
                         xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
-                        pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
+                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
 
     fig = plt.figure(figsize=(figsize[0], figsize[1]))
@@ -219,9 +224,9 @@ def seaborn_subplots(
     gs.tight_layout(fig)
     gs.update(top=1, bottom=0.05, left=0.06, right=1, hspace=0.01, wspace=0.20)
     if fig_name is None:
-        fig_name = f"../figures/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}_20221012.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}_20221018.{fig_format}"
     else:
-        fig_name = f"../figures/{fig_name}_{dark_mode}.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/{fig_name}_{dark_mode}_20221018.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
     print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
 

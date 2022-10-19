@@ -29,7 +29,7 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 300,
+              'dt': 1200,
               'probe': 3,
               'jet_len': 3,
               'level': 'l2',
@@ -38,9 +38,9 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20221017_beta.csv',
+              'fname': '../data/mms_jet_reversal_times_list_20221019_beta.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221017_beta.csv",
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221019_beta.csv",
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
@@ -92,7 +92,7 @@ with suppress_stdout_stderr():
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = -1
+        indx_max = 100
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run
