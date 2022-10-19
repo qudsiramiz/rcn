@@ -88,11 +88,11 @@ with suppress_stdout_stderr():
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 0
+        indx_min = 100
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = 100
+        indx_max = 3000
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run
