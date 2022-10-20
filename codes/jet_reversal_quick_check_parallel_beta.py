@@ -36,7 +36,7 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 100,
+              'dt': 300,
               'probe': 3,
               'jet_len': 3,
               'level': 'l2',
