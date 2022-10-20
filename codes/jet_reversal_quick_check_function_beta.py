@@ -474,22 +474,22 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                           ) / (3 * np.linalg.norm(
                                                             b_lmn_vec_msp_mean) ** 2)
 
-    alpha_msp = np.full(len(ind_walen_check), np.nan)
+    alpha_jet = np.full(len(ind_walen_check), np.nan)
     alpha_msh = np.full(len(ind_msh), np.nan)
-    v_th_msp = np.full((len(ind_walen_check), 3), np.nan)
+    v_th_jet = np.full((len(ind_walen_check), 3), np.nan)
     v_th_msh = np.full((len(ind_msh), 3), np.nan)
 
     if coord_type == 'lmn':
         for i, xx in enumerate(ind_walen_check):
-            alpha_msp[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
+            alpha_jet[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
                             df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
                             df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
                             df_mms['b_lmn_l'][xx] ** 2))
 
-            b_lmn_vec_msp_w = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
+            b_lmn_vec_jet = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
                                         df_mms['b_lmn_l'][xx]]) * 1e-9
             for j in range(3):
-                v_th_msp[i, j] = b_lmn_vec_msp_w[j] * ((1 - alpha_msp[i]) / (mu_0 * df_mms['np'][xx]
+                v_th_jet[i, j] = b_lmn_vec_jet[j] * ((1 - alpha_jet[i]) / (mu_0 * df_mms['np'][xx]
                                                       * 1e6 * m_p))**0.5
         for i in range(len(ind_msh)):
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
@@ -499,12 +499,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                          mu_0 * np_msh[i] * m_p))**0.5
     else:
         for i in range(len(ind_jet)):
-            alpha_msp[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
+            alpha_jet[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
                 np.linalg.norm(b_gse_vec_msp[i, :])**2)
             alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
                 np.linalg.norm(b_gse_vec_msh[i, :])**2)
             for j in range(3):
-                v_th_msp[i, j] = b_gse_vec_msp[i, j] * ((1 - alpha_msp[i]) / (
+                v_th_jet[i, j] = b_gse_vec_msp[i, j] * ((1 - alpha_jet[i]) / (
                                         mu_0 * np_msp[i] * m_p))**0.5
                 v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
                     mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
@@ -520,25 +520,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                           df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
                                                                      mu_0 * df_mms['np'][i] * 1e6
                                                                      * m_p))**0.5
-    delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_msp
+    delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_jet
     delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
-
-    # delta_v_th_mag = np.linalg.norm(delta_v_th, axis=1)
-
-    # Check on which side the density is smaller and assign it to be magnetopause
-    # Check to see if b_gse_z_msp has same sign as vp_gse_z_msp
-    # Ideally this would matter, however, since we are just iunterested in magnitudes and we also
-    # take into account theta not only between 0 and 30 but also 150 and 180, this sign issue
-    # doesn't matter. So I have commented out the code below.
-    # for i in range(len(ind_msp)):
-    #     if coord_type == 'lmn':
-    #         if b_lmn_vec_msp[i,2] * vp_lmn_vec_msp[i,2] > 0:
-    #             delta_v_th[i,:] = - delta_v_th[i,:]
-    #     else:
-    #         if b_gse_vec_msp[i, 2] * vp_gse_vec_msp[i, 2] > 0:
-    #             delta_v_th[i] = delta_v_th[i]
-    #         else:
-    #             delta_v_th[i] = - delta_v_th[i]
 
     vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
                                  df_mms['vp_lmn_m'][ind_walen_check],
