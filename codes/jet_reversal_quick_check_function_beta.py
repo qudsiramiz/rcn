@@ -393,6 +393,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     ind_walen_check = np.arange(ind_walen_check_min, ind_walen_check_max)
     ind_msh = ind_range_msh
 
+    print(f"ind jet is {ind_jet}\n min value of walen is {ind_walen_check_min}\n max value of walen is {ind_walen_check_max}\n")
     # Get different parameters for magnetosphere and magnetosheath
     np_msp = df_mms['np'][ind_msp] * 1e6  # Convert to m^-3 from cm^-3
     np_msh = df_mms['np'][ind_msh] * 1e6  # Convert to m^-3 from cm^-3
@@ -474,138 +475,145 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                           ) / (3 * np.linalg.norm(
                                                             b_lmn_vec_msp_mean) ** 2)
 
-    alpha_jet = np.full(len(ind_walen_check), np.nan)
-    alpha_msh = np.full(len(ind_msh), np.nan)
-    v_th_jet = np.full((len(ind_walen_check), 3), np.nan)
-    v_th_msh = np.full((len(ind_msh), 3), np.nan)
+    method = 2
+    if method == 1:
+        alpha_jet = np.full(len(ind_walen_check), np.nan)
+        alpha_msh = np.full(len(ind_msh), np.nan)
+        v_th_jet = np.full((len(ind_walen_check), 3), np.nan)
+        v_th_msh = np.full((len(ind_msh), 3), np.nan)
 
-    if coord_type == 'lmn':
-        for i, xx in enumerate(ind_walen_check):
-            alpha_jet[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
-                            df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
-                            df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
-                            df_mms['b_lmn_l'][xx] ** 2))
+        if coord_type == 'lmn':
+            for i, xx in enumerate(ind_walen_check):
+                alpha_jet[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
+                                df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
+                                df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
+                                df_mms['b_lmn_l'][xx] ** 2))
 
-            b_lmn_vec_jet = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
-                                        df_mms['b_lmn_l'][xx]]) * 1e-9
-            for j in range(3):
-                v_th_jet[i, j] = b_lmn_vec_jet[j] * ((1 - alpha_jet[i]) / (mu_0 * df_mms['np'][xx]
-                                                      * 1e6 * m_p))**0.5
-        for i in range(len(ind_msh)):
-            alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                np.linalg.norm(b_lmn_vec_msh[i, :])**2)
-            for j in range(3):
-                v_th_msh[i, j] = b_lmn_vec_msh[i, j] * ((1 - alpha_msh[i]) / (
-                                                         mu_0 * np_msh[i] * m_p))**0.5
-    else:
-        for i in range(len(ind_jet)):
-            alpha_jet[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
-                np.linalg.norm(b_gse_vec_msp[i, :])**2)
-            alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                np.linalg.norm(b_gse_vec_msh[i, :])**2)
-            for j in range(3):
-                v_th_jet[i, j] = b_gse_vec_msp[i, j] * ((1 - alpha_jet[i]) / (
-                                        mu_0 * np_msp[i] * m_p))**0.5
-                v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
-                    mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
-                )**0.5
-
-    alpha_all = mu_0 * df_mms['np'] * 1e6 * k_B * (df_mms['tp_para'] - df_mms['tp_perp']
-                ) * ev_to_K / (1e-18 * (df_mms['b_lmn_n'] ** 2 + df_mms['b_lmn_m'] ** 2
-                + df_mms['b_lmn_l'] ** 2))
-
-    v_th_all = np.full((len(df_mms['tp_para']), 3), np.nan)
-    for i in range(len(df_mms['tp_para'])):
-        v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
-                                          df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
-                                                                     mu_0 * df_mms['np'][i] * 1e6
-                                                                     * m_p))**0.5
-    delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_jet
-    delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
-
-    vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
-                                 df_mms['vp_lmn_m'][ind_walen_check],
-                                 df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s to m/s
-    vp_lmn_vec_all = np.array([df_mms['vp_lmn_n'], df_mms['vp_lmn_m'], df_mms['vp_lmn_l']]).T * 1e3
-
-    if coord_type == 'lmn':
-        delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
-        delta_v_obs_all = vp_lmn_vec_msh_mean - vp_lmn_vec_all
-    else:
-        delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
-    # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
-
-    # Compute the angle between the observed and the theoretical velocity jumps
-    theta_w = np.full(len(ind_walen_check), np.nan)
-    for i in range(len(ind_walen_check)):
-        theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
-                               np.linalg.norm(delta_v_th[i, :]) *
-                               np.linalg.norm(delta_v_obs[i, :])
-                               )
-                               )
-
-    theta_all = np.full(len(df_mms['tp_para']), np.nan)
-    for i in range(len(df_mms['tp_para'])):
-        theta_all[i] = np.arccos(np.dot(delta_v_th_all[i, :], delta_v_obs_all[i, :]) / (
-                               np.linalg.norm(delta_v_th_all[i, :]) *
-                               np.linalg.norm(delta_v_obs_all[i, :])
-                               )
-                               )
-
-    # Convert angle to degrees
-    theta_w_deg = theta_w * 180 / np.pi
-    theta_all_deg = theta_all * 180 / np.pi
-
-    # Compute the ratio of the observed and the theoretical velocity jumps
-    R_w = np.linalg.norm(delta_v_th, axis=1) / np.linalg.norm(delta_v_obs, axis=1)
-    R_all = np.linalg.norm(delta_v_th_all, axis=1) / np.linalg.norm(delta_v_obs_all, axis=1)
-
-    # print(f"Values of theta_w_deg: {theta_w_deg}")
-    # print(f"Values of R_w: {R_w}")
-    # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
-    # 180) in green color
-
-    bool_array = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
-                                np.logical_or(np.logical_and(0 < theta_w_deg, theta_w_deg < 30),
-                                np.logical_and(150 < theta_w_deg, theta_w_deg < 180)))
-
-    # Check the number of True in the bool_array
-    num_true = np.sum(bool_array)
-    if num_true >= n_points_walen/2:
-        walen_relation_satisfied = True
-    else:
-        walen_relation_satisfied = False
-
-    ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
-                                    np.ones(n_points_walen, dtype=int),
-                                    'valid') >= n_points_walen/3)
-
-    if len(ind_walen_vals) > 0:
-        walen_relation_satisfied_v2 = True
-    else:
-        walen_relation_satisfied_v2 = False
-
-    if walen_relation_satisfied:
-        print('\033[92m \n Walen relation satisfied \033[0m \n')
-        print(f'\033[92m R_w: {np.nanmedian(R_w):.3f} \033[0m')
-        print(f'\033[92m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
-        if jet_detection:
-            print(f'\033[92m Jet detection: {jet_detection} \033[0m')
+                b_lmn_vec_jet = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
+                                            df_mms['b_lmn_l'][xx]]) * 1e-9
+                for j in range(3):
+                    v_th_jet[i, j] = b_lmn_vec_jet[j] * ((1 - alpha_jet[i]) / (mu_0 * df_mms['np'][xx]
+                                                          * 1e6 * m_p))**0.5
+            for i in range(len(ind_msh)):
+                alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
+                    np.linalg.norm(b_lmn_vec_msh[i, :])**2)
+                for j in range(3):
+                    v_th_msh[i, j] = b_lmn_vec_msh[i, j] * ((1 - alpha_msh[i]) / (
+                                                             mu_0 * np_msh[i] * m_p))**0.5
         else:
-            print(f'\033[91m Jet detection: {jet_detection} \033[0m')
-    else:
-        print('\033[91m \n Walen relation not satisfied \033[0m \n')
-        print(f'\033[91m R_w: {np.nanmedian(R_w):.3f} \033[0m')
-        print(f'\033[91m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
-        if jet_detection:
-            print(f'\033[92m Jet detection: {jet_detection} \033[0m')
-        else:
-            print(f'\033[91m Jet detection: {jet_detection} \033[0m')
+            for i in range(len(ind_jet)):
+                alpha_jet[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
+                    np.linalg.norm(b_gse_vec_msp[i, :])**2)
+                alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
+                    np.linalg.norm(b_gse_vec_msh[i, :])**2)
+                for j in range(3):
+                    v_th_jet[i, j] = b_gse_vec_msp[i, j] * ((1 - alpha_jet[i]) / (
+                                            mu_0 * np_msp[i] * m_p))**0.5
+                    v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
+                        mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
+                    )**0.5
 
-    if walen_relation_satisfied_v2:
-        print('\033[92m Walen relation version 2 is satisfied \033[0m \n')
+        alpha_all = mu_0 * df_mms['np'] * 1e6 * k_B * (df_mms['tp_para'] - df_mms['tp_perp']
+                    ) * ev_to_K / (1e-18 * (df_mms['b_lmn_n'] ** 2 + df_mms['b_lmn_m'] ** 2
+                    + df_mms['b_lmn_l'] ** 2))
+
+        v_th_all = np.full((len(df_mms['tp_para']), 3), np.nan)
+        for i in range(len(df_mms['tp_para'])):
+            v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
+                                              df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
+                                                                         mu_0 * df_mms['np'][i] * 1e6
+                                                                         * m_p))**0.5
+        delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_jet
+        delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
+
+        vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
+                                     df_mms['vp_lmn_m'][ind_walen_check],
+                                     df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s to m/s
+        vp_lmn_vec_all = np.array([df_mms['vp_lmn_n'], df_mms['vp_lmn_m'], df_mms['vp_lmn_l']]).T * 1e3
+
+        if coord_type == 'lmn':
+            delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
+            delta_v_obs_all = vp_lmn_vec_msh_mean - vp_lmn_vec_all
+            print(f"Shape of vp_lmn_vec_msh_mean: {vp_lmn_vec_msh_mean.shape}")
+        else:
+            delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
+        # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
+
+        # Compute the angle between the observed and the theoretical velocity jumps
+        theta_w = np.full(len(ind_walen_check), np.nan)
+        for i in range(len(ind_walen_check)):
+            theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
+                                   np.linalg.norm(delta_v_th[i, :]) *
+                                   np.linalg.norm(delta_v_obs[i, :])
+                                   )
+                                   )
+
+        theta_all = np.full(len(df_mms['tp_para']), np.nan)
+        for i in range(len(df_mms['tp_para'])):
+            theta_all[i] = np.arccos(np.dot(delta_v_th_all[i, :], delta_v_obs_all[i, :]) / (
+                                   np.linalg.norm(delta_v_th_all[i, :]) *
+                                   np.linalg.norm(delta_v_obs_all[i, :])
+                                   )
+                                   )
+
+        # Convert angle to degrees
+        theta_w_deg = theta_w * 180 / np.pi
+        theta_all_deg = theta_all * 180 / np.pi
+
+        # Compute the ratio of the observed and the theoretical velocity jumps
+        R_w = np.linalg.norm(delta_v_th, axis=1) / np.linalg.norm(delta_v_obs, axis=1)
+        R_all = np.linalg.norm(delta_v_th_all, axis=1) / np.linalg.norm(delta_v_obs_all, axis=1)
+
+        # print(f"Values of theta_w_deg: {theta_w_deg}")
+        # print(f"Values of R_w: {R_w}")
+        # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
+        # 180) in green color
+
+        bool_array = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
+                                    np.logical_and(np.logical_and(0 < theta_w_deg, theta_w_deg < 30),
+                                    np.logical_and(150 < theta_w_deg, theta_w_deg < 180)))
+
+        # Check the number of True in the bool_array
+        num_true = np.sum(bool_array)
+        if num_true >= n_points_walen/2:
+            walen_relation_satisfied = True
+        else:
+            walen_relation_satisfied = False
+
+        ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
+                                        np.ones(n_points_walen, dtype=int),
+                                        'valid') >= n_points_walen/3)
+
+        if len(ind_walen_vals) > 0:
+            walen_relation_satisfied_v2 = True
+        else:
+            walen_relation_satisfied_v2 = False
+
+        if walen_relation_satisfied:
+            print('\033[92m \n Walen relation satisfied \033[0m \n')
+            print(f'\033[92m R_w: {np.nanmedian(R_w):.3f} \033[0m')
+            print(f'\033[92m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
+            if jet_detection:
+                print(f'\033[92m Jet detection: {jet_detection} \033[0m')
+            else:
+                print(f'\033[91m Jet detection: {jet_detection} \033[0m')
+        else:
+            print('\033[91m \n Walen relation not satisfied \033[0m \n')
+            print(f'\033[91m R_w: {np.nanmedian(R_w):.3f} \033[0m')
+            print(f'\033[91m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
+            if jet_detection:
+                print(f'\033[92m Jet detection: {jet_detection} \033[0m')
+            else:
+                print(f'\033[91m Jet detection: {jet_detection} \033[0m')
+
+        if walen_relation_satisfied_v2:
+            print('\033[92m Walen relation version 2 is satisfied \033[0m \n')
+        else:
+            print('\033[91m Walen relation version 2 is not satisfied \033[0m \n')
+
     else:
-        print('\033[91m Walen relation version 2 is not satisfied \033[0m \n')
+
+        walen_relation_satisfied, walen_relation_satisfied_v2, theta_w_deg, R_w, theta_all_deg, R_all, ind_walen_vals = check_walen_relation(df_mms=df_mms, ind_walen_check=ind_walen_check, coord_type=coord_type, ind_msh=ind_msh, n_points_walen=n_points_walen, jet_detection=jet_detection)
 
     # Check if within 2 minutes of crossing time the values went above and below the threshold
     # If ind_vals is not empty, then append the crossing time to the csv file
@@ -716,10 +724,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Get the index corresponding to the crossing time in the data
     try:
-        df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
-        df_crossing_temp.set_index("DateStart", inplace=True)
-        crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    except:
         df_crossing_temp = pd.read_csv("../data/mms_jet_reversal_times_list_20221017_beta.csv",
                                        index_col=False)
         # Change the formatting of the date
@@ -727,8 +731,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
             df_crossing_temp['jet_time'][xx] = df_crossing_temp['jet_time'][xx].split('+')[0].split('.')[0]
         df_crossing_temp.set_index("jet_time", inplace=True)
         crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")[:]
+    except:
+        df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
+        df_crossing_temp.set_index("DateStart", inplace=True)
+        crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-    ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0]
+    ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
 
     # Set the fontstyle to Times New Roman
     font = {'family': 'serif', 'weight': 'normal', 'size': 16 }
@@ -927,9 +935,17 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[0].set_title(f"MMS {probe} Jet Reversal Check at {temp3}")
 
         # Add text to the plot
-        # For all the points in theta_w_deg, if it is greater than 90 then subtract 180 from it
-        theta_w_deg_new = np.where(theta_w_deg > 90, 180 - theta_w_deg, theta_w_deg)
-        text = f"$R_w$ = {np.nanmedian(R_w):.2f}\n" +\
+        if len(ind_walen_vals) > 0:
+            theta_w_deg_new = np.where(theta_w_deg[ind_walen_vals] > 90,
+                                       180 - theta_w_deg[ind_walen_vals],
+                                       theta_w_deg[ind_walen_vals])
+            R_w_jet = R_w[ind_walen_vals]
+        else:
+            # For all the points in theta_w_deg, if it is greater than 90 then subtract 180 from it
+            theta_w_deg_new = np.where(theta_w_deg > 90, 180 - theta_w_deg, theta_w_deg)
+            R_w_jet = R_w
+
+        text = f"$R_w$ = {np.nanmedian(R_w_jet):.2f}\n" +\
                f"$\\Theta_w$ = {np.nanmedian(theta_w_deg_new):.2f}"
         axs[4].text(0.02, 1, text, transform=axs[4].transAxes, ha='left', va='top')
 
@@ -978,4 +994,144 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         plt.close("all")
 
     return df_mms_fpi, df_mms_fgm, df_mms
+
+
+def check_walen_relation(df_mms=None, ind_walen_check=None, coord_type="gsm", ind_msh=None,
+                         n_points_walen=None, jet_detection=False,):
+
     
+    # Define the constants
+    mu_0 = 4 * np.pi * 1e-7  # Permeability of free space (H/m)
+    k_B = 1.38064852e-23  # Boltzmann constant in J/K
+    m_p = 1.6726219e-27  # Mass of proton in kg
+    ev_to_K = 11604.505  # Conversion factor from eV to K
+
+    alpha_jet = np.full(len(ind_walen_check), np.nan)
+    alpha_msh = np.full(len(ind_msh), np.nan)
+    v_th_jet = np.full((len(ind_walen_check), 3), np.nan)
+    v_th_msh = np.full((len(ind_msh), 3), np.nan)
+
+    if coord_type == 'lmn':
+        for i, xx in enumerate(ind_walen_check):
+            alpha_jet[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
+                            df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
+                            df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
+                            df_mms['b_lmn_l'][xx] ** 2))
+
+            b_lmn_vec_jet = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
+                                        df_mms['b_lmn_l'][xx]]) * 1e-9
+            for j in range(3):
+                v_th_jet[i, j] = b_lmn_vec_jet[j] * ((1 - alpha_jet[i]) / (mu_0 * df_mms['np'][xx]
+                                                      * 1e6 * m_p))**0.5
+        for i,xx in enumerate(ind_msh):
+            alpha_msh[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
+                            df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
+                            df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
+                            df_mms['b_lmn_l'][xx] ** 2))
+
+            b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
+                                        df_mms['b_lmn_l'][xx]]) * 1e-9
+            for j in range(3):
+                v_th_msh[i, j] = b_lmn_vec_msh[j] * ((1 - alpha_msh[i]) / (mu_0 * df_mms['np'][xx]
+                                                      * 1e6 * m_p))**0.5
+
+    alpha_all = mu_0 * df_mms['np'] * 1e6 * k_B * (df_mms['tp_para'] - df_mms['tp_perp']
+                ) * ev_to_K / (1e-18 * (df_mms['b_lmn_n'] ** 2 + df_mms['b_lmn_m'] ** 2
+                + df_mms['b_lmn_l'] ** 2))
+
+    v_th_all = np.full((len(df_mms['tp_para']), 3), np.nan)
+    for i in range(len(df_mms['tp_para'])):
+        v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
+                                          df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
+                                                                     mu_0 * df_mms['np'][i] * 1e6
+                                                                     * m_p))**0.5
+    delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_jet
+    delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
+
+    vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
+                                 df_mms['vp_lmn_m'][ind_walen_check],
+                                 df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s to m/s
+    vp_lmn_vec_all = np.array([df_mms['vp_lmn_n'], df_mms['vp_lmn_m'], df_mms['vp_lmn_l']]).T * 1e3
+
+    if coord_type == 'lmn':
+        # Find the proton bulk velocity in the msh region and then compute its average
+        vp_lmn_vec_msh = np.array([df_mms['vp_lmn_n'][ind_msh], df_mms['vp_lmn_m'][ind_msh],
+                                   df_mms['vp_lmn_l'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+        vp_lmn_vec_msh_mean = np.nanmean(vp_lmn_vec_msh, axis=1)  # km/sec
+
+        delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
+        delta_v_obs_all = vp_lmn_vec_msh_mean - vp_lmn_vec_all
+
+    # Compute the angle between the observed and the theoretical velocity jumps
+    theta_w = np.full(len(ind_walen_check), np.nan)
+    for i in range(len(ind_walen_check)):
+        theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
+                               np.linalg.norm(delta_v_th[i, :]) *
+                               np.linalg.norm(delta_v_obs[i, :])
+                               )
+                               )
+
+    theta_all = np.full(len(df_mms['tp_para']), np.nan)
+    for i in range(len(df_mms['tp_para'])):
+        theta_all[i] = np.arccos(np.dot(delta_v_th_all[i, :], delta_v_obs_all[i, :]) / (
+                               np.linalg.norm(delta_v_th_all[i, :]) *
+                               np.linalg.norm(delta_v_obs_all[i, :])
+                               )
+                               )
+
+    # Convert angle to degrees
+    theta_w_deg = theta_w * 180 / np.pi
+    theta_all_deg = theta_all * 180 / np.pi
+
+    # Compute the ratio of the observed and the theoretical velocity jumps
+    R_w = np.linalg.norm(delta_v_th, axis=1) / np.linalg.norm(delta_v_obs, axis=1)
+    R_all = np.linalg.norm(delta_v_th_all, axis=1) / np.linalg.norm(delta_v_obs_all, axis=1)
+
+    # print(f"Values of theta_w_deg: {theta_w_deg}")
+    # print(f"Values of R_w: {R_w}")
+    # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
+    # 180) in green color
+
+    bool_array = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
+                                np.logical_and(np.logical_and(0 < theta_w_deg, theta_w_deg < 30),
+                                np.logical_and(150 < theta_w_deg, theta_w_deg < 180)))
+
+    # Check the number of True in the bool_array
+    num_true = np.sum(bool_array)
+    if num_true >= n_points_walen/2:
+        walen_relation_satisfied = True
+    else:
+        walen_relation_satisfied = False
+
+    ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
+                                    np.ones(n_points_walen, dtype=int),
+                                    'valid') >= n_points_walen/3)
+
+    if len(ind_walen_vals) > 0:
+        walen_relation_satisfied_v2 = True
+    else:
+        walen_relation_satisfied_v2 = False
+
+    if walen_relation_satisfied:
+        print('\033[92m \n Walen relation satisfied \033[0m \n')
+        print(f'\033[92m R_w: {np.nanmedian(R_w):.3f} \033[0m')
+        print(f'\033[92m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
+        if jet_detection:
+            print(f'\033[92m Jet detection: {jet_detection} \033[0m')
+        else:
+            print(f'\033[91m Jet detection: {jet_detection} \033[0m')
+    else:
+        print('\033[91m \n Walen relation not satisfied \033[0m \n')
+        print(f'\033[91m R_w: {np.nanmedian(R_w):.3f} \033[0m')
+        print(f'\033[91m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
+        if jet_detection:
+            print(f'\033[92m Jet detection: {jet_detection} \033[0m')
+        else:
+            print(f'\033[91m Jet detection: {jet_detection} \033[0m')
+
+    if walen_relation_satisfied_v2:
+        print('\033[92m Walen relation version 2 is satisfied \033[0m \n')
+    else:
+        print('\033[91m Walen relation version 2 is not satisfied \033[0m \n')
+
+    return walen_relation_satisfied, walen_relation_satisfied_v2, theta_w_deg, R_w, theta_all_deg, R_all, ind_walen_vals
