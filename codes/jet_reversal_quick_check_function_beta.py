@@ -1,6 +1,9 @@
+from cProfile import label
 import datetime
+from email.policy import default
 import os
 from turtle import color
+from matplotlib.colors import Colormap
 
 import matplotlib.pyplot as plt
 from matplotlib.transforms import Transform
@@ -23,10 +26,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                        verbose=True
                        ):
     """
-    For a given crossing time and a given probe, the function finds out if MMS observed a jet during
-    magnetopause crossing. If there was indeed a jet reversal, then the function saves that time to
-    a csv file, along with the probe number, position of the spacecraft, and the time of the
-    crossing.
+    For a given crossing time and a given probe, the function finds out if MMS observed a jet
+    during magnetopause crossing. If there was indeed a jet reversal, then the function saves that
+    time to a csv file, along with the probe number, position of the spacecraft, and the time of
+    the crossing.
 
     Parameters
     ----------
@@ -35,8 +38,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     dt : int
         The time interval to look for a jet reversal.
     probe : int
-        The probe number. Can be 1, 2, 3, or 4. Default is 3. (since the magnetopause crossing times
-        are for MMS3)
+        The probe number. Can be 1, 2, 3, or 4. Default is 3. (since the magnetopause crossing
+        times are for MMS3)
     data_rate : str
         The data rate. Can be 'fast' or 'srvy' or 'brst. Default is 'fast'.
     level : str
@@ -84,7 +87,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     mms_fpi_varnames = [f'mms{probe}_dis_numberdensity_{data_rate}',
                         f'mms{probe}_dis_bulkv_gse_{data_rate}',
                         f'mms{probe}_dis_temppara_{data_rate}',
-                        f'mms{probe}_dis_tempperp_{data_rate}']
+                        f'mms{probe}_dis_tempperp_{data_rate}',
+                        f'mms{probe}_dis_energyspectr_omni_{data_rate}',
+                        f'mms{probe}_des_energyspectr_omni_{data_rate}',]
 
     _ = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level=level,
                     datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
@@ -99,6 +104,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     _ = ptt.get_data(mms_fpi_varnames[1])[1:4][0]
     mms_fpi_temppara = ptt.get_data(mms_fpi_varnames[2])[1]
     mms_fpi_tempperp = ptt.get_data(mms_fpi_varnames[3])[1]
+
+    # Store both the temperatures in the ptt
+    ptt.store_data('Tp', data=[f'mms{probe}_dis_temppara_{data_rate}',
+                               f'mms{probe}_dis_tempperp_{data_rate}'])
 
     # Covert gse to gsm
     _ = spd.cotrans(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}',
@@ -119,9 +128,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     # Create a dataframe with the FPI data
     if coord_type == 'lmn':
         df_mms_fpi = pd.DataFrame(index=mms_fpi_time, data={'np': mms_fpi_numberdensity,
-                                                            'vp_lmn_n': mms_fpi_bulkv_lmn[:, 2],
-                                                            'vp_lmn_m': mms_fpi_bulkv_lmn[:, 1],
                                                             'vp_lmn_l': mms_fpi_bulkv_lmn[:, 0],
+                                                            'vp_lmn_m': mms_fpi_bulkv_lmn[:, 1],
+                                                            'vp_lmn_n': mms_fpi_bulkv_lmn[:, 2],
                                                             'tp_para': mms_fpi_temppara,
                                                             'tp_perp': mms_fpi_tempperp})
     else:
@@ -134,6 +143,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                             'vp_gse_z': mms_fpi_bulkv_gse[:, 2],
                                                             'tp_para': mms_fpi_temppara,
                                                             'tp_perp': mms_fpi_tempperp})
+
     # Make sure that the time indices are in increasing order
     df_mms_fpi = df_mms_fpi.sort_index()
 
@@ -166,72 +176,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                                         '60s', center=True).median()
 
     if coord_type == 'lmn':
-        df_mms_fpi['vp_diff_x'] = df_mms_fpi['vp_lmn_n'] - df_mms_fpi['vp_lmn_n_rolling_median']
+        df_mms_fpi['vp_diff_x'] = df_mms_fpi['vp_lmn_l'] - df_mms_fpi['vp_lmn_l_rolling_median']
         df_mms_fpi['vp_diff_y'] = df_mms_fpi['vp_lmn_m'] - df_mms_fpi['vp_lmn_m_rolling_median']
-        df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - df_mms_fpi['vp_lmn_l_rolling_median']
+        df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_n'] - df_mms_fpi['vp_lmn_n_rolling_median']
         # df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_lmn_l'] - np.nanmean(df_mms_fpi['vp_lmn_l'])
     else:
         df_mms_fpi['vp_diff_x'] = df_mms_fpi['vp_gsm_x'] - df_mms_fpi['vp_gsm_x_rolling_median']
         df_mms_fpi['vp_diff_y'] = df_mms_fpi['vp_gsm_y'] - df_mms_fpi['vp_gsm_y_rolling_median']
         df_mms_fpi['vp_diff_z'] = df_mms_fpi['vp_gsm_z'] - df_mms_fpi['vp_gsm_z_rolling_median']
-
-    # If the absolute of maximum or minimum value of 'vp_gsm_z_diff' is greater than the threshold,
-    # then check if we observed a jet
-    v_thresh = 70  # Defined based on values in literature (Trattner et al. 2017)
-    jet_detection = False
-    # Find out the median value of difference between the indices of df_mms_fpi in seconds
-    median_diff = np.median(np.diff(df_mms_fpi.index.astype(np.int64) / 10**9))
-    print(f"Median difference between the indices of df_mms_fpi in seconds: {median_diff}")
-    n_points = int(jet_len / median_diff)
-
-    if np.abs(df_mms_fpi['vp_diff_z']).max() > v_thresh:
-
-        # Find the index where the maximum value is
-        ind_max_z_diff = df_mms_fpi.index[
-            df_mms_fpi['vp_diff_z'] == df_mms_fpi['vp_diff_z'].max()]
-
-        # Set a time window of +/- 60 seconds around the maximum value
-        time_check_range = [ind_max_z_diff[0] - pd.Timedelta(minutes=1),
-                            ind_max_z_diff[0] + pd.Timedelta(minutes=1)]
-
-        # Define a velocity which might refer to a jet
-        vp_jet = df_mms_fpi['vp_diff_z'].loc[time_check_range[0]:time_check_range[1]]
-
-        # If there is a jet, then it must have sustained velocity above the threshold for at least
-        # jet_len seconds. If not, then it is not a jet.
-        # Based on the data rate, find out the number of data points in the time window which must
-        # be checked for a jet
-        # NOTE: 12 seconds comes from Trenchi et al. (2008) based on their study using Double Star
-        # observation. Though they used it to confirm the Walen relation, I believe that similar
-        # principal can be used for jet detection as well.
-        if n_points == 0 or n_points > len(vp_jet):
-            n_points = 2
-            if verbose:
-                print(f"Since time interval was greater than jet_len, setting it to {n_points}\n")
-        # Find out the indices of all such points
-        ind_right_vals = np.flatnonzero(np.convolve(vp_jet > v_thresh,
-                                        np.ones(n_points, dtype=int), 'same') >= n_points)
-        ind_left_vals = np.flatnonzero(np.convolve(vp_jet < -v_thresh,
-                                       np.ones(n_points, dtype=int), 'same') >= n_points)
-
-        if (len(ind_right_vals) and len(ind_left_vals)) > 0:
-            jet_detection = True
-            # Set the jet location to union of the positive and negative indices
-            ind_jet = np.union1d(ind_right_vals, ind_left_vals)
-            # Find time corresponding to the center of the jet
-            jet_time = vp_jet.index[ind_jet[0]] + (
-                       vp_jet.index[ind_jet[-1]] - vp_jet.index[ind_jet[0]]
-                       ) / 2
-            if verbose:
-                print(f"\n\033[1;32m Jet detected at {jet_time} \033[0m \n")
-        else:
-            ind_jet = np.array([])
-            if verbose:
-                print("\033[1;31m No jet detected \033[0m \n")
-    else:
-        ind_jet = np.array([])
-        if verbose:
-            print("\033[1;31m No jet detected \033[0m \n")
 
     # Get the data from the FGM
     # mms_fgm_varnames = [f'mms{probe}_fgm_b_gsm_srvy_l2_bvec']
@@ -285,134 +237,77 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         if verbose:
             print("\033[1;31m Timezone conversion failed \033[0m \n")
 
-    # Standardise the proton density in the dataframe
-    # df_mms['np_std'] = (df_mms['np'] - df_mms['np'].mean()) / df_mms['np'].std()
+    # Check if magnetosheath and magnetopshere are present and if they are then get the indices
+    # corresponding to the magnetosheath and magnetosphere
+    ind_range_msp, ind_range_msh = check_msp_msh_location(df_mms, verbose=verbose)
 
-    # Find out the index for which 'np_std' is minimum
-    # ind_min_np = np.where(df_mms['np_std'] == df_mms['np_std'].min())[0][0]
-    if len(ind_jet) > 0:
-        # Get the time check range centered around jet location
-        time_check_center = vp_jet.index[ind_jet[0]] + (
-                            vp_jet.index[ind_jet[-1]] - vp_jet.index[ind_jet[0]]) / 2
-        time_check_range = [time_check_center - pd.Timedelta(60, unit='s'),
-                            time_check_center + pd.Timedelta(60, unit='s')]
 
-        # Find out where np is minimum in a time range around the jet location
-        np_check = df_mms['np'].loc[time_check_range[0]:time_check_range[-1]]
-        # Get the time corresponding to the minimum np
-        np_min_time = np_check[np_check == np_check.min()].index[0]
-        # Get the index of the minimum np time in that range
-        ind_min_np = np.where(df_mms.index == np_min_time)[0][0]
-        if verbose:
-            print(f"ind_min_np: {ind_min_np}")
-    else:
-        ind_min_np = np.where(df_mms['np'] == df_mms['np'].min())[0][0]
+    (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
+     ind_jet_center_minus_1_min, ind_jet_center_plus_1_min) = check_jet_location(
+        df_mms=df_mms_fpi, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh, verbose=verbose
+    )
 
-    if verbose:
-        print(f"Magnetopause location: {df_mms.index[ind_min_np]} at location index {ind_min_np}\n")
+    if jet_detection:
+        t_delta_v_min = df_mms_fpi.index[ind_jet_center_minus_1_min:ind_jet_center]
+        t_delta_v_max = df_mms_fpi.index[ind_jet_center:ind_jet_center_plus_1_min]
 
-    # Find the index value closest to 'ind_min_np' where 'np' is greater than 'n_thresh' on both
-    # sides of the minimum value
-    # TODO: Check if threshold value of 3 is fine or if we need to decrease/increase it
-    # n_thresh = 3
-    n_thresh_msp = 5
-    n_thresh_msh = 10
+        # Convert t_delta_v_min and t_delta_v_max to from datetime object to UNIX time
+        t_delta_v_min_unix = [t_delta_v_min[i].timestamp() for i in range(len(t_delta_v_min))]
+        t_delta_v_max_unix = [t_delta_v_max[i].timestamp() for i in range(len(t_delta_v_max))]
+        t_delta_v_min_unix = np.array(t_delta_v_min_unix)
+        t_delta_v_max_unix = np.array(t_delta_v_max_unix)
 
-    # TODO: Instead of one difference between indices, use the median value of differences between
-    # all the indices
-    n_points_msp = int(5 / median_diff)
-    n_points_msh = int(10 / median_diff)
+        # Add delta_v_min and delta_v_max to ptt
+        ptt.store_data('delta_v_min', data={'x': t_delta_v_min_unix,
+                                            'y': delta_v_min})
+        ptt.store_data('delta_v_max', data={'x': t_delta_v_max_unix,
+                                            'y': delta_v_max})
+        ptt.store_data('delta_v_min_max', data=['delta_v_min', 'delta_v_max'])
 
-    n_points_walen = n_points * 3
+        # If jet was detected, then check if walen relation is satisfied
+        (walen_relation_satisfied_v1, walen_relation_satisfied_v2, theta_w_deg, R_w, theta_all_deg,
+         R_all, ind_walen_vals, ind_walen_check) = check_walen_relation(
+                                                                        df_mms=df_mms,
+                                                                        t_jet_center=t_jet_center,
+                                                                        coord_type=coord_type,
+                                                                        ind_msh=ind_range_msh,
+                                                                        n_points_walen=jet_len,
+                                                                        jet_detection=jet_detection)
 
-    # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
-    # on both sides of the minimum value
-    np_msp_bool_array = df_mms['np'] < n_thresh_msp
-    np_msh_bool_array = df_mms['np'] > n_thresh_msh
+    # Select the times corresponding to walen check
+    t_walen_check = df_mms.index[ind_walen_check]
 
-    # ind_np_msp_vals = np.flatnonzero(np.convolve(np_msp_bool_array > 0,
-    #                                              np.ones(
-    #                                                  n_points_msp, dtype=int),
-    #                                              'valid') >= n_points_msp)
+    # Convert t_walen_check to from datetime object to UNIX time
+    t_walen_check_unix = [t_walen_check[i].timestamp() for i in range(len(t_walen_check))]
 
-    result_msp = list(mit.run_length.encode(np_msp_bool_array))
-    # Find the length of longest subsequence of True, and the location if that index in result
-    max_true_count_msp = -1
-    max_true_idx_msp = -1
-    for idx, (val, count) in enumerate(result_msp):
-        if val and max_true_count_msp < count:
-            max_true_count_msp = count
-            max_true_idx_msp = idx
-    # Find total elements before and after the longest subsequence tuple
-    elems_before_idx_msp = sum((idx[1] for idx in result_msp[:max_true_idx_msp]))
-    # elems_after_idx_msp = sum((idx[1] for idx in result_msp[max_true_idx_msp + 1:]))
+    # Add theta_w_deg and R_w to ptt
+    ptt.store_data('theta_w_deg', data={'x': t_walen_check_unix, 'y': theta_w_deg})
+    ptt.store_data('R_w', data={'x': t_walen_check_unix, 'y': R_w})
+    ptt.store_data('theta_R_w', data=['theta_w_deg', 'R_w'])
 
-    # Check if the longest subsequence is greater than the threshold
-    if max_true_count_msp >= n_points_msp:
-        ind_min_msp = int(elems_before_idx_msp + (max_true_count_msp - n_points_msp) / 2)
-        ind_max_msp = int(elems_before_idx_msp + (max_true_count_msp + n_points_msp) / 2)
-        ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
-
-    # ind_np_msh_vals = np.flatnonzero(np.convolve(np_msh_bool_array > 0,
-    #                                  np.ones(n_points_msh, dtype=int),
-    #                                  'valid') >= n_points_msh)
-
-    result_msh = list(mit.run_length.encode(np_msh_bool_array))
-    # Find the length of longest subsequence of True, and the location if that index in result
-    max_true_count_msh = -1
-    max_true_idx_msh = -1
-    for idx, (val, count) in enumerate(result_msh):
-        if val and max_true_count_msh < count:
-            max_true_count_msh = count
-            max_true_idx_msh = idx
-    # Find total elements before and after the longest subsequence tuple
-    elems_before_idx_msh = sum((idx[1]
-                               for idx in result_msh[:max_true_idx_msh]))
-    # elems_after_idx_msh = sum((idx[1] for idx in result_msh[max_true_idx_msh + 1:]))
-
-    # Check if the longest subsequence is greater than the threshold
-    if max_true_count_msh >= n_points_msh:
-        ind_min_msh = int(elems_before_idx_msh + (max_true_count_msh - n_points_msh) / 2)
-        ind_max_msh = int(elems_before_idx_msh + (max_true_count_msh + n_points_msh) / 2)
-        ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
-
-    if verbose:
-        try:
-            print(f"ind_min_msp: {ind_min_msp}")
-            print(f"ind_max_msp: {ind_max_msp}")
-            print(f"ind_min_msh: {ind_min_msh}")
-            print(f"ind_max_msh: {ind_max_msh}")
-        except Exception:
-            pass
-
-    # Set the index values to the full range where we have decided magnetosphere and magnetosheath
-    # are.
-    ind_msp = ind_range_msp
-    ind_walen_check_min = np.where(df_mms.index == vp_jet.index[ind_jet[0]])[0][0]
-    ind_walen_check_max = np.where(df_mms.index == vp_jet.index[ind_jet[-1]])[0][0]
-    ind_walen_check = np.arange(ind_walen_check_min, ind_walen_check_max)
-    ind_msh = ind_range_msh
-
-    print(f"ind jet is {ind_jet}\n min value of walen is {ind_walen_check_min}\n max value of walen is {ind_walen_check_max}\n")
     # Get different parameters for magnetosphere and magnetosheath
-    np_msp = df_mms['np'][ind_msp] * 1e6  # Convert to m^-3 from cm^-3
-    np_msh = df_mms['np'][ind_msh] * 1e6  # Convert to m^-3 from cm^-3
+    np_msp = df_mms['np'][ind_range_msp] * 1e6  # Convert to m^-3 from cm^-3
+    np_msh = df_mms['np'][ind_range_msh] * 1e6  # Convert to m^-3 from cm^-3
 
     if coord_type == 'lmn':
 
-        vp_lmn_vec_msp = np.array([df_mms['vp_lmn_n'][ind_msp], df_mms['vp_lmn_m'][ind_msp],
-                                   df_mms['vp_lmn_l'][ind_msp]]) * 1e3  # Convert to m/s from km/s
+        vp_lmn_vec_msp = np.array([df_mms['vp_lmn_n'][ind_range_msp],
+                                   df_mms['vp_lmn_m'][ind_range_msp],
+                                   df_mms['vp_lmn_l'][ind_range_msp]]) * 1e3  # Convert to m/s
         vp_lmn_vec_msp = vp_lmn_vec_msp.T
 
-        vp_lmn_vec_msh = np.array([df_mms['vp_lmn_n'][ind_msh], df_mms['vp_lmn_m'][ind_msh],
-                                   df_mms['vp_lmn_l'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+        vp_lmn_vec_msh = np.array([df_mms['vp_lmn_n'][ind_range_msh],
+                                   df_mms['vp_lmn_m'][ind_range_msh],
+                                   df_mms['vp_lmn_l'][ind_range_msh]]) * 1e3  # Convert to m/s
         vp_lmn_vec_msh = vp_lmn_vec_msh.T
 
-        b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][ind_msp], df_mms['b_lmn_m'][ind_msp],
-                                  df_mms['b_lmn_l'][ind_msp]]) * 1e-9  # Convert to T from nT
+        b_lmn_vec_msp = np.array([df_mms['b_lmn_n'][ind_range_msp],
+                                  df_mms['b_lmn_m'][ind_range_msp],
+                                  df_mms['b_lmn_l'][ind_range_msp]]) * 1e-9  # Convert to T from nT
         b_lmn_vec_msp = b_lmn_vec_msp.T
-        b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][ind_msh], df_mms['b_lmn_m'][ind_msh],
-                                  df_mms['b_lmn_l'][ind_msh]]) * 1e-9  # Convert to T from nT
+        b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][ind_range_msh],
+                                  df_mms['b_lmn_m'][ind_range_msh],
+                                  df_mms['b_lmn_l'][ind_range_msh]]) * 1e-9  # Convert to T from nT
         b_lmn_vec_msh = b_lmn_vec_msh.T
 
         # Get the mean and median values of np, vp, and b for the magnetosphere and magnetosheath
@@ -439,23 +334,27 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                    ) * 180 / np.pi
 
     else:
-        vp_gse_vec_msp = np.array([df_mms['vp_gse_x'][ind_msp], df_mms['vp_gse_y'][ind_msp],
-                                   df_mms['vp_gse_z'][ind_msp]]) * 1e3  # Convert to m/s from km/s
+        vp_gse_vec_msp = np.array([df_mms['vp_gse_x'][ind_range_msp],
+                                   df_mms['vp_gse_y'][ind_range_msp],
+                                   df_mms['vp_gse_z'][ind_range_msp]]) * 1e3  # Convert to m/s from km/s
         vp_gse_vec_msp = vp_gse_vec_msp.T
-        vp_gse_vec_msh = np.array([df_mms['vp_gse_x'][ind_msh], df_mms['vp_gse_y'][ind_msh],
-                                   df_mms['vp_gse_z'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+        vp_gse_vec_msh = np.array([df_mms['vp_gse_x'][ind_range_msh],
+                                   df_mms['vp_gse_y'][ind_range_msh],
+                                   df_mms['vp_gse_z'][ind_range_msh]]) * 1e3  # Convert to m/s from km/s
         vp_gse_vec_msh = vp_gse_vec_msh.T
-        b_gse_vec_msp = np.array([df_mms['b_gse_x'][ind_msp], df_mms['b_gse_y'][ind_msp],
-                                  df_mms['b_gse_z'][ind_msp]]) * 1e-9  # Convert to T from nT
+        b_gse_vec_msp = np.array([df_mms['b_gse_x'][ind_range_msp],
+                                  df_mms['b_gse_y'][ind_range_msp],
+                                  df_mms['b_gse_z'][ind_range_msp]]) * 1e-9  # Convert to T from nT
         b_gse_vec_msp = b_gse_vec_msp.T
-        b_gse_vec_msh = np.array([df_mms['b_gse_x'][ind_msh], df_mms['b_gse_y'][ind_msh],
-                                  df_mms['b_gse_z'][ind_msh]]) * 1e-9  # Convert to T from nT
+        b_gse_vec_msh = np.array([df_mms['b_gse_x'][ind_range_msh],
+                                  df_mms['b_gse_y'][ind_range_msh],
+                                  df_mms['b_gse_z'][ind_range_msh]]) * 1e-9  # Convert to T from nT
         b_gse_vec_msh = b_gse_vec_msh.T
 
-    tp_para_msp = df_mms['tp_para'][ind_msp] * ev_to_K  # Convert to K from ev
-    tp_para_msh = df_mms['tp_para'][ind_msh] * ev_to_K  # Convert to K from ev
-    tp_perp_msp = df_mms['tp_perp'][ind_msp] * ev_to_K  # Convert to K from ev
-    tp_perp_msh = df_mms['tp_perp'][ind_msh] * ev_to_K  # Convert to K from ev
+    tp_para_msp = df_mms['tp_para'][ind_range_msp] * ev_to_K  # Convert to K from ev
+    tp_para_msh = df_mms['tp_para'][ind_range_msh] * ev_to_K  # Convert to K from ev
+    tp_perp_msp = df_mms['tp_perp'][ind_range_msp] * ev_to_K  # Convert to K from ev
+    tp_perp_msh = df_mms['tp_perp'][ind_range_msh] * ev_to_K  # Convert to K from ev
 
     # Get the mean and median values of temperature for the magnetosphere and magnetosheath
     tp_para_msp_median = np.nanmedian(tp_para_msp)
@@ -475,150 +374,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                           ) / (3 * np.linalg.norm(
                                                             b_lmn_vec_msp_mean) ** 2)
 
-    method = 2
-    if method == 1:
-        alpha_jet = np.full(len(ind_walen_check), np.nan)
-        alpha_msh = np.full(len(ind_msh), np.nan)
-        v_th_jet = np.full((len(ind_walen_check), 3), np.nan)
-        v_th_msh = np.full((len(ind_msh), 3), np.nan)
-
-        if coord_type == 'lmn':
-            for i, xx in enumerate(ind_walen_check):
-                alpha_jet[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
-                                df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
-                                df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
-                                df_mms['b_lmn_l'][xx] ** 2))
-
-                b_lmn_vec_jet = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
-                                            df_mms['b_lmn_l'][xx]]) * 1e-9
-                for j in range(3):
-                    v_th_jet[i, j] = b_lmn_vec_jet[j] * ((1 - alpha_jet[i]) / (mu_0 * df_mms['np'][xx]
-                                                          * 1e6 * m_p))**0.5
-            for i in range(len(ind_msh)):
-                alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                    np.linalg.norm(b_lmn_vec_msh[i, :])**2)
-                for j in range(3):
-                    v_th_msh[i, j] = b_lmn_vec_msh[i, j] * ((1 - alpha_msh[i]) / (
-                                                             mu_0 * np_msh[i] * m_p))**0.5
-        else:
-            for i in range(len(ind_jet)):
-                alpha_jet[i] = (mu_0 * np_msp[i] * k_B) * (tp_para_msp[i] - tp_perp_msp[i]) / (
-                    np.linalg.norm(b_gse_vec_msp[i, :])**2)
-                alpha_msh[i] = (mu_0 * np_msh[i] * k_B) * (tp_para_msh[i] - tp_perp_msh[i]) / (
-                    np.linalg.norm(b_gse_vec_msh[i, :])**2)
-                for j in range(3):
-                    v_th_jet[i, j] = b_gse_vec_msp[i, j] * ((1 - alpha_jet[i]) / (
-                                            mu_0 * np_msp[i] * m_p))**0.5
-                    v_th_msh[i, j] = b_gse_vec_msh[i, j] * (1 - alpha_msh[i]) / (
-                        mu_0 * np_msh[i] * m_p * (1 - alpha_msh[i])
-                    )**0.5
-
-        alpha_all = mu_0 * df_mms['np'] * 1e6 * k_B * (df_mms['tp_para'] - df_mms['tp_perp']
-                    ) * ev_to_K / (1e-18 * (df_mms['b_lmn_n'] ** 2 + df_mms['b_lmn_m'] ** 2
-                    + df_mms['b_lmn_l'] ** 2))
-
-        v_th_all = np.full((len(df_mms['tp_para']), 3), np.nan)
-        for i in range(len(df_mms['tp_para'])):
-            v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
-                                              df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
-                                                                         mu_0 * df_mms['np'][i] * 1e6
-                                                                         * m_p))**0.5
-        delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_jet
-        delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
-
-        vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
-                                     df_mms['vp_lmn_m'][ind_walen_check],
-                                     df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s to m/s
-        vp_lmn_vec_all = np.array([df_mms['vp_lmn_n'], df_mms['vp_lmn_m'], df_mms['vp_lmn_l']]).T * 1e3
-
-        if coord_type == 'lmn':
-            delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
-            delta_v_obs_all = vp_lmn_vec_msh_mean - vp_lmn_vec_all
-            print(f"Shape of vp_lmn_vec_msh_mean: {vp_lmn_vec_msh_mean.shape}")
-        else:
-            delta_v_obs = vp_gse_vec_msh - vp_gse_vec_msp
-        # delta_v_obs_mag = np.linalg.norm(delta_v_obs, axis=1)
-
-        # Compute the angle between the observed and the theoretical velocity jumps
-        theta_w = np.full(len(ind_walen_check), np.nan)
-        for i in range(len(ind_walen_check)):
-            theta_w[i] = np.arccos(np.dot(delta_v_th[i, :], delta_v_obs[i, :]) / (
-                                   np.linalg.norm(delta_v_th[i, :]) *
-                                   np.linalg.norm(delta_v_obs[i, :])
-                                   )
-                                   )
-
-        theta_all = np.full(len(df_mms['tp_para']), np.nan)
-        for i in range(len(df_mms['tp_para'])):
-            theta_all[i] = np.arccos(np.dot(delta_v_th_all[i, :], delta_v_obs_all[i, :]) / (
-                                   np.linalg.norm(delta_v_th_all[i, :]) *
-                                   np.linalg.norm(delta_v_obs_all[i, :])
-                                   )
-                                   )
-
-        # Convert angle to degrees
-        theta_w_deg = theta_w * 180 / np.pi
-        theta_all_deg = theta_all * 180 / np.pi
-
-        # Compute the ratio of the observed and the theoretical velocity jumps
-        R_w = np.linalg.norm(delta_v_th, axis=1) / np.linalg.norm(delta_v_obs, axis=1)
-        R_all = np.linalg.norm(delta_v_th_all, axis=1) / np.linalg.norm(delta_v_obs_all, axis=1)
-
-        # print(f"Values of theta_w_deg: {theta_w_deg}")
-        # print(f"Values of R_w: {R_w}")
-        # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
-        # 180) in green color
-
-        bool_array = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
-                                    np.logical_and(np.logical_and(0 < theta_w_deg, theta_w_deg < 30),
-                                    np.logical_and(150 < theta_w_deg, theta_w_deg < 180)))
-
-        # Check the number of True in the bool_array
-        num_true = np.sum(bool_array)
-        if num_true >= n_points_walen/2:
-            walen_relation_satisfied = True
-        else:
-            walen_relation_satisfied = False
-
-        ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
-                                        np.ones(n_points_walen, dtype=int),
-                                        'valid') >= n_points_walen/3)
-
-        if len(ind_walen_vals) > 0:
-            walen_relation_satisfied_v2 = True
-        else:
-            walen_relation_satisfied_v2 = False
-
-        if walen_relation_satisfied:
-            print('\033[92m \n Walen relation satisfied \033[0m \n')
-            print(f'\033[92m R_w: {np.nanmedian(R_w):.3f} \033[0m')
-            print(f'\033[92m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
-            if jet_detection:
-                print(f'\033[92m Jet detection: {jet_detection} \033[0m')
-            else:
-                print(f'\033[91m Jet detection: {jet_detection} \033[0m')
-        else:
-            print('\033[91m \n Walen relation not satisfied \033[0m \n')
-            print(f'\033[91m R_w: {np.nanmedian(R_w):.3f} \033[0m')
-            print(f'\033[91m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
-            if jet_detection:
-                print(f'\033[92m Jet detection: {jet_detection} \033[0m')
-            else:
-                print(f'\033[91m Jet detection: {jet_detection} \033[0m')
-
-        if walen_relation_satisfied_v2:
-            print('\033[92m Walen relation version 2 is satisfied \033[0m \n')
-        else:
-            print('\033[91m Walen relation version 2 is not satisfied \033[0m \n')
-
-    else:
-
-        walen_relation_satisfied, walen_relation_satisfied_v2, theta_w_deg, R_w, theta_all_deg, R_all, ind_walen_vals = check_walen_relation(df_mms=df_mms, ind_walen_check=ind_walen_check, coord_type=coord_type, ind_msh=ind_msh, n_points_walen=n_points_walen, jet_detection=jet_detection)
-
     # Check if within 2 minutes of crossing time the values went above and below the threshold
     # If ind_vals is not empty, then append the crossing time to the csv file
     # if len(ind_vals) > 0:
-    if walen_relation_satisfied or jet_detection or walen_relation_satisfied_v2:
+    if walen_relation_satisfied_v1 or jet_detection or walen_relation_satisfied_v2:
         # for xxx in range(1):
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
@@ -648,7 +407,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
         data_dict = {'Date': crossing_time,
                      'Probe': probe,
-                     'walen1': walen_relation_satisfied,
+                     'walen1': walen_relation_satisfied_v1,
                      'walen2': walen_relation_satisfied_v2,
                      'jet_detection': jet_detection,
                      'x_gsm': np.round(x, 3),
@@ -657,11 +416,11 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                      'r_spc': np.round(r_yz, 3),
                      'r_W': np.round(np.nanmedian(R_w), 3),
                      'theta_w': np.round(np.nanmedian(theta_w_deg), 3),
-                     'jet_time': jet_time,
-                     'ind_min_msp': ind_min_msp,
-                     'ind_max_msp': ind_max_msp,
-                     'ind_min_msh': ind_min_msh,
-                     'ind_max_msh': ind_max_msh,
+                     'jet_time': t_jet_center,
+                     'ind_min_msp': ind_range_msp[0],
+                     'ind_max_msp': ind_range_msp[-1],
+                     'ind_min_msh': ind_range_msh[0],
+                     'ind_max_msh': ind_range_msh[-1],
                      'angle_b_lmn_vec_msp_msh_median': np.round(angle_b_lmn_vec_msp_msh_median, 3),
                      'b_lmn_vec_msp_mean_n': np.round(b_lmn_vec_msp_mean[0] * 1e9, 3),
                      'b_lmn_vec_msp_mean_m': np.round(b_lmn_vec_msp_mean[1] * 1e9, 3),
@@ -728,7 +487,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                        index_col=False)
         # Change the formatting of the date
         for xx in range(len(df_crossing_temp)):
-            df_crossing_temp['jet_time'][xx] = df_crossing_temp['jet_time'][xx].split('+')[0].split('.')[0]
+            df_crossing_temp['jet_time'][xx] = df_crossing_temp['jet_time'][xx].split(
+                                             '+')[0].split('.')[0]
         df_crossing_temp.set_index("jet_time", inplace=True)
         crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")[:]
     except:
@@ -760,6 +520,50 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # plt.style.use('dark_background')
 
+    # if jet_detection:
+
+    tplot_globat_options = {"show_all_axes": True,
+                            "black_background": True,
+                            "crosshair": True,
+                            "vertical_spacing": 0,
+                            }
+    for key in tplot_globat_options:
+        ptt.tplot_options(key, tplot_globat_options[key])
+
+
+    # ptt.timebar(ptt.get_data(mms_fpi_varnames[0])[0].min() + 200, color='red', dash=True, thick=2)
+    # ptt.timespan(ptt.get_data(mms_fpi_varnames[0])[0].min() + 160, 100, keyword="seconds")
+    energy_spectr_dict_option = {'Colormap': "Spectral_r",
+                                 'ylog': True,
+                                 'zlog': True}
+    temp_dict_option = {'ylog': True,
+                        'color': ['red', 'blue'],
+                        'linestyle': '-',
+                        'legend_names': ['para', 'perp']
+                        }
+    delta_v_min_max_dict_option = {'color': ['k', 'k'],
+                                   'linestyle': '-',
+                                   'legend_names': ['delta_v_min', 'delta_v_max'],
+                                    'yrange': [-200, 200]
+                                   }
+    keys_to_plot = [f'mms{probe}_dis_numberdensity_{data_rate}',
+                    'Tp',
+                    f'mms{probe}_dis_energyspectr_omni_{data_rate}',
+                    f'mms{probe}_des_energyspectr_omni_{data_rate}',
+                    f'mms{probe}_dis_bulkv_lmn_{data_rate}',
+                    'delta_v_min_max',
+                    'theta_w_deg',
+                    'R_w',
+                    ]
+    #ptt.options(f'mms{probe}_dis_numberdensity_{data_rate}', 'ylog', True)
+    ptt.options(f'mms{probe}_dis_energyspectr_omni_{data_rate}', opt_dict=energy_spectr_dict_option)
+    ptt.options(f'mms{probe}_des_energyspectr_omni_{data_rate}', opt_dict=energy_spectr_dict_option)
+    ptt.options('Tp', opt_dict=temp_dict_option)
+    ptt.options('delta_v_min_max', opt_dict=delta_v_min_max_dict_option)
+
+    ptt.tplot(keys_to_plot, save_png="test_plot", display=False)
+
+    """
     plt.close("all")
 
     if coord_type == 'lmn':
@@ -845,12 +649,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # axs[2].legend(loc='upper right')
         # axs[2].grid(True)
 
-        if walen_relation_satisfied:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z.rolling(1).mean(), 'g-', lw=lw)
+        if walen_relation_satisfied_v1:
+            axs[3].plot(df_mms.index, df_mms.vp_diff_x.rolling(1).mean(), 'g-', lw=lw)
         elif walen_relation_satisfied_v2:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z.rolling(1).mean(), 'b-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_x.rolling(1).mean(), 'b-', lw=lw)
         else:
-            axs[3].plot(df_mms.index, df_mms.vp_diff_z.rolling(1).mean(), 'r-', lw=lw)
+            axs[3].plot(df_mms.index, df_mms.vp_diff_x.rolling(1).mean(), 'r-', lw=lw)
         if jet_detection:
             # Make a box around the jet
             axs[3].axvspan(vp_jet.index[ind_jet[0]], vp_jet.index[ind_jet[-1]], color='c',
@@ -956,17 +760,17 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         axs[0].text(
             1.0, 1.01, f"$\\theta_{{B_{{msh}},B_{{msp}}}}=${angle_b_lmn_vec_msp_msh_median:.0f}",
             transform=axs[0].transAxes, ha='center',  va='bottom', color='r')
-        if (walen_relation_satisfied or walen_relation_satisfied_v2) & jet_detection:
+        if (walen_relation_satisfied_v1 or walen_relation_satisfied_v2) & jet_detection:
             folder_name = "../figures/jet_reversal_checks/check_20221020/jet_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
-        elif (walen_relation_satisfied or walen_relation_satisfied_v2) & (not jet_detection):
+        elif (walen_relation_satisfied_v1 or walen_relation_satisfied_v2) & (not jet_detection):
             folder_name = "../figures/jet_reversal_checks/check_20221020/walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
-        elif (not walen_relation_satisfied) & (
+        elif (not walen_relation_satisfied_v1) & (
                 not walen_relation_satisfied_v2) & jet_detection:
             folder_name = "../figures/jet_reversal_checks/check_20221020/jet"
             # If the folder doesn't exist, create it
@@ -992,19 +796,66 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                    f'mms{probe}_dis_bulkv_gsm_{data_rate}'],
                   combine_axes=True, save_png='b_n_v_fig', display=False)
         plt.close("all")
-
+    """
     return df_mms_fpi, df_mms_fgm, df_mms
 
 
-def check_walen_relation(df_mms=None, ind_walen_check=None, coord_type="gsm", ind_msh=None,
-                         n_points_walen=None, jet_detection=False,):
 
-    
+def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type="gsm",
+                         ind_msh=None, n_points_walen=10, jet_detection=False,):
+    """
+    Check if the Walen relation is satisfied for a given index values in the dataframe.
+
+    Parameters
+    ----------
+    df_mms : pandas.DataFrame
+        Dataframe containing the MMS data.
+    ind_walen_check : list
+        List of indices to check the Walen relation.
+    coord_type : str
+        Coordinate system to use for the Walen relation. Default is "gsm". Other options are "gse"
+        and "lmn".
+    ind_msh : list
+        List of indices for the magnetosheath.
+    n_points_walen : int
+        Number of points to use for the Walen relation. Default is 10.
+    jet_detection : bool
+        Whether the jet was detected or not. Default is False.
+
+    Returns
+    -------
+    walen_relation_satisfied : bool
+        Whether the Walen relation is satisfied or not.
+    walen_relation_satisfied_v2 : bool
+        Whether the Walen relation is satisfied or not.
+    theta_w_deg : numpy.ndarray
+        The theta parameter for the Walen relation, restricted to the region for which the Walen
+        relation was checked
+    R_w : numpy.ndarray
+        The R parameter for the Walen relation, restricted to the region for which the Walen
+        relation was checked
+    theta_all_deg : numpy.ndarray
+        The theta parameter for the Walen relation, for whole dataframe
+    R_all : numpy.ndarray
+        The R parameter for the Walen relation, for whole dataframe
+    ind_walen_vals: numpy.ndarray
+        Indicess within the jet region for which the Walen relation was satisfied continuously for
+        n_points_walen
+    """
+
     # Define the constants
     mu_0 = 4 * np.pi * 1e-7  # Permeability of free space (H/m)
     k_B = 1.38064852e-23  # Boltzmann constant in J/K
     m_p = 1.6726219e-27  # Mass of proton in kg
     ev_to_K = 11604.505  # Conversion factor from eV to K
+
+    # Define ind_walen_check as indices corresponding to 30 seconds before and after t_jet_center
+    t_jet_center_minus_30_sec = t_jet_center - datetime.timedelta(seconds=dt_walen)
+    ind_jet_center_minus_30_sec = np.argmin(np.abs(df_mms.index - t_jet_center_minus_30_sec))
+    t_jet_center_plus_30_sec = t_jet_center + datetime.timedelta(seconds=dt_walen)
+    ind_jet_center_plus_30_sec = np.argmin(np.abs(df_mms.index - t_jet_center_plus_30_sec))
+
+    ind_walen_check = np.arange(ind_jet_center_minus_30_sec, ind_jet_center_plus_30_sec)
 
     alpha_jet = np.full(len(ind_walen_check), np.nan)
     alpha_msh = np.full(len(ind_msh), np.nan)
@@ -1015,48 +866,48 @@ def check_walen_relation(df_mms=None, ind_walen_check=None, coord_type="gsm", in
         for i, xx in enumerate(ind_walen_check):
             alpha_jet[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
                             df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
-                            df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
-                            df_mms['b_lmn_l'][xx] ** 2))
+                            df_mms['b_lmn_l'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
+                            df_mms['b_lmn_n'][xx] ** 2))
 
-            b_lmn_vec_jet = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
-                                        df_mms['b_lmn_l'][xx]]) * 1e-9
+            b_lmn_vec_jet = np.array([df_mms['b_lmn_l'][xx], df_mms['b_lmn_m'][xx],
+                                        df_mms['b_lmn_n'][xx]]) * 1e-9
             for j in range(3):
                 v_th_jet[i, j] = b_lmn_vec_jet[j] * ((1 - alpha_jet[i]) / (mu_0 * df_mms['np'][xx]
                                                       * 1e6 * m_p))**0.5
         for i,xx in enumerate(ind_msh):
             alpha_msh[i] = (mu_0 * df_mms['np'][xx] * 1e6 * k_B) * (
                             df_mms['tp_para'][xx] - df_mms['tp_perp'][xx]) * ev_to_K / (1e-18 * (
-                            df_mms['b_lmn_n'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
-                            df_mms['b_lmn_l'][xx] ** 2))
+                            df_mms['b_lmn_l'][xx] ** 2 + df_mms['b_lmn_m'][xx] ** 2 +
+                            df_mms['b_lmn_n'][xx] ** 2))
 
-            b_lmn_vec_msh = np.array([df_mms['b_lmn_n'][xx], df_mms['b_lmn_m'][xx],
-                                        df_mms['b_lmn_l'][xx]]) * 1e-9
+            b_lmn_vec_msh = np.array([df_mms['b_lmn_l'][xx], df_mms['b_lmn_m'][xx],
+                                        df_mms['b_lmn_n'][xx]]) * 1e-9
             for j in range(3):
                 v_th_msh[i, j] = b_lmn_vec_msh[j] * ((1 - alpha_msh[i]) / (mu_0 * df_mms['np'][xx]
                                                       * 1e6 * m_p))**0.5
 
     alpha_all = mu_0 * df_mms['np'] * 1e6 * k_B * (df_mms['tp_para'] - df_mms['tp_perp']
-                ) * ev_to_K / (1e-18 * (df_mms['b_lmn_n'] ** 2 + df_mms['b_lmn_m'] ** 2
-                + df_mms['b_lmn_l'] ** 2))
+                ) * ev_to_K / (1e-18 * (df_mms['b_lmn_l'] ** 2 + df_mms['b_lmn_m'] ** 2
+                + df_mms['b_lmn_n'] ** 2))
 
     v_th_all = np.full((len(df_mms['tp_para']), 3), np.nan)
     for i in range(len(df_mms['tp_para'])):
-        v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_n'][i], df_mms['b_lmn_m'][i],
-                                          df_mms['b_lmn_l'][i]]) * ((1 - alpha_all[i]) / (
+        v_th_all[i, :] = 1e-9 * np.array([df_mms['b_lmn_l'][i], df_mms['b_lmn_m'][i],
+                                          df_mms['b_lmn_n'][i]]) * ((1 - alpha_all[i]) / (
                                                                      mu_0 * df_mms['np'][i] * 1e6
                                                                      * m_p))**0.5
     delta_v_th = np.nanmean(v_th_msh, axis=0) - v_th_jet
     delta_v_th_all = np.nanmean(v_th_msh, axis=0) - v_th_all
 
-    vp_lmn_vec_walen = np.array([df_mms['vp_lmn_n'][ind_walen_check],
+    vp_lmn_vec_walen = np.array([df_mms['vp_lmn_l'][ind_walen_check],
                                  df_mms['vp_lmn_m'][ind_walen_check],
-                                 df_mms['vp_lmn_l'][ind_walen_check]]).T * 1e3  # km/s to m/s
-    vp_lmn_vec_all = np.array([df_mms['vp_lmn_n'], df_mms['vp_lmn_m'], df_mms['vp_lmn_l']]).T * 1e3
+                                 df_mms['vp_lmn_n'][ind_walen_check]]).T * 1e3  # km/s to m/s
+    vp_lmn_vec_all = np.array([df_mms['vp_lmn_l'], df_mms['vp_lmn_m'], df_mms['vp_lmn_n']]).T * 1e3
 
     if coord_type == 'lmn':
         # Find the proton bulk velocity in the msh region and then compute its average
-        vp_lmn_vec_msh = np.array([df_mms['vp_lmn_n'][ind_msh], df_mms['vp_lmn_m'][ind_msh],
-                                   df_mms['vp_lmn_l'][ind_msh]]) * 1e3  # Convert to m/s from km/s
+        vp_lmn_vec_msh = np.array([df_mms['vp_lmn_l'][ind_msh], df_mms['vp_lmn_m'][ind_msh],
+                                   df_mms['vp_lmn_n'][ind_msh]]) * 1e3  # Convert to m/s from km/s
         vp_lmn_vec_msh_mean = np.nanmean(vp_lmn_vec_msh, axis=1)  # km/sec
 
         delta_v_obs = vp_lmn_vec_msh_mean - vp_lmn_vec_walen
@@ -1098,21 +949,29 @@ def check_walen_relation(df_mms=None, ind_walen_check=None, coord_type="gsm", in
 
     # Check the number of True in the bool_array
     num_true = np.sum(bool_array)
-    if num_true >= n_points_walen/2:
-        walen_relation_satisfied = True
+
+    # If more than 50% of the data points satisfy the Walen relation, then the Walen relation
+    # version 1 is assumed to be satisfied
+    if num_true >= len(ind_walen_check)/2:
+        walen_relation_satisfied_v1 = True
     else:
-        walen_relation_satisfied = False
+        walen_relation_satisfied_v1 = False
+
+    # Check if the Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w
+    # < 180) continuously at least once for same length of time as the jet length
 
     ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
                                     np.ones(n_points_walen, dtype=int),
-                                    'valid') >= n_points_walen/3)
+                                    'valid') >= n_points_walen)
 
+    # If Walen relation is satisfied continuously for same length of time as the jet length, then
+    # Walen relation version 2 is assumed to be satisfied
     if len(ind_walen_vals) > 0:
         walen_relation_satisfied_v2 = True
     else:
         walen_relation_satisfied_v2 = False
 
-    if walen_relation_satisfied:
+    if walen_relation_satisfied_v1:
         print('\033[92m \n Walen relation satisfied \033[0m \n')
         print(f'\033[92m R_w: {np.nanmedian(R_w):.3f} \033[0m')
         print(f'\033[92m theta_w_deg: {np.nanmedian(theta_w_deg):.3f} \033[0m')
@@ -1134,4 +993,215 @@ def check_walen_relation(df_mms=None, ind_walen_check=None, coord_type="gsm", in
     else:
         print('\033[91m Walen relation version 2 is not satisfied \033[0m \n')
 
-    return walen_relation_satisfied, walen_relation_satisfied_v2, theta_w_deg, R_w, theta_all_deg, R_all, ind_walen_vals
+    return walen_relation_satisfied_v1, walen_relation_satisfied_v2, theta_w_deg, R_w,\
+            theta_all_deg, R_all, ind_walen_vals, ind_walen_check
+
+
+def check_jet_location(df_mms=None, jet_len=3, v_thresh=70, ind_msh=None, verbose=True):
+
+    # Compute the median time difference between the points
+    # NOTE: The reason for factor 10**9 is to convert the time difference to seconds from
+    # nanoseconds which is the format in which df_mms.index.astype(np.int64) outputs time
+    time_cadence_median = np.median(np.diff(df_mms.index.astype(np.int64) / 10**9))
+
+    # Compute the number of points corresponding to jet_len
+    n_points_jet = int(jet_len / time_cadence_median)
+
+    # Define the distance within which maximum and minimum values of jet velocity must lie
+    # to be considered as a jet (within 30 seconds)
+    delta_jet_min_max_ind = int(30 / time_cadence_median)
+
+    # Get the median value of the velocity corresponding to the magnetosheath in the lmn coordinate
+    # system
+    vp_lmn_vec_msh_median = np.array([np.nanmedian(df_mms['vp_lmn_l'][ind_msh]),
+                                      np.nanmedian(df_mms['vp_lmn_m'][ind_msh]),
+                                      np.nanmedian(df_mms['vp_lmn_n'][ind_msh])])
+
+    # Subtract the median value of the velocity corresponding to the magnetosheath from the velocity
+    # in the lmn coordinate system
+    vp_lmn_diff_l = df_mms['vp_lmn_l'] - vp_lmn_vec_msh_median[0]
+    # vp_lmn_diff_m = df_mms['vp_lmn_m'] - vp_lmn_vec_msh_mean[1]
+    # vp_lmn_diff_n = df_mms['vp_lmn_n'] - vp_lmn_vec_msh_mean[2]
+
+    # Add the difference in the velocity in the lmn coordinate system to the dataframe
+    df_mms['vp_lmn_diff_l'] = vp_lmn_diff_l
+
+    # If the maximum and minimum values of vp_lmn_diff_l is greater and smaller than v_thresh
+    # respectively then continue to try and find the jet location
+    if np.nanmax(vp_lmn_diff_l) > v_thresh and np.nanmin(vp_lmn_diff_l) < -v_thresh:
+        # Find the index where vp_lmn_diff_l has the maximum value
+        ind_jet_max = np.argmax(vp_lmn_diff_l)
+        t_jet_max = df_mms.index[ind_jet_max]
+
+        # Within a minute of ind_jet_max find the index where vp_lmn_diff_l has the minimum value
+        ind_jet_min = np.argmin(vp_lmn_diff_l[ind_jet_max - delta_jet_min_max_ind:ind_jet_max
+                                            + delta_jet_min_max_ind])
+        t_jet_min = df_mms.index[ind_jet_min]
+
+        # Find the time centered between t_jet_max and t_jet_min, which are datetime objects
+        if t_jet_max < t_jet_min:
+            t_jet_center = t_jet_max + (t_jet_min - t_jet_max) / 2
+            # Find the median value of vp_lmn_diff_l from 1 minute before t_jet_center to
+            # t_jet_center
+            t_jet_center_minus_1_min = t_jet_center - datetime.timedelta(minutes=1)
+            ind_jet_center_minus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_minus_1_min))
+            ind_jet_center = np.argmin(np.abs(df_mms.index - t_jet_center))
+            v_max_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center])
+
+            # Find the median value of vp_lmn_diff_l between t_jet_center and 1 minute after
+            # t_jet_center
+            t_jet_center_plus_1_min = t_jet_center + datetime.timedelta(minutes=1)
+            ind_jet_center_plus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_plus_1_min))
+            v_min_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min])
+
+            # Subtract v_max_median from vp_lmn_diff_l from t_jet_cener_minus_1_min to
+            # t_jet_center
+            delta_v_max = vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center] - v_max_median
+
+            # Subtract v_min_median from vp_lmn_diff_l from t_jet_center to t_jet_center_plus_1_min
+            delta_v_min = vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min] - v_min_median
+
+            # Check if delta_v_max has a sustained value greater than v_thresh for n_points_jet
+            # points
+            ind_v_gt_vthresh = np.flatnonzero(np.convolve(delta_v_max >= v_thresh,
+                                                          np.ones(n_points_jet, dtype=int),
+                                                          'valid') >= n_points_jet)
+            # Check if delta_v_min has a sustained value less than -v_thresh for n_points_jet
+            # points
+            ind_v_lt_vthresh = np.flatnonzero(np.convolve(delta_v_min <= -v_thresh,
+                                                          np.ones(n_points_jet, dtype=int),
+                                                          'valid') >= n_points_jet)
+            # If both conditions are satisfied then a jet is found
+            if len(ind_v_gt_vthresh) > 0 and len(ind_v_lt_vthresh) > 0:
+                jet_detection = True
+        else:
+            t_jet_center = t_jet_min + (t_jet_max - t_jet_min) / 2
+            # Find the median value of vp_lmn_diff_l from 1 minute before t_jet_center to
+            # t_jet_center
+            t_jet_center_minus_1_min = t_jet_center - datetime.timedelta(minutes=1)
+            ind_jet_center_minus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_minus_1_min))
+            ind_jet_center = np.argmin(np.abs(df_mms.index - t_jet_center))
+            v_min_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center])
+
+            # Find the median value of vp_lmn_diff_l between t_jet_center and 1 minute after
+            # t_jet_center
+            t_jet_center_plus_1_min = t_jet_center + datetime.timedelta(minutes=1)
+            ind_jet_center_plus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_plus_1_min))
+            v_max_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min])
+
+            # Subtract v_min_median from vp_lmn_diff_l from t_jet_cener_minus_1_min to
+            # t_jet_center
+            delta_v_min = vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center] - v_min_median
+
+            # Subtract v_max_median from vp_lmn_diff_l from t_jet_center to t_jet_center_plus_1_min
+            delta_v_max = vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min] - v_max_median
+
+            # Check if delta_v_min has a sustained value less than -v_thresh for n_points_jet
+            # points
+            ind_v_lt_vthresh = np.flatnonzero(np.convolve(delta_v_min <= -v_thresh,
+                                                          np.ones(n_points_jet, dtype=int),
+                                                          'valid') >= n_points_jet)
+            # Check if delta_v_max has a sustained value greater than v_thresh for n_points_jet
+            # points
+            ind_v_gt_vthresh = np.flatnonzero(np.convolve(delta_v_max >= v_thresh,
+                                                          np.ones(n_points_jet, dtype=int),
+                                                          'valid') >= n_points_jet)
+
+            # If both conditions are satisfied then a jet is found
+            if len(ind_v_lt_vthresh) > 0 and len(ind_v_gt_vthresh) > 0:
+                jet_detection = True
+
+        if jet_detection and verbose:
+            print(f'\n\033[1;32m Jet found at {t_jet_center}\033[0m \n')
+    else:
+        jet_detection = False
+        ind_jet_center = []
+        delta_v_min = []
+        delta_v_max = []
+
+        if verbose:
+            print(f'\n\033[1;31m No jet found\033[0m \n')
+    return (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
+            ind_jet_center_minus_1_min, ind_jet_center_plus_1_min)
+
+
+def check_msp_msh_location(df_mms, verbose=True):
+
+    # TODO: Check if threshold value of 5 and 10 ares fine or if we need to decrease/increase it
+    n_thresh_msp = 5
+    n_thresh_msh = 10
+
+
+    # Compute the median time difference between the points
+    # NOTE: The reason for factor 10**9 is to convert the time difference to seconds from
+    # nanoseconds which is the format in which df_mms.index.astype(np.int64) outputs time
+    time_cadence_median = np.median(np.diff(df_mms.index.astype(np.int64) / 10**9))
+
+    # TODO: Instead of one difference between indices, use the median value of differences between
+    # all the indices
+    n_points_msp = int(5 / time_cadence_median)
+    n_points_msh = int(10 / time_cadence_median)
+
+    n_points_walen = int(10 / time_cadence_median)
+
+    # Find an interval of length at least 'n_points_msp_msh' where 'np' is greater than 'n_thresh'
+    # on both sides of the minimum value
+    np_msp_bool_array = df_mms['np'] < n_thresh_msp
+    np_msh_bool_array = df_mms['np'] > n_thresh_msh
+
+    # ind_np_msp_vals = np.flatnonzero(np.convolve(np_msp_bool_array > 0,
+    #                                              np.ones(
+    #                                                  n_points_msp, dtype=int),
+    #                                              'valid') >= n_points_msp)
+
+    result_msp = list(mit.run_length.encode(np_msp_bool_array))
+    # Find the length of longest subsequence of True, and the location if that index in result
+    max_true_count_msp = -1
+    max_true_idx_msp = -1
+    for idx, (val, count) in enumerate(result_msp):
+        if val and max_true_count_msp < count:
+            max_true_count_msp = count
+            max_true_idx_msp = idx
+    # Find total elements before and after the longest subsequence tuple
+    elems_before_idx_msp = sum((idx[1] for idx in result_msp[:max_true_idx_msp]))
+    # elems_after_idx_msp = sum((idx[1] for idx in result_msp[max_true_idx_msp + 1:]))
+
+    # Check if the longest subsequence is greater than the threshold
+    if max_true_count_msp >= n_points_msp:
+        ind_min_msp = int(elems_before_idx_msp + (max_true_count_msp - n_points_msp) / 2)
+        ind_max_msp = int(elems_before_idx_msp + (max_true_count_msp + n_points_msp) / 2)
+        ind_range_msp = np.arange(ind_min_msp, ind_max_msp)
+
+    # ind_np_msh_vals = np.flatnonzero(np.convolve(np_msh_bool_array > 0,
+    #                                  np.ones(n_points_msh, dtype=int),
+    #                                  'valid') >= n_points_msh)
+
+    result_msh = list(mit.run_length.encode(np_msh_bool_array))
+    # Find the length of longest subsequence of True, and the location if that index in result
+    max_true_count_msh = -1
+    max_true_idx_msh = -1
+    for idx, (val, count) in enumerate(result_msh):
+        if val and max_true_count_msh < count:
+            max_true_count_msh = count
+            max_true_idx_msh = idx
+    # Find total elements before and after the longest subsequence tuple
+    elems_before_idx_msh = sum((idx[1]
+                               for idx in result_msh[:max_true_idx_msh]))
+    # elems_after_idx_msh = sum((idx[1] for idx in result_msh[max_true_idx_msh + 1:]))
+
+    # Check if the longest subsequence is greater than the threshold
+    if max_true_count_msh >= n_points_msh:
+        ind_min_msh = int(elems_before_idx_msh + (max_true_count_msh - n_points_msh) / 2)
+        ind_max_msh = int(elems_before_idx_msh + (max_true_count_msh + n_points_msh) / 2)
+        ind_range_msh = np.arange(ind_min_msh, ind_max_msh)
+
+    if verbose:
+        try:
+            print(f"ind_min_msp: {ind_min_msp}")
+            print(f"ind_max_msp: {ind_max_msp}")
+            print(f"ind_min_msh: {ind_min_msh}")
+            print(f"ind_max_msh: {ind_max_msh}")
+        except Exception:
+            pass
+
+    return ind_range_msp, ind_range_msh

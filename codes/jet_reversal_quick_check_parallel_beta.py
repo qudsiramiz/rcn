@@ -41,7 +41,7 @@ def check_jet_reversal(crossing_time):
               'jet_len': 3,
               'level': 'l2',
               'coord_type': 'lmn',
-              'data_type': 'dis-moms',
+              'data_type': ['dis-moms', 'des-moms'],
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
@@ -51,7 +51,7 @@ def check_jet_reversal(crossing_time):
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
-    df_fpi, df_fgm, df_mms = jrcfb.jet_reversal_check(**inputs)
+    _ = jrcfb.jet_reversal_check(**inputs)
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     #try:
     #    try:
@@ -79,6 +79,10 @@ def check_jet_reversal(crossing_time):
     #    pass
 
 
+crossing_time = df_jet_reversal_times.index[0]
+check_jet_reversal(crossing_time)
+
+'''
 @contextmanager
 def suppress_stdout_stderr():
     """A context manager that redirects stdout and stderr to devnull"""
@@ -133,3 +137,4 @@ for foo in range(1):
     #     # Exit the completed processes
     #     for p in processes:
     #         p.join()
+'''

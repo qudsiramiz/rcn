@@ -1,0 +1,133 @@
+====================================================================================================
+Tplot Options
+
+pytplot.tplot_options(option, value)[source]
+
+    This function allows the user to set GLOBAL options for the generated plots.
+    Parameters:	
+
+        option – str The name of the option. See section below
+        value – str/int/float/list The value of the option. See section below.
+
+    Options:
+        Options 	Value type 	Notes
+        title 	str 	Title of the the entire output
+        title_size 	int 	Font size of the output
+        wsize 	[int, int] 	[height, width], pixel size of the plot window
+        title_align 	int 	Offset position in pixels of the title
+        var_label 	srt 	Name of the tplot variable to be used as another x axis
+        alt_range 	[flt, flt] 	The min and max altitude to be plotted on all alt plots
+        map_x_range 	[int, int] 	The min and max longitude to be plotted on all map plots
+        map_y_range 	[int, int] 	The min and max latitude to be plotted on all map plots
+        x_range 	[flt, flt] 	The min and max x_range (usually time) to be plotted on all Spec/1D 
+        plots
+        data_gap 	int 	Number of seconds with consecutive nan values allowed before no interp 
+        should occur
+        roi 	[str, str] 	Times between which there’s a region of interest for a user
+        crosshair 	bool 	Option allowing crosshairs and crosshair legend
+        vertical_spacing 	int 	The space in pixels between two plots
+        show_all_axes 	bool 	Whether or not to just use one axis at the bottom of the plot
+        black_background 	bool 	Whether or not to make plot backgrounds black w/ white text
+        axis_font_size 	int 	The font size of the axis ticks. Default is 10.
+
+    Returns:	None
+
+====================================================================================================
+ pytplot.timebar(t, varname=None, databar=False, delete=False, color='black', thick=1, dash=False)
+
+    This function will add a vertical bar to all time series plots. This is useful if you want to 
+    bring attention to a specific time.
+    Parameters:	
+
+        t – flt/list The time in seconds since Jan 01 1970 to place the vertical bar. If a list of 
+        numbers are supplied, multiple bars will be created. If “databar” is set, then “t” becomes 
+        the point on the y axis to place a horizontal bar.
+        varname – str/list, optional The variable(s) to add the vertical bar to. If not set, the 
+        default is to add it to all current plots.
+        databar – bool, optional This will turn the timebar into a horizontal data bar. If this is 
+        set True, then variable “t” becomes the point on the y axis to place a horizontal bar.
+        delete – bool, optional If set to True, at lease one varname must be supplied. The timebar 
+        at point “t” for variable “varname” will be removed.
+        color – str The color of the bar
+        thick – int The thickness of the bar
+        dash – bool If set to True, the bar is dashed rather than solid
+
+    Returns:	
+
+    None
+
+====================================================================================================
+ pytplot.timespan(t1, dt, keyword='days')[source]
+
+    This function will set the time range for all time series plots. This is a wrapper for the 
+    function “xlim” to better handle time axes.
+    Parameters:	
+
+        t1 – flt/str The time to start all time series plots. Can be given in seconds since epoch, 
+        or as a string in the format “YYYY-MM-DD HH:MM:SS”
+        dt – flt The time duration of the plots. Default is number of days.
+        keyword – str Sets the units of the “dt” variable. Days, hours, minutes, and seconds are all 
+        accepted.
+
+    Returns:	
+
+    None
+
+====================================================================================================
+ pytplot.tplot_rename(old_name, new_name)[source]
+
+    This function will rename tplot variables that are already stored in memory.
+    Parameters:	
+
+        old_name – str Old name of the Tplot Variable
+        new_name – str New name of the Tplot Variable
+
+    Returns:	
+
+    None
+
+====================================================================================================
+ pytplot.xlim(min, max)[source]
+
+    This function will set the x axis range for all time series plots
+    Parameters:	
+
+        min – flt The time to start all time series plots. Can be given in seconds since epoch, or 
+        as a string in the format “YYYY-MM-DD HH:MM:SS”
+        max – flt The time to end all time series plots. Can be given in seconds since epoch, or as 
+        a string in the format “YYYY-MM-DD HH:MM:SS”
+
+    Returns:	
+
+    None
+
+====================================================================================================
+pytplot.ylim(name, min, max)[source]
+
+    This function will set the y axis range displayed for a specific tplot variable.
+    Parameters:	
+
+        name – str The name of the tplot variable that you wish to set y limits for.
+        min – flt The start of the y axis.
+        max – flt The end of the y axis.
+
+    Returns:	
+
+    None
+
+====================================================================================================
+ pytplot.zlim(name, min, max)[source]
+
+    This function will set the z axis range displayed for a specific tplot variable. This is only 
+    used for spec plots, where the z axis represents the magnitude of the values in each bin.
+    Parameters:	
+
+        name – str The name of the tplot variable that you wish to set z limits for.
+        min – flt The start of the z axis.
+        max – flt The end of the z axis.
+
+    Returns:	
+
+    None
+
+====================================================================================================
