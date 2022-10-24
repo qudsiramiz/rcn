@@ -230,6 +230,12 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         print(f"FGM Dataframe: \n{df_mms_fgm.head()} \n")
     # Merge the two dataframes
     df_mms = pd.merge_asof(df_mms_fpi, df_mms_fgm, left_index=True, right_index=True)
+
+    # Compute the median time difference between the points
+    # NOTE: The reason for factor 10**9 is to convert the time difference to seconds from
+    # nanoseconds which is the format in which df_mms.index.astype(np.int64) outputs time
+    time_cadence_median = np.median(np.diff(df_mms.index.astype(np.int64) / 10**9))
+
     # Make the time index timezone aware
     try:
         df_mms.index = df_mms.index.tz_localize(pytz.utc)
@@ -239,11 +245,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Check if magnetosheath and magnetopshere are present and if they are then get the indices
     # corresponding to the magnetosheath and magnetosphere
-    ind_range_msp, ind_range_msh = check_msp_msh_location(df_mms, verbose=verbose)
+    ind_range_msp, ind_range_msh = check_msp_msh_location(df_mms=df_mms,
+                                                          time_cadence_median=time_cadence_median,
+                                                          verbose=verbose)
 
     (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
      ind_jet_center_minus_1_min, ind_jet_center_plus_1_min) = check_jet_location(
-        df_mms=df_mms_fpi, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh, verbose=verbose
+        df_mms=df_mms_fpi, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh,
+        time_cadence_median=time_cadence_median, verbose=verbose
     )
 
     if jet_detection:
@@ -523,7 +532,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
 
 def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type="gsm",
-                         ind_msh=None, n_points_walen=10, jet_detection=False,):
+                         ind_msh=None, n_points_walen=10, time_cadence_median=0.15,
+                         jet_detection=False,):
     """
     Check if the Walen relation is satisfied for a given index values in the dataframe.
 
@@ -569,6 +579,8 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
     k_B = 1.38064852e-23  # Boltzmann constant in J/K
     m_p = 1.6726219e-27  # Mass of proton in kg
     ev_to_K = 11604.505  # Conversion factor from eV to K
+
+    n_points_walen = int(n_points_walen / time_cadence_median)
 
     # Define ind_walen_check as indices corresponding to 30 seconds before and after t_jet_center
     t_jet_center_minus_30_sec = t_jet_center - datetime.timedelta(seconds=dt_walen)
@@ -664,16 +676,21 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
     # Check if Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w <
     # 180) in green color
 
-    bool_array = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
-                                np.logical_and(np.logical_and(0 < theta_w_deg, theta_w_deg < 30),
-                                np.logical_and(150 < theta_w_deg, theta_w_deg < 180)))
+    bool_array_gt = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
+                                   np.logical_and(0 <= theta_w_deg, theta_w_deg <= 30))
+
+    bool_array_lt = np.logical_and(np.logical_and(0.4 < R_w, R_w < 3),
+                                   np.logical_and(150 <= theta_w_deg, theta_w_deg <= 180))
 
     # Check the number of True in the bool_array
-    num_true = np.sum(bool_array)
+    num_true_gt = np.sum(bool_array_gt)
+    num_true_lt = np.sum(bool_array_lt)
 
     # If more than 50% of the data points satisfy the Walen relation, then the Walen relation
     # version 1 is assumed to be satisfied
-    if num_true >= len(ind_walen_check)/2:
+    if ((num_true_gt + num_true_lt) >= len(ind_walen_check)/2 and 
+        num_true_gt > 0 and 
+        num_true_lt > 0):
         walen_relation_satisfied_v1 = True
     else:
         walen_relation_satisfied_v1 = False
@@ -681,13 +698,19 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
     # Check if the Walen relation is satisfied (0.4 < R_w < 3 and 0 < theta_w < 30 or 150 < theta_w
     # < 180) continuously at least once for same length of time as the jet length
 
-    ind_walen_vals = np.flatnonzero(np.convolve(bool_array > 0,
-                                    np.ones(n_points_walen, dtype=int),
-                                    'valid') >= n_points_walen)
+    ind_walen_vals_gt = np.flatnonzero(np.convolve(bool_array_gt > 0,
+                                       np.ones(n_points_walen, dtype=int),
+                                      'valid') >= n_points_walen)
+    ind_walen_vals_lt = np.flatnonzero(np.convolve(bool_array_lt > 0,
+                                       np.ones(n_points_walen, dtype=int),
+                                      'valid') >= n_points_walen)
+
+    # Set ind_walen_vals to union of ind_walen_vals_gt and ind_walen_vals_lt
+    ind_walen_vals = np.union1d(ind_walen_vals_gt, ind_walen_vals_lt)
 
     # If Walen relation is satisfied continuously for same length of time as the jet length, then
     # Walen relation version 2 is assumed to be satisfied
-    if len(ind_walen_vals) > 0:
+    if len(ind_walen_vals_gt) > 0 and len(ind_walen_vals_lt) > 0:
         walen_relation_satisfied_v2 = True
     else:
         walen_relation_satisfied_v2 = False
@@ -718,12 +741,8 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
             theta_all_deg, R_all, ind_walen_vals, ind_walen_check
 
 
-def check_jet_location(df_mms=None, jet_len=3, v_thresh=70, ind_msh=None, verbose=True):
-
-    # Compute the median time difference between the points
-    # NOTE: The reason for factor 10**9 is to convert the time difference to seconds from
-    # nanoseconds which is the format in which df_mms.index.astype(np.int64) outputs time
-    time_cadence_median = np.median(np.diff(df_mms.index.astype(np.int64) / 10**9))
+def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thresh=70,
+                       ind_msh=None, verbose=True):
 
     # Compute the number of points corresponding to jet_len
     n_points_jet = int(jet_len / time_cadence_median)
@@ -854,7 +873,7 @@ def check_jet_location(df_mms=None, jet_len=3, v_thresh=70, ind_msh=None, verbos
             ind_jet_center_minus_1_min, ind_jet_center_plus_1_min)
 
 
-def check_msp_msh_location(df_mms, verbose=True):
+def check_msp_msh_location(df_mms=None, time_cadence_median=0.15, verbose=True):
 
     # TODO: Check if threshold value of 5 and 10 ares fine or if we need to decrease/increase it
     n_thresh_msp = 5
