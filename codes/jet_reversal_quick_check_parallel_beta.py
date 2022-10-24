@@ -51,7 +51,7 @@ def check_jet_reversal(crossing_time):
               "verbose": True
               }
     inputs["data_rate"] = 'brst'
-    _ = jrcfb.jet_reversal_check(**inputs)
+    ptt, df_mms, ind_range_msp, ind_range_msh = jrcfb.jet_reversal_check(**inputs)
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     #try:
     #    try:
@@ -77,10 +77,14 @@ def check_jet_reversal(crossing_time):
     #                f.write(f"{crossing_time},{e}\n")
     #            f.close()
     #    pass
+    return ptt, df_mms, ind_range_msp, ind_range_msh
 
-
-crossing_time = df_jet_reversal_times.index[0]
-check_jet_reversal(crossing_time)
+for xx in range(1):
+    try:
+        crossing_time = df_jet_reversal_times.index[xx]
+        dat, df_mms, ind_range_msp, ind_range_msh = check_jet_reversal(crossing_time)
+    except Exception as e:
+        print(f"{e} for date {crossing_time}")
 
 '''
 @contextmanager

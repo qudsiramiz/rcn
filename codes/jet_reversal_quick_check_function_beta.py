@@ -211,9 +211,9 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
 
     # Create a dataframe with the FGM data
     if coord_type == 'lmn':
-        df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_lmn_n': mms_fgm_b_lmn[:, 2],
+        df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_lmn_l': mms_fgm_b_lmn[:, 0],
                                                             'b_lmn_m': mms_fgm_b_lmn[:, 1],
-                                                            'b_lmn_l': mms_fgm_b_lmn[:, 0]})
+                                                            'b_lmn_n': mms_fgm_b_lmn[:, 2]})
     else:
         df_mms_fgm = pd.DataFrame(index=mms_fgm_time, data={'b_gsm_x': mms_fgm_b_gsm[:, 0],
                                                             'b_gsm_y': mms_fgm_b_gsm[:, 1],
@@ -262,7 +262,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                             'y': delta_v_min})
         ptt.store_data('delta_v_max', data={'x': t_delta_v_max_unix,
                                             'y': delta_v_max})
-        ptt.store_data('delta_v_min_max', data=['delta_v_min', 'delta_v_max'])
+        ptt.store_data('delta_v', data=['delta_v_min', 'delta_v_max'])
 
         # If jet was detected, then check if walen relation is satisfied
         (walen_relation_satisfied_v1, walen_relation_satisfied_v2, theta_w_deg, R_w, theta_all_deg,
@@ -497,71 +497,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
     ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
-
-    # Set the fontstyle to Times New Roman
-    font = {'family': 'serif', 'weight': 'normal', 'size': 16 }
-    plt.rc('font', **font)
-    plt.rc('text', usetex=True)
-    # Set tick parameters such that ticks are visible on all sides
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['ytick.direction'] = 'in'
-    plt.rcParams['xtick.top'] = True
-    plt.rcParams['ytick.right'] = True
-
-    # Set the tick length and widths
-    plt.rcParams['xtick.major.size'] = 5
-    plt.rcParams['xtick.major.width'] = 1
-    plt.rcParams['ytick.major.size'] = 5
-    plt.rcParams['ytick.major.width'] = 1
-    plt.rcParams['xtick.minor.size'] = 3
-    plt.rcParams['xtick.minor.width'] = 1
-    plt.rcParams['ytick.minor.size'] = 3
-    plt.rcParams['ytick.minor.width'] = 1
-
-    # plt.style.use('dark_background')
-
-    # if jet_detection:
-
-    tplot_globat_options = {"show_all_axes": True,
-                            "black_background": True,
-                            "crosshair": True,
-                            "vertical_spacing": 0,
-                            }
-    for key in tplot_globat_options:
-        ptt.tplot_options(key, tplot_globat_options[key])
-
-
-    # ptt.timebar(ptt.get_data(mms_fpi_varnames[0])[0].min() + 200, color='red', dash=True, thick=2)
-    # ptt.timespan(ptt.get_data(mms_fpi_varnames[0])[0].min() + 160, 100, keyword="seconds")
-    energy_spectr_dict_option = {'Colormap': "Spectral_r",
-                                 'ylog': True,
-                                 'zlog': True}
-    temp_dict_option = {'ylog': True,
-                        'color': ['red', 'blue'],
-                        'linestyle': '-',
-                        'legend_names': ['para', 'perp']
-                        }
-    delta_v_min_max_dict_option = {'color': ['k', 'k'],
-                                   'linestyle': '-',
-                                   'legend_names': ['delta_v_min', 'delta_v_max'],
-                                    'yrange': [-200, 200]
-                                   }
-    keys_to_plot = [f'mms{probe}_dis_numberdensity_{data_rate}',
-                    'Tp',
-                    f'mms{probe}_dis_energyspectr_omni_{data_rate}',
-                    f'mms{probe}_des_energyspectr_omni_{data_rate}',
-                    f'mms{probe}_dis_bulkv_lmn_{data_rate}',
-                    'delta_v_min_max',
-                    'theta_w_deg',
-                    'R_w',
-                    ]
-    #ptt.options(f'mms{probe}_dis_numberdensity_{data_rate}', 'ylog', True)
-    ptt.options(f'mms{probe}_dis_energyspectr_omni_{data_rate}', opt_dict=energy_spectr_dict_option)
-    ptt.options(f'mms{probe}_des_energyspectr_omni_{data_rate}', opt_dict=energy_spectr_dict_option)
-    ptt.options('Tp', opt_dict=temp_dict_option)
-    ptt.options('delta_v_min_max', opt_dict=delta_v_min_max_dict_option)
-
-    ptt.tplot(keys_to_plot, save_png="test_plot", display=False)
+    tplot_fnc(ptt=ptt, probe=probe, data_rate=data_rate, df_mms=df_mms,
+              ind_range_msp=ind_range_msp, ind_range_msh=ind_range_msh)
 
     """
     plt.close("all")
@@ -797,7 +734,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                   combine_axes=True, save_png='b_n_v_fig', display=False)
         plt.close("all")
     """
-    return df_mms_fpi, df_mms_fgm, df_mms
+    #return df_mms_fpi, df_mms_fgm, df_mms
+    return ptt, df_mms, ind_range_msp, ind_range_msh
 
 
 
@@ -1205,3 +1143,94 @@ def check_msp_msh_location(df_mms, verbose=True):
             pass
 
     return ind_range_msp, ind_range_msh
+
+
+def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=None,
+              ind_range_msh=None):
+    # Set the fontstyle to Times New Roman
+    font = {'family': 'serif', 'weight': 'normal', 'size': 12}
+    plt.rc('font', **font)
+    plt.rc('text', usetex=False)
+    # Set tick parameters such that ticks are visible on all sides
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+    plt.rcParams['xtick.top'] = True
+    plt.rcParams['ytick.right'] = True
+
+    # Set the tick length and widths
+    plt.rcParams['xtick.major.size'] = 5
+    plt.rcParams['xtick.major.width'] = 1
+    plt.rcParams['ytick.major.size'] = 5
+    plt.rcParams['ytick.major.width'] = 1
+    plt.rcParams['xtick.minor.size'] = 3
+    plt.rcParams['xtick.minor.width'] = 1
+    plt.rcParams['ytick.minor.size'] = 3
+    plt.rcParams['ytick.minor.width'] = 1
+
+    # Define the size of the figure
+    plt.rcParams['figure.figsize'] = [20, 6]
+
+    # plt.style.use('dark_background')
+
+    # if jet_detection:
+
+    tplot_global_options = {"show_all_axes": True,
+                            "black_background": True,
+                            "crosshair": True,
+                            "vertical_spacing": 0,
+                            "wsize": [2500, 1080],
+                            # "title": f"Probe {probe} {data_rate}",
+                            }
+    for key in tplot_global_options:
+        ptt.tplot_options(key, tplot_global_options[key])
+
+    keys_to_plot = [f'mms{probe}_dis_energyspectr_omni_{data_rate}',
+                    f'mms{probe}_dis_numberdensity_{data_rate}',
+                    f'mms{probe}_des_energyspectr_omni_{data_rate}',
+                    'Tp',
+                    f'mms3_fgm_b_lmn_srvy_l2',
+                    f'mms{probe}_dis_bulkv_lmn_{data_rate}',
+                    'delta_v',
+                    'R_w',
+                    'theta_w_deg',
+                    ]
+
+    # ptt.timebar(ptt.get_data(mms_fpi_varnames[0])[0].min() + 200, color='red', dash=True, thick=2)
+    # ptt.timespan(ptt.get_data(mms_fpi_varnames[0])[0].min() + 160, 100, keyword="seconds")
+    energy_spectr_dict_option = {'Colormap': "Spectral_r",
+                                 'ylog': True,
+                                 'zlog': True}
+    tp_dict_option = {'ylog': True,
+                        'color': ['red', 'blue'],
+                        'linestyle': '-',
+                        'legend_names': ['$\parallel$', '$\perp$']
+                        }
+    delta_v_dict_option = {'color': 'k',
+                                   'linestyle': '-',
+                                    'yrange': [-250, 250],
+                                    'varlabel': '$\Delta v$',
+                                   }
+
+    theta_w_deg_dict_option = {'color': 'k',
+                               'linestyle': '-',
+                               'yrange': [0, 180],
+                               }
+
+    msp_time = df_mms.index[ind_range_msp[int(len(ind_range_msp)/2)]]
+    msh_time = df_mms.index[ind_range_msh[int(len(ind_range_msh)/2)]]
+    # Convert msp_time to UNIX time
+    msp_time_unix = msp_time.timestamp()
+    msh_time_unix = msh_time.timestamp()
+    ptt.timebar(msp_time_unix, databar=False, color='red', dash=True, thick=2)
+    ptt.timebar(msh_time_unix, databar=False, color='blue', dash=True, thick=2)
+    ptt.timebar([70, -70], databar=True, varname='delta_v', color='k', dash=True, thick=2)
+
+    ptt.options(f'mms{probe}_dis_energyspectr_omni_{data_rate}', 
+                opt_dict=energy_spectr_dict_option)
+    ptt.options(f'mms{probe}_des_energyspectr_omni_{data_rate}', 
+                opt_dict=energy_spectr_dict_option)
+    ptt.options('Tp', opt_dict=tp_dict_option)
+    ptt.options('delta_v', opt_dict=delta_v_dict_option)
+    ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
+
+    ptt.tplot(keys_to_plot, save_png="test_plot", display=False)
