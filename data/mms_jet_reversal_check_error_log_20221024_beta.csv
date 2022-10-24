@@ -1,0 +1,15 @@
+DateStart,Error
+2015-09-02 13:39:04.097000+00:00,local variable 't_jet_center' referenced before assignment
+2015-09-02 15:25:04.180000+00:00,local variable 't_jet_center' referenced before assignment
+2015-09-01 12:30:44.092000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-02 16:07:04.213000+00:00,local variable 't_jet_center' referenced before assignment
+2015-09-01 12:20:54.135000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-01 12:11:14.077000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-01 21:24:44.190000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-02 16:11:44.116000+00:00,local variable 't_jet_center' referenced before assignment
+2015-09-01 21:51:34.162000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-01 21:09:14.178000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-02 15:36:14.088000+00:00,local variable 't_jet_center' referenced before assignment
+2015-09-01 21:16:54.084000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-01 21:59:24.118000+00:00,local variable 'ind_range_msh' referenced before assignment
+2015-09-02 15:29:44.083000+00:00,local variable 't_jet_center' referenced before assignment
