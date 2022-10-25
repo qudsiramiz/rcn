@@ -1108,23 +1108,23 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
 
     if (walen_v1 or walen_v2) & jet_detection:
-            folder_name = "../figures/jet_reversal_checks/check_20221024/jet_walen"
+            folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/jet_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
     elif (walen_v1 or walen_v2) & (not jet_detection):
-        folder_name = "../figures/jet_reversal_checks/check_20221024/walen"
+        folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/walen"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
     elif (not walen_v1) & (
             not walen_v2) & jet_detection:
-        folder_name = "../figures/jet_reversal_checks/check_20221024/jet"
+        folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/jet"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
     else:
-        folder_name = "../figures/jet_reversal_checks/check_20221024/no_jet_no_walen"
+        folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/no_jet_no_walen"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)

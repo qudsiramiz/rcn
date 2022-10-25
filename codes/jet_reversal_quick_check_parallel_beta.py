@@ -56,10 +56,10 @@ def check_jet_reversal(crossing_time):
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     try:
         try:
-            inputs["data_rate"] = 'brst'
+            inputs["data_rate"] = 'fast'
             _ = jrcfb.jet_reversal_check(**inputs)
         except Exception:
-            inputs["data_rate"] = 'fast'
+            inputs["data_rate"] = 'brst'
             _ = jrcfb.jet_reversal_check(**inputs)
     except Exception as e:
         # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
@@ -111,7 +111,7 @@ with suppress_stdout_stderr():
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = -1
+        indx_max = 200
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run
