@@ -25,7 +25,7 @@ df_crossings.set_index("DateStart", inplace=True)
 
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
-
+date_obs = "20221026"
 def check_jet_reversal(crossing_time):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
@@ -44,10 +44,11 @@ def check_jet_reversal(crossing_time):
               'data_type': ['dis-moms', 'des-moms'],
               'time_clip': True,
               'latest_version': True,
+              'date_obs': date_obs,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20221025_beta_fast.csv',
+              'fname': f'../data/mms_jet_reversal_times_list_{date_obs}_beta_fast.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221025_beta_fast.csv",
+              'error_file_log_name': f"../data/mms_jet_reversal_check_error_log_{date_obs}_beta_fast.csv",
               "verbose": True
               }
     # inputs["data_rate"] = 'brst'
@@ -56,7 +57,7 @@ def check_jet_reversal(crossing_time):
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     try:
         # try:
-        inputs["data_rate"] = 'fast'
+        inputs["data_rate"] = 'brst'
         _ = jrcfb.jet_reversal_check(**inputs)
         # except Exception:
         #     inputs["data_rate"] = 'brst'
@@ -100,18 +101,18 @@ def suppress_stdout_stderr():
 
 use_parallel = True
 
-with suppress_stdout_stderr():
-# for foo in range(1):
+# with suppress_stdout_stderr():
+for foo in range(1):
     if use_parallel:
         # Set the number of processes to use
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 200
+        indx_min = 44
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = 2000
+        indx_max = indx_min + 1
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run

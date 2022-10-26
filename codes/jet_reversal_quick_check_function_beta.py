@@ -20,7 +20,7 @@ import pytz
 
 def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', level='l2',
                        coord_type='lmn', data_type='dis-moms', time_clip=True, latest_version=True,
-                       jet_len=5, figname='mms_jet_reversal_check',
+                       jet_len=5, figname='mms_jet_reversal_check', date_obs=None,
                        fname='../data/mms_jet_reversal_times.csv',
                        error_file_log_name="../data/mms_jet_reversal_check_error_log.csv",
                        verbose=True
@@ -250,14 +250,14 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                                           verbose=verbose)
 
     (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
-     ind_jet_center_minus_1_min, ind_jet_center_plus_1_min) = check_jet_location(
-        df_mms=df_mms_fpi, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh,
+     ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l) = check_jet_location(
+        df_mms=df_mms, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh,
         time_cadence_median=time_cadence_median, verbose=verbose
     )
 
     if jet_detection:
-        t_delta_v_min = df_mms_fpi.index[ind_jet_center_minus_1_min:ind_jet_center]
-        t_delta_v_max = df_mms_fpi.index[ind_jet_center:ind_jet_center_plus_1_min]
+        t_delta_v_min = df_mms.index[ind_jet_center_minus_1_min:ind_jet_center]
+        t_delta_v_max = df_mms.index[ind_jet_center:ind_jet_center_plus_1_min]
 
         # Convert t_delta_v_min and t_delta_v_max to from datetime object to UNIX time
         t_delta_v_min_unix = [t_delta_v_min[i].timestamp() for i in range(len(t_delta_v_min))]
@@ -525,7 +525,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         tplot_fnc(ptt=ptt, probe=probe, data_rate=data_rate, df_mms=df_mms,
                   ind_range_msp=ind_range_msp, ind_range_msh=ind_range_msh,
                   t_jet_center=t_jet_center, walen_v1=walen_relation_satisfied_v1,
-                  walen_v2=walen_relation_satisfied_v2, jet_detection=jet_detection, ind_crossing=ind_crossing, shear_val=int(angle_b_lmn_vec_msp_msh_median))
+                  walen_v2=walen_relation_satisfied_v2, jet_detection=jet_detection, ind_crossing=ind_crossing, shear_val=int(angle_b_lmn_vec_msp_msh_median),
+                  date_obs=date_obs)
 
     return None
 
@@ -749,8 +750,7 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
 
     # Define the distance within which maximum and minimum values of jet velocity must lie
     # to be considered as a jet (within 30 seconds)
-    delta_jet_min_max_ind = int(30 / time_cadence_median)
-
+    delta_jet_min_max_ind = int(60 / time_cadence_median)
     # Get the median value of the velocity corresponding to the magnetosheath in the lmn coordinate
     # system
     vp_lmn_vec_msh_median = np.array([np.nanmedian(df_mms['vp_lmn_l'][ind_msh]),
@@ -766,111 +766,163 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
     # Add the difference in the velocity in the lmn coordinate system to the dataframe
     df_mms['vp_lmn_diff_l'] = vp_lmn_diff_l
 
-    # If the maximum and minimum values of vp_lmn_diff_l is greater and smaller than v_thresh
-    # respectively then continue to try and find the jet location
-    if np.nanmax(vp_lmn_diff_l) > v_thresh and np.nanmin(vp_lmn_diff_l) < -v_thresh:
-        # Find the index where vp_lmn_diff_l has the maximum value
-        ind_jet_max = np.argmax(vp_lmn_diff_l)
-        t_jet_max = df_mms.index[ind_jet_max]
+    print('vp_lmn_diff_l added to the dataframe')
 
-        # Within 30 seconds  of ind_jet_max find the index where vp_lmn_diff_l has the minimum value
-        ind_jet_min = np.argmin(vp_lmn_diff_l[ind_jet_max - delta_jet_min_max_ind:ind_jet_max
+    # Find the index where vp_lmn_diff_l has the maximum value
+    ind_jet_max = np.argmax(vp_lmn_diff_l)
+    t_jet_max = df_mms.index[ind_jet_max]
+
+    # Within 30 seconds of ind_jet_max find the index where vp_lmn_diff_l has the minimum value
+    ind_jet_min = ind_jet_max - delta_jet_min_max_ind + np.argmin(vp_lmn_diff_l[ind_jet_max -
+                                              delta_jet_min_max_ind:ind_jet_max
                                             + delta_jet_min_max_ind])
-        t_jet_min = df_mms.index[ind_jet_min]
+    t_jet_min = df_mms.index[ind_jet_min]
 
+        # If the minimum value of vp_lmn_diff_l is greater than -v_thresh then exit the function
+        #if vp_lmn_diff_l[ind_jet_min] > -v_thresh:
+        #    if verbose:
+        #        print(f'\033[91m \n Jet not detected \033[0m \n'
+        #        f'\033[91m and value of vp_lmn_diff_l is {vp_lmn_diff_l[ind_jet_min]:.3f} \033[0m')
+        #    return (False, None, None, None, None, None, None, None, None, None, None, None, None,
+        #            vp_lmn_diff_l)
+    if t_jet_max < t_jet_min:
         # Find the time centered between t_jet_max and t_jet_min, which are datetime objects
-        if t_jet_max < t_jet_min:
-            t_jet_center = t_jet_max + (t_jet_min - t_jet_max) / 2
-            # Find the median value of vp_lmn_diff_l from 1 minute before t_jet_center to
-            # t_jet_center
-            t_jet_center_minus_1_min = t_jet_center - datetime.timedelta(minutes=1)
-            ind_jet_center_minus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_minus_1_min))
-            ind_jet_center = np.argmin(np.abs(df_mms.index - t_jet_center))
-            v_max_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center])
+        t_jet_center = t_jet_max + (t_jet_min - t_jet_max) / 2
+        ind_jet_center = np.argmin(np.abs(df_mms.index - t_jet_center))
 
-            # Find the median value of vp_lmn_diff_l between t_jet_center and 1 minute after
-            # t_jet_center
-            t_jet_center_plus_1_min = t_jet_center + datetime.timedelta(minutes=1)
-            ind_jet_center_plus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_plus_1_min))
-            v_min_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min])
+        # Find the time difference between t_jet_max and t_jet_center
+        delta_t_jet_max_center = t_jet_center - t_jet_max
+        # Find the number of points corresponding to delta_t_jet_max_center
+        delta_n_jet_max_center = int(delta_t_jet_max_center.total_seconds() / time_cadence_median)
 
-            # Subtract v_max_median from vp_lmn_diff_l from t_jet_cener_minus_1_min to
-            # t_jet_center
-            delta_v_max = vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center] - v_max_median
+        # Find the time difference between t_jet_min and t_jet_center
+        delta_t_jet_min_center = t_jet_min - t_jet_center
+        # Find the number of points corresponding to delta_t_jet_min_center
+        delta_n_jet_min_center = int(delta_t_jet_min_center.total_seconds() / time_cadence_median)
 
-            # Subtract v_min_median from vp_lmn_diff_l from t_jet_center to t_jet_center_plus_1_min
-            delta_v_min = vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min] - v_min_median
+        # Find the median value of vp_lmn_diff_l from 1 minute before t_jet_center until just before
+        # the jet starts
+        t_jet_center_minus_1_min = t_jet_center - datetime.timedelta(minutes=1)
+        ind_jet_center_minus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_minus_1_min))
+        v_max_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center_minus_1_min:
+                                                 (ind_jet_center - 2 * delta_n_jet_max_center)])
 
-            # Check if delta_v_max has a sustained value greater than v_thresh for n_points_jet
-            # points
-            ind_v_gt_vthresh = np.flatnonzero(np.convolve(delta_v_max >= v_thresh,
-                                                          np.ones(n_points_jet, dtype=int),
-                                                          'valid') >= n_points_jet)
-            # Check if delta_v_min has a sustained value less than -v_thresh for n_points_jet
-            # points
-            ind_v_lt_vthresh = np.flatnonzero(np.convolve(delta_v_min <= -v_thresh,
-                                                          np.ones(n_points_jet, dtype=int),
-                                                          'valid') >= n_points_jet)
-            # If both conditions are satisfied then a jet is found
-            if len(ind_v_gt_vthresh) > 0 and len(ind_v_lt_vthresh) > 0:
-                jet_detection = True
+        # Find the median value of vp_lmn_diff_l between t_jet_center and 1 minute after
+        # t_jet_center
+        t_jet_center_plus_1_min = t_jet_center + datetime.timedelta(minutes=1)
+        ind_jet_center_plus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_plus_1_min))
+        v_min_median = np.nanmedian(vp_lmn_diff_l[(ind_jet_center + 2 * delta_n_jet_min_center):
+                                                  ind_jet_center_plus_1_min])
+
+        # Subtract v_max_median from vp_lmn_diff_l from t_jet_cener_minus_1_min to
+        # t_jet_center
+        delta_v_max = vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center] - v_max_median
+
+        # Subtract v_min_median from vp_lmn_diff_l from t_jet_center to t_jet_center_plus_1_min
+        delta_v_min = vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min] - v_min_median
+
+        # Check if delta_v_max has a sustained value greater than v_thresh for n_points_jet
+        # points
+        ind_v_gt_vthresh = np.flatnonzero(np.convolve(delta_v_max >= v_thresh,
+                                                        np.ones(n_points_jet, dtype=int),
+                                                        'valid') >= n_points_jet)
+        # Check if delta_v_min has a sustained value less than -v_thresh for n_points_jet
+        # points
+        ind_v_lt_vthresh = np.flatnonzero(np.convolve(delta_v_min <= -v_thresh,
+                                                        np.ones(n_points_jet, dtype=int),
+                                                        'valid') >= n_points_jet)
+        # If both conditions are satisfied then a jet is found
+        if len(ind_v_gt_vthresh) > 0 and len(ind_v_lt_vthresh) > 0:
+            jet_detection = True
         else:
-            t_jet_center = t_jet_min + (t_jet_max - t_jet_min) / 2
-            # Find the median value of vp_lmn_diff_l from 1 minute before t_jet_center to
-            # t_jet_center
-            t_jet_center_minus_1_min = t_jet_center - datetime.timedelta(minutes=1)
-            ind_jet_center_minus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_minus_1_min))
-            ind_jet_center = np.argmin(np.abs(df_mms.index - t_jet_center))
-            v_min_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center])
-
-            # Find the median value of vp_lmn_diff_l between t_jet_center and 1 minute after
-            # t_jet_center
-            t_jet_center_plus_1_min = t_jet_center + datetime.timedelta(minutes=1)
-            ind_jet_center_plus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_plus_1_min))
-            v_max_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min])
-
-            # Subtract v_min_median from vp_lmn_diff_l from t_jet_cener_minus_1_min to
-            # t_jet_center
-            delta_v_min = vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center] - v_min_median
-
-            # Subtract v_max_median from vp_lmn_diff_l from t_jet_center to t_jet_center_plus_1_min
-            delta_v_max = vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min] - v_max_median
-
-            # Check if delta_v_min has a sustained value less than -v_thresh for n_points_jet
-            # points
-            ind_v_lt_vthresh = np.flatnonzero(np.convolve(delta_v_min <= -v_thresh,
-                                                          np.ones(n_points_jet, dtype=int),
-                                                          'valid') >= n_points_jet)
-            # Check if delta_v_max has a sustained value greater than v_thresh for n_points_jet
-            # points
-            ind_v_gt_vthresh = np.flatnonzero(np.convolve(delta_v_max >= v_thresh,
-                                                          np.ones(n_points_jet, dtype=int),
-                                                          'valid') >= n_points_jet)
-
-            # If both conditions are satisfied then a jet is found
-            if len(ind_v_lt_vthresh) > 0 and len(ind_v_gt_vthresh) > 0:
-                jet_detection = True
-            else:
-                jet_detection = False
-                ind_jet_center = []
-                delta_v_min = []
-                delta_v_max = []
-        if verbose:
-            if jet_detection:
-                print(f'\n\033[1;32m Jet found at {t_jet_center}\033[0m \n')
-            else:
-                print(f'\n\033[1;31m No jet found at {t_jet_center}\033[0m \n')
-
+            jet_detection = False
+            # ind_jet_center = []
+            # delta_v_min = []
+            # delta_v_max = []
     else:
-        jet_detection = False
-        ind_jet_center = []
-        delta_v_min = []
-        delta_v_max = []
+        t_jet_center = t_jet_min + (t_jet_max - t_jet_min) / 2
+        ind_jet_center = np.argmin(np.abs(df_mms.index - t_jet_center))
 
-        if verbose:
-            print(f'\n\033[1;31m No jet found\033[0m \n')
+        # Find the time difference between t_jet_max and t_jet_center
+        delta_t_jet_max_center = t_jet_max - t_jet_center
+        # Find the number of points corresponding to delta_t_jet_max_center
+        delta_n_jet_max_center = int(delta_t_jet_max_center.total_seconds() / time_cadence_median)
+
+        # Find the time difference between t_jet_min and t_jet_center
+        delta_t_jet_min_center = t_jet_center - t_jet_min
+        # Find the number of points corresponding to delta_t_jet_min_center
+        delta_n_jet_min_center = int(delta_t_jet_min_center.total_seconds() / time_cadence_median)
+
+        # Find the median value of vp_lmn_diff_l from 1 minute before t_jet_center to just before
+        # the jet starts
+        t_jet_center_minus_1_min = t_jet_center - datetime.timedelta(minutes=1)
+        ind_jet_center_minus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_minus_1_min))
+        v_min_median = np.nanmedian(vp_lmn_diff_l[ind_jet_center_minus_1_min:
+                                                 (ind_jet_center - 2 * delta_n_jet_min_center)])
+
+        # Find the median value of vp_lmn_diff_l between just following the jet and 1 minute after
+        # t_jet_center
+        t_jet_center_plus_1_min = t_jet_center + datetime.timedelta(minutes=1)
+        ind_jet_center_plus_1_min = np.argmin(np.abs(df_mms.index - t_jet_center_plus_1_min))
+        v_max_median = np.nanmedian(vp_lmn_diff_l[(ind_jet_center + 2 * delta_n_jet_max_center):
+                                                   ind_jet_center_plus_1_min])
+
+        # Subtract v_min_median from vp_lmn_diff_l from t_jet_cener_minus_1_min to
+        # t_jet_center
+        delta_v_min = vp_lmn_diff_l[ind_jet_center_minus_1_min:ind_jet_center] - v_min_median
+
+        # Subtract v_max_median from vp_lmn_diff_l from t_jet_center to t_jet_center_plus_1_min
+        delta_v_max = vp_lmn_diff_l[ind_jet_center:ind_jet_center_plus_1_min] - v_max_median
+
+        # Check if delta_v_min has a sustained value less than -v_thresh for n_points_jet
+        # points
+        ind_v_lt_vthresh = np.flatnonzero(np.convolve(delta_v_min <= -v_thresh,
+                                                        np.ones(n_points_jet, dtype=int),
+                                                        'valid') >= n_points_jet)
+        # Check if delta_v_max has a sustained value greater than v_thresh for n_points_jet
+        # points
+        ind_v_gt_vthresh = np.flatnonzero(np.convolve(delta_v_max >= v_thresh,
+                                                        np.ones(n_points_jet, dtype=int),
+                                                        'valid') >= n_points_jet)
+
+        # If both conditions are satisfied then a jet is found
+        if len(ind_v_lt_vthresh) > 0 and len(ind_v_gt_vthresh) > 0:
+            jet_detection = True
+        else:
+            jet_detection = False
+            # ind_jet_center = []
+            # delta_v_min = []
+            # delta_v_max = []
+    if verbose:
+        if jet_detection:
+            print(f'\n\033[1;32m Jet found at {t_jet_center}\033[0m \n')
+        else:
+            print(f'\n\033[1;31m No jet found at {t_jet_center}\033[0m \n')
+
+    print(f'Jet detection: {jet_detection}')
+    print(f't jet center: {t_jet_center}')
+    print(f't jet center minus 1 min: {t_jet_center_minus_1_min}')
+    print(f't jet center plus 1 min: {t_jet_center_plus_1_min}')
+    # Plot vp_lmn_diff_l, delta_v_max, delta_v_min, v_max_median, and v_min_median
+    plt.figure(figsize=(10, 5))
+    plt.plot(vp_lmn_diff_l, 'r-', alpha=0.3)
+    plt.plot(delta_v_max, 'b-', alpha=1)
+    plt.plot(delta_v_min, 'g-', alpha=1)
+    # Draw a vertical line at t_jet_center
+    plt.axvline(ind_jet_center, color='k', linestyle='--', alpha=0.5)
+    # Draw a vertical line at t_jet_center_minus_1_min
+    plt.axvline(t_jet_center_minus_1_min, color='k', linestyle='--', alpha=0.5)
+    # Draw a vertical line at t_jet_center_plus_1_min
+    #plt.axvline(t_jet_center_plus_1_min, color='k', linestyle='--', alpha=0.5)
+    # Draw a horizontal line at v_thresh
+    plt.axhline(v_thresh, color='k', linestyle='--', alpha=0.5)
+    # Draw a horizontal line at -v_thresh
+    plt.axhline(-v_thresh, color='k', linestyle='--', alpha=0.5)
+
+    plt.savefig('test.png')
+    plt.close()
     return (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
-            ind_jet_center_minus_1_min, ind_jet_center_plus_1_min)
+            ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l)
 
 
 def check_msp_msh_location(df_mms=None, time_cadence_median=0.15, verbose=True):
@@ -957,7 +1009,7 @@ def check_msp_msh_location(df_mms=None, time_cadence_median=0.15, verbose=True):
 
 def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=None,
               ind_range_msh=None, t_jet_center=None, walen_v1=False, walen_v2=False,
-              jet_detection=False, ind_crossing=None, shear_val=None):
+              jet_detection=False, ind_crossing=None, shear_val=None, date_obs=None,):
     # Set the fontstyle to Times New Roman
     font = {'family': 'serif', 'weight': 'normal', 'size': 12}
     plt.rc('font', **font)
@@ -1032,7 +1084,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     tp_dict_option = {'ylog': True,
                       'color': ['red', 'blue'],
                       'linestyle': '-',
-                      'legend_names': ['$\parallel$', '$\perp$'],
+                      'legend_names': ['$\\parallel$', '$\\perp$'],
                       'ytitle': '$T_{\\rm p}$',
                       'ysubtitle': '[eV]',
                       }
@@ -1066,8 +1118,8 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
 
     delta_v_dict_option = {'color': delta_v_line_color,
                            'linestyle': '-',
-                            'yrange': [-250, 250],
-                            'ytitle': '$\Delta v$',
+                            'yrange': [-100, 100],
+                            'ytitle': '$\\Delta v$',
                             'ysubtitle': 'km/s',
                            }
 
@@ -1078,7 +1130,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     theta_w_deg_dict_option = {'color': delta_v_line_color,
                                'linestyle': '-',
                                'yrange': [0, 180],
-                               'ytitle': '$\Theta_{\\rm w}$',
+                               'ytitle': '$\\theta_{\\rm w}$',
                                'ysubtitle': 'deg',
                                }
 
@@ -1108,23 +1160,23 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
 
     if (walen_v1 or walen_v2) & jet_detection:
-            folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/jet_walen"
+            folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/jet_walen"
             # If the folder doesn't exist, create it
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
     elif (walen_v1 or walen_v2) & (not jet_detection):
-        folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/walen"
+        folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/walen"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
     elif (not walen_v1) & (
             not walen_v2) & jet_detection:
-        folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/jet"
+        folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/jet"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
     else:
-        folder_name = f"../figures/jet_reversal_checks/check_20221025/{data_rate}/no_jet_no_walen"
+        folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/no_jet_no_walen"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)

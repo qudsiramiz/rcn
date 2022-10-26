@@ -1,0 +1,5 @@
+DateStart,Error
+2015-09-07 17:07:34.144000+00:00,too many values to unpack (expected 8)
+2015-09-02 16:48:44.145000+00:00,local variable 'jet_detection' referenced before assignment
+2015-09-02 17:50:44.194000+00:00,attempt to get argmin of an empty sequence
+2015-09-03 15:27:44.206000+00:00,shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (0,) and arg 1 with shape (2,).
