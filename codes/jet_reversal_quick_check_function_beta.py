@@ -899,27 +899,29 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
         else:
             print(f'\n\033[1;31m No jet found at {t_jet_center}\033[0m \n')
 
-    print(f'Jet detection: {jet_detection}')
-    print(f't jet center: {t_jet_center}')
-    print(f't jet center minus 1 min: {t_jet_center_minus_1_min}')
-    print(f't jet center plus 1 min: {t_jet_center_plus_1_min}')
+
     # Plot vp_lmn_diff_l, delta_v_max, delta_v_min, v_max_median, and v_min_median
     plt.figure(figsize=(10, 5))
     plt.plot(vp_lmn_diff_l, 'r-', alpha=0.3)
-    plt.plot(delta_v_max, 'b-', alpha=1)
-    plt.plot(delta_v_min, 'g-', alpha=1)
+    plt.plot(delta_v_max, 'b-', alpha=1, label='$\\Delta v{\\rm max}$')
+    plt.plot(delta_v_min, 'g-', alpha=1, label='$\\Delta v{\\rm min}$')
     # Draw a vertical line at t_jet_center
-    plt.axvline(ind_jet_center, color='k', linestyle='--', alpha=0.5)
+    plt.axvline(t_jet_center, color='k', linestyle='--', alpha=0.5)
     # Draw a vertical line at t_jet_center_minus_1_min
-    plt.axvline(t_jet_center_minus_1_min, color='k', linestyle='--', alpha=0.5)
+    plt.axvline(t_jet_center_minus_1_min, color='m', linestyle='--', alpha=0.5)
     # Draw a vertical line at t_jet_center_plus_1_min
-    #plt.axvline(t_jet_center_plus_1_min, color='k', linestyle='--', alpha=0.5)
+    plt.axvline(t_jet_center_plus_1_min, color='g', linestyle='--', alpha=0.5)
     # Draw a horizontal line at v_thresh
     plt.axhline(v_thresh, color='k', linestyle='--', alpha=0.5)
     # Draw a horizontal line at -v_thresh
     plt.axhline(-v_thresh, color='k', linestyle='--', alpha=0.5)
+    plt.title(f"Different delta as a function of time at {t_jet_center}")
+    plt.xlabel("Time [UTC]")
+    plt.ylabel("$\\Delta V$ [km/s]")
+    plt.legend(loc=1)
+    save_folder = "../figures/"
+    plt.savefig(f"delta_v_{t_jet_center}.png", dpi=300, bbox_inches='tight', pad_inches=0.1, transparent=True, facecolor='w', edgecolor='w', orientation='landscape')
 
-    plt.savefig('test.png')
     plt.close()
     return (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
             ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l)
