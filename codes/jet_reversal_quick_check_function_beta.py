@@ -773,7 +773,7 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
         ind_jet_max = np.argmax(vp_lmn_diff_l)
         t_jet_max = df_mms.index[ind_jet_max]
 
-        # Within a minute of ind_jet_max find the index where vp_lmn_diff_l has the minimum value
+        # Within 30 seconds  of ind_jet_max find the index where vp_lmn_diff_l has the minimum value
         ind_jet_min = np.argmin(vp_lmn_diff_l[ind_jet_max - delta_jet_min_max_ind:ind_jet_max
                                             + delta_jet_min_max_ind])
         t_jet_min = df_mms.index[ind_jet_min]

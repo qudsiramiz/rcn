@@ -45,9 +45,9 @@ def check_jet_reversal(crossing_time):
               'time_clip': True,
               'latest_version': True,
               'figname': 'mms_jet_reversal_check_lmn_mean',
-              'fname': '../data/mms_jet_reversal_times_list_20221024_beta.csv',
+              'fname': '../data/mms_jet_reversal_times_list_20221025_beta_fast.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221024_beta.csv",
+              'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20221025_beta_fast.csv",
               "verbose": True
               }
     # inputs["data_rate"] = 'brst'
@@ -55,12 +55,12 @@ def check_jet_reversal(crossing_time):
     # _ =  jrcfb.jet_reversal_check(**inputs)
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     try:
-        try:
-            inputs["data_rate"] = 'fast'
-            _ = jrcfb.jet_reversal_check(**inputs)
-        except Exception:
-            inputs["data_rate"] = 'brst'
-            _ = jrcfb.jet_reversal_check(**inputs)
+        # try:
+        inputs["data_rate"] = 'fast'
+        _ = jrcfb.jet_reversal_check(**inputs)
+        # except Exception:
+        #     inputs["data_rate"] = 'brst'
+        #     _ = jrcfb.jet_reversal_check(**inputs)
     except Exception as e:
         # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
         # Save the crossing time to a file
@@ -107,11 +107,11 @@ with suppress_stdout_stderr():
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 0
+        indx_min = 200
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = 200
+        indx_max = 2000
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run

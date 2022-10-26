@@ -22,7 +22,7 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 
-df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221017_beta.csv",
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221024_beta.csv",
                               index_col=False)
 
 # If nay column has NaN, drop that row
@@ -37,10 +37,15 @@ df_jet_reversal.sort_index(inplace=True)
 # Convert the index to datetime
 df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 
+time_diff = (df_jet_reversal.index[1:] - df_jet_reversal.index[:-1]).total_seconds()
+
+# Drop rows where time_diff is less than 60 seconds
+df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff < 60)[0] + 1])
+
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 11
+ind_min = 44
 ind_max = -1
 
 
@@ -59,7 +64,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        with suppress_stdout_stderr():
+        #with suppress_stdout_stderr():
+        for foo in range(1):
             try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
@@ -142,13 +148,13 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "interpolation": "None",
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221018.csv",
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221024.csv",
                     "rc_folder": "../data/rx_d/",
                     "save_rc_file": True,
                     "walen1": df_jet_reversal["walen1"][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal["jet_detection"][ind_range],
-                    "fig_version": "v11",
+                    "fig_version": "v12",
                     "r_W": df_jet_reversal["r_W"][ind_range],
                     "theta_W": df_jet_reversal["theta_w"][ind_range],
                     # "jet_time": df_jet_reversal["jet_time"][ind_range],

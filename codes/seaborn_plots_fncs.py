@@ -4,6 +4,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
+import os
 
 import SeabornFig2Grid as sfg
 
@@ -49,7 +50,7 @@ def kde_plots(
     axs1 = sns.JointGrid(x=x, y=y, data=df, xlim=xlim, ylim=ylim, height=height, ratio=ratio,
                          space=space, hue_norm=hue_norm)
     if y == "msh_msp_shear":
-        axs1.plot_joint(sns.scatterplot, s=np.array(df.r_rc.values), alpha=alpha, color=color)
+        axs1.plot_joint(sns.scatterplot, s=10, alpha=alpha, color=color)
     else:
         axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
@@ -140,7 +141,10 @@ def kde_plots(
     axs1.fig.tight_layout()
 
     if (fig_save):
-        fname = f'../figures/seaborn_plots/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221018.png'
+        fig_dir = f"../figures/seaborn_plots/20221024/"
+        if not os.path.exists(fig_dir):
+            os.makedirs(fig_dir)
+        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221024.png"
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
     return axs1
@@ -224,9 +228,9 @@ def seaborn_subplots(
     gs.tight_layout(fig)
     gs.update(top=1, bottom=0.05, left=0.06, right=1, hspace=0.01, wspace=0.20)
     if fig_name is None:
-        fig_name = f"../figures/seaborn_plots/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}_20221018.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}_20221024.{fig_format}"
     else:
-        fig_name = f"../figures/seaborn_plots/{fig_name}_{dark_mode}_20221018.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/20221024/{fig_name}_{dark_mode}_20221024.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
     print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
 

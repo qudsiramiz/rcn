@@ -11,7 +11,7 @@ importlib.reload(rxmf)
 importlib.reload(spf)
 importlib.reload(sfg)
 
-file_name = "../data/rx_d/reconnection_line_data_mms3_20221018.csv"
+file_name = "../data/rx_d/reconnection_line_data_mms3_20221024.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
@@ -172,8 +172,8 @@ plt.rc('text', usetex=True)
 label_fontsize = 15
 tick_fontsize = 12
 data_type = ["shear", "rx_en", "va_cs", "bisec"]
-ind1 = 8
-ind2 = 9
+ind1 = 0
+ind2 = 10
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     if key == "msh_msp_shear":
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["delta_beta", "msh_msp_shear"],
