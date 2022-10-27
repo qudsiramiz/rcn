@@ -522,8 +522,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                         print(f'Data for all keys written to file {fname}')
                     f.close()
 
-    if jet_detection:
-        tplot_fnc(ptt=ptt, probe=probe, data_rate=data_rate, df_mms=df_mms,
+    #if jet_detection:
+    tplot_fnc(ptt=ptt, probe=probe, data_rate=data_rate, df_mms=df_mms,
                   ind_range_msp=ind_range_msp, ind_range_msh=ind_range_msh,
                   t_jet_center=t_jet_center, walen_v1=walen_relation_satisfied_v1,
                   walen_v2=walen_relation_satisfied_v2, jet_detection=jet_detection, ind_crossing=ind_crossing, shear_val=int(angle_b_lmn_vec_msp_msh_median),
@@ -921,11 +921,11 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
     plt.legend(loc=1)
     # On plot write jet detection status
     if jet_detection:
-        plt.text(0., 0.9, ind_crossing, horizontalalignment='left',
+        plt.text(0.05, 0.95, ind_crossing, horizontalalignment='left',
                  verticalalignment='top', transform=plt.gca().transAxes, color='g')
         save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/jet/"
     else:
-        plt.text(0., 0.9, ind_crossing, horizontalalignment='left',
+        plt.text(0.05, 0.95, ind_crossing, horizontalalignment='left',
                  verticalalignment='top', transform=plt.gca().transAxes, color='r')
         save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/no_jet/"
 
@@ -1197,11 +1197,18 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
-    r_w_median = np.round(np.nanmedian(ptt.get_data('R_w')[1]), 1)
-    theta_w = ptt.get_data('theta_w_deg')[1]
+    try:
+        r_w_median = np.round(np.nanmedian(ptt.get_data('R_w')[1]), 1)
+        theta_w = ptt.get_data('theta_w_deg')[1]
+    except Exception:
+        r_w_median = np.nan
+        theta_w = np.nan
     # If theta_w is greater than 90 degree, then subtract it from 180 degree
-    theta_w[theta_w > 90] = 180 - theta_w[theta_w > 90]
-    theta_w_median = int(np.nanmedian(theta_w))
+    try:
+        theta_w[theta_w > 90] = 180 - theta_w[theta_w > 90]
+        theta_w_median = int(np.nanmedian(theta_w))
+    except Exception:
+        theta_w_median = np.nan
 
     figname = f"{folder_name}/mms{probe}_{t_jet_center.strftime('%Y%m%d_%H%M')}_" + \
               f"{str(ind_crossing).zfill(5)}_{shear_val}s_{r_w_median}rw_{theta_w_median}th"
