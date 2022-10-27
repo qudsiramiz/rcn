@@ -46,19 +46,23 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         Whether or not to clip the data to the time range of the crossing time. Default is True.
     latest_version : bool
         Whether or not to use the latest version of the data. Default is True.
+    jet_len : int
+        The time length for which the jet should be observed. Default is 5.
+    figname : str
+        The name of the figure to be saved. Default is 'mms_jet_reversal_check'.
+    date_obs : str
+        The date of the observation. Default is None.
     fname : str
         The name of the csv file to save the data to. Default is 'mms_jet_reversal_times.csv'.
+    error_file_log_name : str
+        The name of the csv file to save the error log to. Default is
+        '../data/mms_jet_reversal_check_error_log.csv'.
+    verbose : bool
+        Whether or not to print the status of the function. Default is True.
 
     Returns
     -------
-    df_mms_fpi : pandas.DataFrame
-        The dataframe containing the data from the FPI.
-
-    df_mms_fgm : pandas.DataFrame
-        The dataframe containing the data from the FGM.
-
-    df_mms : pandas.DataFrame
-        The merged dataframe containing the data from the FPI and FGM.
+    None
     """
 
     # Define the absolute permeability of free space in m^2 kg^-1 s^-1
@@ -532,9 +536,11 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
     Parameters
     ----------
     df_mms : pandas.DataFrame
-        Dataframe containing the MMS data.
-    ind_walen_check : list
-        List of indices to check the Walen relation.
+        Dataframe containing the MMS data, both the FPI and FPGM
+    t_jet_center : datetime
+        Time of the jet center. This is the time of the center of the jet.
+    dt_walen : int
+        Time interval in seconds to check the Walen relation
     coord_type : str
         Coordinate system to use for the Walen relation. Default is "gsm". Other options are "gse"
         and "lmn".
@@ -542,15 +548,17 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
         List of indices for the magnetosheath.
     n_points_walen : int
         Number of points to use for the Walen relation. Default is 10.
+    time_cadence_median : float
+        Median time cadence of the data. Default is 0.15 seconds.
     jet_detection : bool
         Whether the jet was detected or not. Default is False.
 
     Returns
     -------
-    walen_relation_satisfied : bool
-        Whether the Walen relation is satisfied or not.
+    walen_relation_satisfied_v1 : bool
+        Whether the Walen relation, version 1 is satisfied or not.
     walen_relation_satisfied_v2 : bool
-        Whether the Walen relation is satisfied or not.
+        Whether the Walen relation, version 2 is satisfied or not.
     theta_w_deg : numpy.ndarray
         The theta parameter for the Walen relation, restricted to the region for which the Walen
         relation was checked
@@ -564,6 +572,8 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
     ind_walen_vals: numpy.ndarray
         Indicess within the jet region for which the Walen relation was satisfied continuously for
         n_points_walen
+    ind_walen_check: numpy.ndarray
+        Indices within the jet region for which the Walen relation was checked
     """
 
     # Define the constants
@@ -739,7 +749,53 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
 
 def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thresh=70,
                        ind_msh=None, verbose=True, ind_crossing=None, date_obs=None):
+    """
+    This function checks if a jet is present in the given data frame.
 
+    Parameters
+    ----------
+    df_mms : pandas.DataFrame
+        Data frame containing the MMS data
+    jet_len : float
+        Length of the time for which jet must have threshold velocity to be considered as a jet,
+        both at the positive and negative side of the crossing point
+    time_cadence_median : float
+        Median time cadence of the data in seconds
+    v_thresh : float
+        Threshold velocity in km/s. Default is 70 km/s
+    ind_msh : numpy.ndarray
+        Indices of the MSH data
+    verbose : bool
+        If True, prints the jet location and the jet length
+    ind_crossing : numpy.ndarray
+        Indices of the crossing points
+    date_obs : str
+        Date of observation in the format 'YYYY-MM-DD'
+
+    Returns
+    -------
+    jet_present : bool
+        True if jet is present, False otherwise
+    delta_v_min : float
+        Difference between the velocity with respect to a reference magnetosheath velocity and the
+        time series from 1 minute before/after the jet center to the point just before/after the jet
+        starts/ends
+    delta_v_max : float
+        Difference between the velocity with respect to a reference magnetosheath velocity and the
+        time series from 1 minute before/after the jet center to the point just before/after the jet
+        starts/ends
+    t_jet_center : datetime.datetime
+        Time of the jet center in datetime format
+    ind_jet_center : int
+        Index of the jet center in the dataframe
+    ind_jet_center_minus_1_min: int
+        Index of the point 1 minute before the jet center in the dataframe
+    ind_jet_center_plus_1_min: int
+        Index of the point 1 minute after the jet center in the dataframe
+    vp_lmn_diff_l: np.ndarray
+        Difference between the velocity with respect to a reference magnetosheath velocity and the
+        'l' component of the velocity
+    """
     # Compute the number of points corresponding to jet_len
     n_points_jet = int(jet_len / time_cadence_median)
 
@@ -930,7 +986,25 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
 
 
 def check_msp_msh_location(df_mms=None, time_cadence_median=0.15, verbose=True):
+    """
+    Try to find the location of the msh and msp
 
+    Parameters
+    ----------
+    df_mms : pandas.DataFrame
+        Dataframe containing the mms data
+    time_cadence_median : float
+        Median time cadence of the data
+    verbose : bool
+        If True, print information
+
+    Returns
+    -------
+    ind_range_msh : numpy.ndarray
+        Location of the msh
+    ind_range_msp : numpy.ndarray
+        Location of the msp
+    """
     # TODO: Check if threshold value of 5 and 10 ares fine or if we need to decrease/increase it
     n_thresh_msp = 5
     n_thresh_msh = 10
@@ -1013,6 +1087,38 @@ def check_msp_msh_location(df_mms=None, time_cadence_median=0.15, verbose=True):
 def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=None,
               ind_range_msh=None, t_jet_center=None, walen_v1=False, walen_v2=False,
               jet_detection=False, ind_crossing=None, shear_val=None, date_obs=None,):
+    """
+    Plot the data from the MMS spacecraft along with walen test and jet detection results
+
+    Parameters
+    ----------
+    ptt : str
+        The pytplot object
+    probe : int
+        The probe number. Default is 3
+    data_rate : str
+        The data rate. Default is 'brst'
+    df_mms : pandas.DataFrame
+        The dataframe containing the MMS data
+    ind_range_msp : numpy.ndarray
+        The indices of the MSP
+    ind_range_msh : numpy.ndarray
+        The indices of the MSH
+    t_jet_center : datetime.datetime
+        The time of the jet center
+    walen_v1 : bool
+        The status of the walen test v1
+    walen_v2 : bool
+        The status of the walen test v2
+    jet_detection : bool
+        The status of the jet detection
+    ind_crossing : int
+        The index of the crossing date
+    shear_val : float
+        The shear value between the magnetosheath and the magnetosphere
+    date_obs : datetime.datetime
+        The observation date
+    """
     # Set the fontstyle to Times New Roman
     font = {'family': 'serif', 'weight': 'normal', 'size': 12}
     plt.rc('font', **font)

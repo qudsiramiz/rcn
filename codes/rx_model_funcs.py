@@ -974,7 +974,6 @@ def ridge_finder_multiple(
             print('Figure not saved, folder does not exist. Create folder ../figures')
             # pass
         # plt.close()
-    # plt.savefig("/home/cephadrius/Dropbox/test.pdf", bbox_inches='tight', pad_inches=0.05, dpi=200)
     plt.close()
     return y_vals, x_intr_vals_list, y_intr_vals_list
 
@@ -1295,7 +1294,8 @@ def get_sw_params(
              ["IMF Plasma velocity (km/sec)", f"[{v_imf[0]:.2f}, {v_imf[1]:.2f}, {v_imf[2]:.2f}]"],
              ["IMF clock angle (degrees)", f"{imf_clock_angle:.2f}"],
              ["IMF Sym H", f"{sym_h_imf:.2f}"],
-             ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f}, {mean_mms_sc_pos[2]:.2f}]"]],
+             ["MMS position (GSM) (R_E)", f"[{mean_mms_sc_pos[0]:.2f}, {mean_mms_sc_pos[1]:.2f}, "
+                                          f"{mean_mms_sc_pos[2]:.2f}]"]],
             headers=["Parameter", "Value"], tablefmt="fancy_grid", floatfmt=".2f",
             numalign="center"))
 

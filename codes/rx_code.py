@@ -65,7 +65,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
         with suppress_stdout_stderr():
-        #for foo in range(1):
+            # for foo in range(1):
             try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
