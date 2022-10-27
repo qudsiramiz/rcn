@@ -269,7 +269,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
      ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l) = check_jet_location(
         df_mms=df_mms, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh,
-        time_cadence_median=time_cadence_median, verbose=verbose, ind_crossing=ind_crossing
+        time_cadence_median=time_cadence_median, verbose=verbose, ind_crossing=ind_crossing,
+        date_obs=date_obs
     )
 
     if jet_detection:
@@ -744,7 +745,7 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
 
 
 def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thresh=70,
-                       ind_msh=None, verbose=True, ind_crossing=None):
+                       ind_msh=None, verbose=True, ind_crossing=None, date_obs=None):
 
     # Compute the number of points corresponding to jet_len
     n_points_jet = int(jet_len / time_cadence_median)
@@ -923,11 +924,11 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
     if jet_detection:
         plt.text(0.05, 0.95, ind_crossing, horizontalalignment='left',
                  verticalalignment='top', transform=plt.gca().transAxes, color='g')
-        save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/jet/"
+        save_folder = f"../figures/jet_reversal_checks/check_{date_obs}/delta_v/jet/"
     else:
         plt.text(0.05, 0.95, ind_crossing, horizontalalignment='left',
                  verticalalignment='top', transform=plt.gca().transAxes, color='r')
-        save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/no_jet/"
+        save_folder = f"../figures/jet_reversal_checks/check_{date_obs}/delta_v/no_jet/"
 
     if not os.path.exists(save_folder):
         os.makedirs(save_folder)

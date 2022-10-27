@@ -25,7 +25,7 @@ df_crossings.set_index("DateStart", inplace=True)
 
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
-date_obs = "20221026"
+date_obs = "20221027"
 def check_jet_reversal(crossing_time):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
@@ -101,18 +101,18 @@ def suppress_stdout_stderr():
 
 use_parallel = True
 
-# with suppress_stdout_stderr():
-for foo in range(1):
+with suppress_stdout_stderr():
+    # for foo in range(1):
     if use_parallel:
         # Set the number of processes to use
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 44
+        indx_min = 0
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 1
+        indx_max = indx_min + 200
         # create a pool of processes
         pool = mp.Pool()
         # create a list of processes to run
