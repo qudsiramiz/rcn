@@ -26,6 +26,8 @@ df_crossings.set_index("DateStart", inplace=True)
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
 date_obs = "20221027"
+
+
 def check_jet_reversal(crossing_time):
     # Convert the crossing time to a datetime object
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
@@ -48,7 +50,7 @@ def check_jet_reversal(crossing_time):
               'figname': 'mms_jet_reversal_check_lmn_mean',
               'fname': f'../data/mms_jet_reversal_times_list_{date_obs}_beta_fast.csv',
               # 'fname': '../data/test.csv',
-              'error_file_log_name': f"../data/mms_jet_reversal_check_error_log_{date_obs}_beta_fast.csv",
+              'error_file_log_name': f"../data/mms_jet_reversal_check_err_log_{date_obs}_beta.csv",
               "verbose": True
               }
     # inputs["data_rate"] = 'brst'
@@ -81,14 +83,6 @@ def check_jet_reversal(crossing_time):
         pass
     # return ptt, df_mms, ind_range_msp, ind_range_msh, t_jet_center
     return None
-
-
-# for xx in range(1):
-#     try:
-#         crossing_time = df_crossings.index[xx]
-#         dat, df_mms, ind_range_msp, ind_range_msh, t_jet_center = check_jet_reversal(crossing_time)
-#     except Exception as e:
-#         print(f"{e} for date {crossing_time}")
 
 
 @contextmanager
