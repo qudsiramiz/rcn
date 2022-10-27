@@ -269,7 +269,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
      ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l) = check_jet_location(
         df_mms=df_mms, jet_len=jet_len, v_thresh=70, ind_msh=ind_range_msh,
-        time_cadence_median=time_cadence_median, verbose=verbose
+        time_cadence_median=time_cadence_median, verbose=verbose, ind_crossing=ind_crossing
     )
 
     if jet_detection:
