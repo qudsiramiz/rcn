@@ -22,7 +22,7 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 
-df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221024_beta.csv",
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_fast.csv",
                               index_col=False)
 
 # If nay column has NaN, drop that row
@@ -45,7 +45,7 @@ df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 44
+ind_min = 0
 ind_max = -1
 
 
