@@ -899,12 +899,11 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
         else:
             print(f'\n\033[1;31m No jet found at {t_jet_center}\033[0m \n')
 
-
     # Plot vp_lmn_diff_l, delta_v_max, delta_v_min, v_max_median, and v_min_median
     plt.figure(figsize=(10, 5))
     plt.plot(vp_lmn_diff_l, 'r-', alpha=0.3)
-    plt.plot(delta_v_max, 'b-', alpha=1, label='$\\Delta v{\\rm max}$')
-    plt.plot(delta_v_min, 'g-', alpha=1, label='$\\Delta v{\\rm min}$')
+    plt.plot(delta_v_max, 'b-', alpha=1, label='$\\Delta v_{\\rm max}$')
+    plt.plot(delta_v_min, 'g-', alpha=1, label='$\\Delta v_{\\rm min}$')
     # Draw a vertical line at t_jet_center
     plt.axvline(t_jet_center, color='k', linestyle='--', alpha=0.5)
     # Draw a vertical line at t_jet_center_minus_1_min
@@ -915,13 +914,23 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
     plt.axhline(v_thresh, color='k', linestyle='--', alpha=0.5)
     # Draw a horizontal line at -v_thresh
     plt.axhline(-v_thresh, color='k', linestyle='--', alpha=0.5)
-    plt.title(f"Different delta as a function of time at {t_jet_center}")
+    plt.title(f"Different delta as a function of time at {t_jet_center.strftime('%Y-%m-%d %H:%M:%S')}")
     plt.xlabel("Time [UTC]")
     plt.ylabel("$\\Delta V$ [km/s]")
     plt.legend(loc=1)
-    save_folder = "../figures/"
-    plt.savefig(f"delta_v_{t_jet_center}.png", dpi=300, bbox_inches='tight', pad_inches=0.1, transparent=True, facecolor='w', edgecolor='w', orientation='landscape')
+    save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/"
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+    fig_name = f"{save_folder}/delta_v_{t_jet_center.strftime('%Y-%m-%d_%H:%M:%S')}.png"
+    plt.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.1, transparent=True, facecolor='w', edgecolor='w', orientation='landscape')
 
+    # On plot write jet detection status
+    if jet_detection:
+        plt.text(0., 0.9, 'Jet', horizontalalignment='left',
+                 verticalalignment='top', transform=plt.gca().transAxes, color='g')
+    else:
+        plt.text(0., 0.9, 'Jet', horizontalalignment='left',
+                 verticalalignment='top', transform=plt.gca().transAxes, color='r')
     plt.close()
     return (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
             ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l)
