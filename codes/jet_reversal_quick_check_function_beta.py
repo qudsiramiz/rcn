@@ -83,6 +83,23 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     crossing_time_max = crossing_time + datetime.timedelta(seconds=dt)
     trange = [crossing_time_min, crossing_time_max]
 
+    # Get the index corresponding to the crossing time in the data
+    # try:
+    #     df_crossing_temp = pd.read_csv("../data/mms_jet_reversal_times_list_20221017_beta.csv",
+    #                                    index_col=False)
+    #     # Change the formatting of the date
+    #     for xx in range(len(df_crossing_temp)):
+    #         df_crossing_temp['jet_time'][xx] = df_crossing_temp['jet_time'][xx].split(
+    #                                          '+')[0].split('.')[0]
+    #     df_crossing_temp.set_index("jet_time", inplace=True)
+    #     crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")[:]
+    # except:
+    df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
+    df_crossing_temp.set_index("DateStart", inplace=True)
+    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+    ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
+
     # Get the data from the FPI
     mms_fpi_varnames = [f'mms{probe}_dis_numberdensity_{data_rate}',
                         f'mms{probe}_dis_bulkv_gse_{data_rate}',
@@ -505,22 +522,6 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                         print(f'Data for all keys written to file {fname}')
                     f.close()
 
-    # Get the index corresponding to the crossing time in the data
-    # try:
-    #     df_crossing_temp = pd.read_csv("../data/mms_jet_reversal_times_list_20221017_beta.csv",
-    #                                    index_col=False)
-    #     # Change the formatting of the date
-    #     for xx in range(len(df_crossing_temp)):
-    #         df_crossing_temp['jet_time'][xx] = df_crossing_temp['jet_time'][xx].split(
-    #                                          '+')[0].split('.')[0]
-    #     df_crossing_temp.set_index("jet_time", inplace=True)
-    #     crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")[:]
-    # except:
-    df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
-    df_crossing_temp.set_index("DateStart", inplace=True)
-    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
-    ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
     if jet_detection:
         tplot_fnc(ptt=ptt, probe=probe, data_rate=data_rate, df_mms=df_mms,
                   ind_range_msp=ind_range_msp, ind_range_msh=ind_range_msh,
@@ -743,7 +744,7 @@ def check_walen_relation(df_mms=None, t_jet_center=None, dt_walen=30, coord_type
 
 
 def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thresh=70,
-                       ind_msh=None, verbose=True):
+                       ind_msh=None, verbose=True, ind_crossing=None):
 
     # Compute the number of points corresponding to jet_len
     n_points_jet = int(jet_len / time_cadence_median)
@@ -918,20 +919,24 @@ def check_jet_location(df_mms=None, jet_len=3, time_cadence_median=0.15, v_thres
     plt.xlabel("Time [UTC]")
     plt.ylabel("$\\Delta V$ [km/s]")
     plt.legend(loc=1)
-    save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/"
-    if not os.path.exists(save_folder):
-        os.makedirs(save_folder)
-    fig_name = f"{save_folder}/delta_v_{t_jet_center.strftime('%Y-%m-%d_%H:%M:%S')}.png"
-    plt.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.1, transparent=True, facecolor='w', edgecolor='w', orientation='landscape')
-
     # On plot write jet detection status
     if jet_detection:
-        plt.text(0., 0.9, 'Jet', horizontalalignment='left',
+        plt.text(0., 0.9, ind_crossing, horizontalalignment='left',
                  verticalalignment='top', transform=plt.gca().transAxes, color='g')
+        save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/jet/"
     else:
-        plt.text(0., 0.9, 'Jet', horizontalalignment='left',
+        plt.text(0., 0.9, ind_crossing, horizontalalignment='left',
                  verticalalignment='top', transform=plt.gca().transAxes, color='r')
-    plt.close()
+        save_folder = "../figures/jet_reversal_checks/check_20221026/delta_v/no_jet/"
+
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
+
+    fig_name = f"{save_folder}/delta_v_{t_jet_center.strftime('%Y-%m-%d_%H-%M-%S')}.png"
+
+    plt.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.1, transparent=True,
+                facecolor='w', edgecolor='w', orientation='landscape')
+
     return (jet_detection, delta_v_min, delta_v_max, t_jet_center, ind_jet_center,
             ind_jet_center_minus_1_min, ind_jet_center_plus_1_min, vp_lmn_diff_l)
 
