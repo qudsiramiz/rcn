@@ -107,10 +107,10 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                     datatype=data_type, varnames=mms_fpi_varnames, time_clip=time_clip,
                     latest_version=latest_version)
 
-    mms_fpi_time = ptt.get_data(mms_fpi_varnames[0])[0]
+    mms_fpi_time_unix = ptt.get_data(mms_fpi_varnames[0])[0]
     # Convert the time to a datetime object
-    mms_fpi_time = pd.to_datetime(mms_fpi_time, unit='s')
-    mms_fpi_time = mms_fpi_time.tz_localize(pytz.utc)
+    mms_fpi_time_local = pd.to_datetime(mms_fpi_time_unix, unit='s')
+    mms_fpi_time = mms_fpi_time_local.tz_localize(pytz.utc)
 
     mms_fpi_numberdensity = ptt.get_data(mms_fpi_varnames[0])[1]
     _ = ptt.get_data(mms_fpi_varnames[1])[1:4][0]
@@ -284,6 +284,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         ptt.store_data('delta_v_max', data={'x': t_delta_v_max_unix,
                                             'y': delta_v_max})
         ptt.store_data('delta_v', data=['delta_v_min', 'delta_v_max'])
+
+        # Add vp_lmn_diff_l to ptt
+        ptt.store_data('vp_lmn_diff_l', data={'x': mms_fpi_time_unix,
+                                              'y': vp_lmn_diff_l})
+
+        # Add delta_v and vp_lmn_diff_l to ptt
+        ptt.store_data('delta_v_vp_lmn_diff_l', data=['delta_v_min', 'delta_v_max', 'vp_lmn_diff_l'])
 
         # If jet was detected, then check if walen relation is satisfied
 
@@ -1166,7 +1173,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                     'Tp',
                     'mms3_fgm_b_lmn_srvy_l2',
                     f'mms{probe}_dis_bulkv_lmn_{data_rate}',
-                    'delta_v',
+                    'delta_v_vp_lmn_diff_l',
                     'R_w',
                     'theta_w_deg',
                     ]
@@ -1229,11 +1236,25 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     else:
         delta_v_line_color = 'black'
 
-    delta_v_dict_option = {'color': delta_v_line_color,
-                           'linestyle': '-',
-                           'yrange': [-100, 100],
+    # Define the limits of the delta v plot
+    dv_min_min = np.nanmin(ptt.get_data("delta_v_min")[1:])
+    dv_min_max = np.nanmax(ptt.get_data("delta_v_min")[1:])
+    dv_max_min = np.nanmin(ptt.get_data("delta_v_max")[1:])
+    dv_max_max = np.nanmax(ptt.get_data("delta_v_max")[1:])
+    dv_vpl_min = np.nanmin(ptt.get_data("vp_lmn_diff_l")[1:])
+    dv_vpl_max = np.nanmax(ptt.get_data("vp_lmn_diff_l")[1:])
+
+    dv_min = 1.1 * min(dv_min_min, dv_max_min, dv_vpl_min)
+    dv_max = 1.1 * max(dv_min_max, dv_max_max, dv_vpl_max)
+
+    delta_v_dict_option = {'color': ['green', 'blue', 'red'],
+                           'linestyle': ['-', '--', '--'],
+                           'lw': [2, 1, 5],
+                           'yrange': [dv_min, dv_max],
                            'ytitle': '$\\Delta v$',
                            'ysubtitle': 'km/s',
+                           'legend_names': ['$\\Delta v_{min}$', '$\\Delta v_{max}$',
+                                      '$\\Delta v_{p,L}$'],
                            }
 
     r_w_dict_option = {'color': delta_v_line_color,
@@ -1268,7 +1289,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ptt.options('Tp', opt_dict=tp_dict_option)
     ptt.options('mms3_fgm_b_lmn_srvy_l2', opt_dict=b_dict_option)
     ptt.options(f'mms{probe}_dis_bulkv_lmn_{data_rate}', opt_dict=bulkv_dict_option)
-    ptt.options('delta_v', opt_dict=delta_v_dict_option)
+    ptt.options('delta_v_vp_lmn_diff_l', opt_dict=delta_v_dict_option)
     ptt.options('R_w', opt_dict=r_w_dict_option)
     ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
 
