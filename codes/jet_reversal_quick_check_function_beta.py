@@ -1118,6 +1118,10 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
         The shear value between the magnetosheath and the magnetosphere
     date_obs : datetime.datetime
         The observation date
+
+    Returns
+    -------
+    None
     """
     # Set the fontstyle to Times New Roman
     font = {'family': 'serif', 'weight': 'normal', 'size': 12}
@@ -1307,3 +1311,5 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
               f"{str(ind_crossing).zfill(5)}_{shear_val}s_{r_w_median}rw_{theta_w_median}th"
     # figname = 'test'
     ptt.tplot(keys_to_plot, save_png=figname, display=False)
+
+    return None
