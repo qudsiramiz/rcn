@@ -6,7 +6,7 @@ import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221024.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221027.csv"))
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 for file_name in fnames:
     for cut_type in cut_type_list[:]:

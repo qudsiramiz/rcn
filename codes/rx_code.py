@@ -45,7 +45,7 @@ df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 1
+ind_min = 140
 ind_max = -1
 
 
