@@ -22,7 +22,7 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 
-df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_fast.csv",
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_brst.csv",
                               index_col=False)
 
 # If nay column has NaN, drop that row
@@ -46,7 +46,7 @@ trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
 ind_min = 0
-ind_max = -1
+ind_max = 1
 
 
 @contextmanager
@@ -64,8 +64,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        with suppress_stdout_stderr():
-            # for foo in range(1):
+        # with suppress_stdout_stderr():
+        for foo in range(1):
             try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
