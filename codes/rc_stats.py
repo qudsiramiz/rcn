@@ -13,17 +13,17 @@ for file_name in fnames:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
 
         fig_inputs = {
-            'bins': np.linspace(0, 15, 20),
+            'bins': np.linspace(0, 10, 20),
             'file_name': file_name,
             'dark_mode': True,
             'fig_name':  f"rx_hist_{mms_probe_num}",
             'fig_format': 'jpg',
-            'fig_folder': '../figures/rx_hist/rx_hist_v12',
+            'fig_folder': '../figures/rx_hist/rx_hist_v13',
             'fig_size': (8, 8),
             'histtype': 'step',
             'linewidth': 3,
             'cut_type': cut_type,
-            'r_lim': [0.1, 12],
+            'r_lim': [0.01, 10],
             'density': True,
         }
 
