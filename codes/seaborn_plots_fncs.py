@@ -25,15 +25,14 @@ def kde_plots(
               marker_size=20,
               spearman=None,
               pearson=None,
-              cmap="Blues",
               fig_save=True,
               hue_norm=mpl.colors.LogNorm(),
               height=8,
               ratio=8,
               space=0,
               alpha=0.7,
-              bins=20,
-              dark_mode=False,
+              bins=[20, 20],
+              dark_mode=True,
               ):
 
     pad = 7
@@ -50,7 +49,7 @@ def kde_plots(
     axs1 = sns.JointGrid(x=x, y=y, data=df, xlim=xlim, ylim=ylim, height=height, ratio=ratio,
                          space=space, hue_norm=hue_norm)
     if y == "msh_msp_shear":
-        axs1.plot_joint(sns.scatterplot, s=10, alpha=alpha, color=color)
+        axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
     else:
         axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
@@ -141,10 +140,10 @@ def kde_plots(
     axs1.fig.tight_layout()
 
     if (fig_save):
-        fig_dir = f"../figures/seaborn_plots/20221027/"
+        fig_dir = f"../figures/seaborn_plots/20221102/"
         if not os.path.exists(fig_dir):
             os.makedirs(fig_dir)
-        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221027.png"
+        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221102.png"
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
     return axs1

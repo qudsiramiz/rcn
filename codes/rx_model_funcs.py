@@ -545,7 +545,11 @@ def ridge_finder_multiple(
         raise ValueError("No image given")
 
     if len(t_range) == 1:
-        t_range_date = datetime.datetime.strptime(t_range[0], '%Y-%m-%d %H:%M:%S')
+        # Check if t_range is a datetime object
+        if isinstance(t_range[0], datetime.datetime):
+            t_range_date = t_range[0]
+        else:
+            t_range_date = datetime.datetime.strptime(t_range[0], '%Y-%m-%d %H:%M:%S')
         t_range_date_min = t_range_date - datetime.timedelta(minutes=dt)
         t_range_date_max = t_range_date + datetime.timedelta(minutes=dt)
         t_range = [t_range_date_min.strftime('%Y-%m-%d %H:%M:%S'),
@@ -1427,7 +1431,11 @@ def rx_model(
 
     # If trange has only one element, then make it a list of length 2 with 'dt' minutes of padding
     if len(trange) == 1:
-        trange_date = datetime.datetime.strptime(trange[0], '%Y-%m-%d %H:%M:%S')
+        # Check if trange is a datetime object
+        if isinstance(trange[0], datetime.datetime):
+            trange_date = trange[0]
+        else:
+            trange_date = datetime.datetime.strptime(trange[0], '%Y-%m-%d %H:%M:%S')
         trange_date_min = trange_date - datetime.timedelta(minutes=dt)
         trange_date_max = trange_date + datetime.timedelta(minutes=dt)
         trange = [trange_date_min.strftime('%Y-%m-%d %H:%M:%S'),

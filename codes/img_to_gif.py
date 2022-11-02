@@ -84,21 +84,35 @@ def gif_maker(file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", durat
 
 
 def make_gifs(
-    img_folder="/home/cephadrius/Desktop/git/rcn/figures/all_ridge_plots/t96/gaussian_interpolation/",
+    img_folder="../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
     vid_folder="/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    vid_name="all_ridge_t96_gaussian",
+    vid_name="all_ridge_2hr_1min_vid",
     vid_type="mp4",
     skip_rate=1,
     duration=0.05,
-    fps=25
+    fps=10
     ):
     """
-    Make gifs for the last n days. Default is 120 days, averaged over the last 30 days.
+    Make a gif from a list of images.
 
     Parameters
     ----------
-    number_of_days : int, optional
-        Number of days to be considered for plotting the gif. The default is 120.
+    img_folder : str, optional
+        Folder containing the images. The default is
+        "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/".
+    vid_folder : str, optional
+        Folder to save the gif. The default is
+        "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/".
+    vid_name : str, optional
+        Name of the gif file. The default is "all_ridge_2hr_1min_vid".
+    vid_type : str, optional
+        Type of the video. The default is "mp4".
+    skip_rate : int, optional
+        Skip rate of the gif. The default is 1.
+    duration : float, optional
+        Duration for which each image is displayed in gif. The default is 0.05.
+    fps : int, optional
+        Frames per second for mp4 video. The default is 10.
 
     Returns
     -------
@@ -115,15 +129,16 @@ def make_gifs(
     for i,key in enumerate(list(file_list_dict.keys())):
         vid_name = f"{vid_folder}{vid_name}_{fps}fps.mp4"
         try:
-            gif_maker(file_list_dict[key], vid_name, mode="I", skip_rate=skip_rate, vid_type=vid_type, fps=fps, duration=0.05)
+            gif_maker(file_list_dict[key], vid_name, mode="I", skip_rate=skip_rate, 
+                      vid_type=vid_type, fps=fps, duration=0.05)
         except ValueError as e:
             print(e)
             pass
 
 image_inputs_t01 = {
-    "img_folder":"/home/cephadrius/Desktop/git/rcn/figures/all_ridge_plots/t01/gaussian_interpolation/",
+    "img_folder":"../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
     "vid_folder":"/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    "vid_name":"all_ridge_t01_gaussian",
+    "vid_name":"all_ridge_2hr_1min_vid",
     "vid_type":"mp4",
     "skip_rate":1,
     "duration":0.05,
@@ -131,12 +146,12 @@ image_inputs_t01 = {
 }
 
 image_inputs_t96 = {
-    "img_folder":"/home/cephadrius/Desktop/git/rcn/figures/all_ridge_plots/t96/gaussian_interpolation/",
+    "img_folder":"../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
     "vid_folder":"/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    "vid_name":"all_ridge_t96_gaussian",
+    "vid_name":"all_ridge_2hr_1min_vid",
     "vid_type":"mp4",
     "skip_rate":1,
     "duration":0.05,
-    "fps":1
+    "fps":5
 }
 make_gifs(**image_inputs_t96)

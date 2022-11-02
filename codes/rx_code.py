@@ -40,12 +40,12 @@ df_jet_reversal.index = pd.to_datetime(df_jet_reversal.index)
 time_diff = (df_jet_reversal.index[1:] - df_jet_reversal.index[:-1]).total_seconds()
 
 # Drop rows where time_diff is less than 60 seconds
-df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff < 60)[0] + 1])
+df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff < 10)[0] + 1])
 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 140
+ind_min = 0
 ind_max = -1
 
 
