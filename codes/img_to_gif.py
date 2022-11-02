@@ -143,7 +143,7 @@ image_inputs_t01 = {
 }
 
 image_inputs_t96 = {
-    "img_folder": "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/temp/",
+    "img_folder": "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
     "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
     "vid_name": "all_ridge_2hr_1min_vid",
     "vid_type": "mp4",
