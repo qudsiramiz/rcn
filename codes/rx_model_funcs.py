@@ -1478,7 +1478,6 @@ def rx_model(
     len_y = int((y_max - y_min) / dr) + 1
     len_z = int((z_max - z_min) / dr) + 1
 
-
     if nprocesses is None:
         p = mp.Pool()
     else:

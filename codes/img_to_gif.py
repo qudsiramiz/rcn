@@ -12,7 +12,7 @@ import numpy as np
 def gif_maker(file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", duration=0.05, fps=25):
     """
     Make a gif from a list of images.
-    
+
     Parameters
     ----------
     file_list : list
@@ -51,11 +51,7 @@ def gif_maker(file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", durat
         raise ValueError("vid_name is None. Please provide the name of the gif/video")
     if len(file_list) == 0:
         raise ValueError("file_list is empty")
-    #if len(file_list) >= 1501:
-    #    # Check if the skip_rate is an integer
-    #    if skip_rate != int(skip_rate):
-    #        raise ValueError("skip_rate must be an integer")
-    #    file_list = file_list[-1500::skip_rate]
+
     if vid_type == "gif":
         if duration != float(duration):
             raise ValueError("duration must be a float")
@@ -91,7 +87,7 @@ def make_gifs(
     skip_rate=1,
     duration=0.05,
     fps=10
-    ):
+):
     """
     Make a gif from a list of images.
 
@@ -119,39 +115,40 @@ def make_gifs(
         None.
     """
 
-    print(f"Code execution started at (UTC):" +
+    print("Code execution started at (UTC):" +
           f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}\n")
 
     file_list_dict = {}
 
     file_list_dict["file_list"] = np.sort(glob.glob(img_folder + "*.png"))
 
-    for i,key in enumerate(list(file_list_dict.keys())):
+    for i, key in enumerate(list(file_list_dict.keys())):
         vid_name = f"{vid_folder}{vid_name}_{fps}fps.mp4"
         try:
-            gif_maker(file_list_dict[key], vid_name, mode="I", skip_rate=skip_rate, 
+            gif_maker(file_list_dict[key], vid_name, mode="I", skip_rate=skip_rate,
                       vid_type=vid_type, fps=fps, duration=0.05)
         except ValueError as e:
             print(e)
             pass
 
+
 image_inputs_t01 = {
-    "img_folder":"../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
-    "vid_folder":"/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    "vid_name":"all_ridge_2hr_1min_vid",
-    "vid_type":"mp4",
-    "skip_rate":1,
-    "duration":0.05,
-    "fps":1
+    "img_folder": "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
+    "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
+    "vid_name": "all_ridge_2hr_1min_vid",
+    "vid_type": "mp4",
+    "skip_rate": 1,
+    "duration": 0.05,
+    "fps": 1
 }
 
 image_inputs_t96 = {
-    "img_folder":"../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
-    "vid_folder":"/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    "vid_name":"all_ridge_2hr_1min_vid",
-    "vid_type":"mp4",
-    "skip_rate":1,
-    "duration":0.05,
-    "fps":5
+    "img_folder": "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
+    "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
+    "vid_name": "all_ridge_2hr_1min_vid",
+    "vid_type": "mp4",
+    "skip_rate": 1,
+    "duration": 0.05,
+    "fps": 5
 }
 make_gifs(**image_inputs_t96)

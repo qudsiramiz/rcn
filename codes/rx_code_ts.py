@@ -142,16 +142,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "rc_file_name": f"rx_line_data_time_series_mms{mms_probe_num}_20221102.csv",
                     "rc_folder": "../data/rx_d/ts/",
                     "save_rc_file": False,
-                    #"walen1": df_jet_reversal["walen1"][ind_range],
-                    #"walen2": df_jet_reversal["walen2"][ind_range],
-                    #"jet_detection": df_jet_reversal["jet_detection"][ind_range],
                     "fig_version": "time_series",
-                    #"r_W": df_jet_reversal["r_W"][ind_range],
-                    #"theta_W": df_jet_reversal["theta_w"][ind_range],
-                    # "jet_time": df_jet_reversal["jet_time"][ind_range],
-                    #"np_median_msp": df_jet_reversal["np_msp_median"][ind_range],
-                    #"np_median_msh": df_jet_reversal["np_msh_median"][ind_range],
-                    #"df_jet_reversal": df_jet_reversal.iloc[ind_range],
                 }
 
                 y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(

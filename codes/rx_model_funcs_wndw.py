@@ -1145,7 +1145,7 @@ def rx_model(
     len_z = int((z_max - z_min)/dr) + 1
 
     if __name__ == '__main__':
-    p = mp.Pool()
+        p = mp.Pool()
 
     input = ((j, k, y_max, z_max, dr, m_p, ro, alpha, rmp, sw_params, model_type)
               for j in range(len_y) for k in range(len_z))
