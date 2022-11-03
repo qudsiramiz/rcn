@@ -132,23 +132,18 @@ def make_gifs(
             pass
 
 
-image_inputs_t01 = {
-    "img_folder": "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
-    "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    "vid_name": "all_ridge_2hr_1min_vid",
-    "vid_type": "mp4",
-    "skip_rate": 1,
-    "duration": 0.05,
-    "fps": 1
-}
+# Find all the folders in the current directory
+folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_*/")
 
-image_inputs_t96 = {
-    "img_folder": "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series/",
-    "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
-    "vid_name": "all_ridge_2hr_1min_vid",
-    "vid_type": "mp4",
-    "skip_rate": 1,
-    "duration": 0.05,
-    "fps": 5
-}
-make_gifs(**image_inputs_t96)
+for folder in folder_list[1:]:
+    image_inputs_t96 = {
+        "img_folder": folder,
+        "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
+        "vid_name": folder.split("/")[-2],
+        "vid_type": "mp4",
+        "skip_rate": 1,
+        "duration": 0.05,
+        "fps": 1
+    }
+    print(f"Processing folder: {folder}")
+    make_gifs(**image_inputs_t96)
