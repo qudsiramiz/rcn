@@ -776,11 +776,14 @@ def ridge_finder_multiple(
         if save_rc_file:
             if not os.path.exists(rc_folder):
                 os.makedirs(rc_folder)
-            var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
-                       "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection,"\
-                       "r_W,theta_W,np_median_msp,np_median_msh,b_imf_x,b_imf_y,"\
-                       "b_imf_z,dipole,imf_clock_angle,p_dyn"
+            #var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
+            #           "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection,"\
+            #           "r_W,theta_W,np_median_msp,np_median_msh,b_imf_x,b_imf_y,"\
+            #           "b_imf_z,dipole,imf_clock_angle,p_dyn"
 
+            var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
+                       "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,b_imf_x,b_imf_y,"\
+                       "b_imf_z,dipole,imf_clock_angle,p_dyn"
             data_dict = {
                 "mms_spc_num": mms_probe_num,
                 "date_from": t_range[0],
@@ -793,14 +796,14 @@ def ridge_finder_multiple(
                 "b_msh_z": b_msh[2],
                 "r_rc": np.round(dist_rc, 3),
                 "method_used": method_used,
-                "walen1": walen1,
-                "walen2": walen2,
-                "jet_detection": jet_detection,
-                "r_W": r_W,
-                "theta_W": theta_W,
-                # "jet_time": jet_time,
-                "np_median_msp": np_median_msp,
-                "np_median_msh": np_median_msh,
+                # "walen1": walen1,
+                # "walen2": walen2,
+                # "jet_detection": jet_detection,
+                # "r_W": r_W,
+                # "theta_W": theta_W,
+                # # "jet_time": jet_time,
+                # "np_median_msp": np_median_msp,
+                # "np_median_msh": np_median_msh,
                 "b_imf_x": b_imf[0],
                 "b_imf_y": b_imf[1],
                 "b_imf_z": b_imf[2],
@@ -810,12 +813,14 @@ def ridge_finder_multiple(
             }
             # Add keys and data from df_jet_reversal to data_dict if those keys aren't already
             # present in the dictionary
-            for key in df_jet_reversal.keys():
-                if key not in data_dict.keys():
-                    data_dict[key] = df_jet_reversal[key]
-                    # Add the key to the variable list
-                    var_list += "," + key
-
+            try:
+                for key in df_jet_reversal.keys():
+                    if key not in data_dict.keys():
+                        data_dict[key] = df_jet_reversal[key]
+                        # Add the key to the variable list
+                        var_list += "," + key
+            except Exception:
+                pass
             # Save data to the csv file using tab delimiter
             if not os.path.exists(rc_folder + rc_file_name):
                 with open(rc_folder + rc_file_name, 'w') as f:

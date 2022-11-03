@@ -18,27 +18,6 @@ font = {"family": "serif", "weight": "normal", "size": 10}
 plt.rc("font", **font)
 plt.rc("text", usetex=True)
 
-start = time.time()
-
-today_date = datetime.datetime.today().strftime("%Y-%m-%d")
-
-
-# Define a center time (centered on the jet location)
-center_time = "2015-10-03 16:48:33"
-# Convert the center time to datetime and set the timezone to UTC
-center_time = pd.to_datetime(center_time).tz_localize("UTC")
-# Get a start/end time 1 hour before/after the center time and set the time zone to UTC
-start_time = (center_time - pd.Timedelta("1 hour")).tz_convert("UTC")
-end_time = (center_time + pd.Timedelta("1 hour")).tz_convert("UTC")
-
-# Define an array of time ranges to loop over, between the start and end times with 1 minute
-# intervals
-trange_list = pd.date_range(start_time, end_time, freq="1min").tz_convert("UTC")
-# trange_list_new = trange_list[trange_ind_list]
-mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 0
-ind_max = 121
-
 
 @contextmanager
 def suppress_stdout_stderr():
@@ -48,8 +27,32 @@ def suppress_stdout_stderr():
             yield (err, out)
 
 
-for mms_probe_num in mms_probe_num_list[2:3]:
-    for ind_range, trange in enumerate(trange_list[ind_min:ind_max], start=ind_min):
+start = time.time()
+
+today_date = datetime.datetime.today().strftime("%Y-%m-%d")
+
+
+# Define a center time (centered on the jet location)
+center_time_list = ["2015-09-07 14:12:33", "2015-09-19 09:37:00", "2016-12-26 11:10:00",
+                    "2016-11-15 13:28:00", "2017-02-04 01:04:00", "2017-01-24 03:56:00",
+                    "2017-01-21 00:09:00", "2017-01-09 02:58:00", "2017-01-05 01:21:00"]
+
+ind_min = 8
+ind_max = 9
+
+for center_time_str in center_time_list[ind_min:]:
+    center_time = pd.to_datetime(center_time_str).tz_localize("UTC")
+
+    # Get a start/end time 1 hour before/after the center time and set the time zone to UTC
+    start_time = (center_time - pd.Timedelta("3 hour")).tz_convert("UTC")
+    end_time = (center_time + pd.Timedelta("3 hour")).tz_convert("UTC")
+
+    # Define an array of time ranges to loop over, between the start and end times with 1 minute
+    # intervals
+    ind_t_min = 0
+    ind_t_max = -1
+    trange_list = pd.date_range(start_time, end_time, freq="1min").tz_convert("UTC")
+    for ind_range, trange in enumerate(trange_list[ind_t_min:], start=ind_t_min):
         # Convert trange to string to format '%Y-%m-%d %H:%M:%S'
         # trange = trange.strftime('%Y-%m-%d %H:%M:%S')
         # trange = [trange.split("+")[0].split(".")[0]]
@@ -58,7 +61,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # with suppress_stdout_stderr():
         for foo in range(1):
             try:
-                mms_probe_num = str(mms_probe_num)
+                mms_probe_num = str(3)
                 min_max_val = 20
                 dr = 0.25
                 y_min = - min_max_val
@@ -71,7 +74,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "trange": [trange],
                     "probe": None,
                     "omni_level": "hro",
-                    "mms_probe_num": mms_probe_num,
+                    "mms_probe_num": 3,
                     "model_type": model_type,
                     "m_p": 1,
                     "dr": dr,
@@ -109,7 +112,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "b_msh": np.round(sw_params["mms_b_gsm"], 2),
                     "xrange": [y_min, y_max],
                     "yrange": [z_min, z_max],
-                    "mms_probe_num": mms_probe_num,
+                    "mms_probe_num": 3,
                     "mms_sc_pos": np.round(np.nanmean(sw_params["mms_sc_pos"], axis=0), 2),
                     "dr": dr,
                     "dipole_tilt_angle": sw_params["ps"],
@@ -139,10 +142,10 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "interpolation": "None",
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"rx_line_data_time_series_mms{mms_probe_num}_20221102.csv",
-                    "rc_folder": "../data/rx_d/ts/",
-                    "save_rc_file": False,
-                    "fig_version": "time_series",
+                    "rc_file_name": f"rx_line_data_time_series_mms{3}_{center_time.strftime('%Y%m%d_%H%M%S')}.csv",
+                    "rc_folder": "../data/rx_d/time_series/",
+                    "save_rc_file": True,
+                    "fig_version": f"time_series_{center_time.strftime('%Y%m%d_%H%M%S')}",
                 }
 
                 y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(
