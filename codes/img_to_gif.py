@@ -71,7 +71,10 @@ def gif_maker(file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", durat
         with iio.get_writer(vid_name, mode=mode, fps=fps) as writer:
             for filename in file_list:
                 count += 1
-                print(f"Processing image {count} of {len(file_list)}")
+                # Print the image number being processed every 10 images, in green color
+                if count % 10 == 0:
+                    print(f"Processed images ==> \033[92m {count} \033[00m of"
+                          f" \033[91m {len(file_list)} \033[00m")
                 img = iio.imread(filename)
                 writer.append_data(img)
     writer.close()
@@ -135,7 +138,7 @@ def make_gifs(
 # Find all the folders in the current directory
 folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_*/")
 
-for folder in folder_list[1:]:
+for folder in folder_list[:1]:
     image_inputs_t96 = {
         "img_folder": folder,
         "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
@@ -143,7 +146,7 @@ for folder in folder_list[1:]:
         "vid_type": "mp4",
         "skip_rate": 1,
         "duration": 0.05,
-        "fps": 1
+        "fps": 3
     }
     print(f"Processing folder: {folder}")
     make_gifs(**image_inputs_t96)

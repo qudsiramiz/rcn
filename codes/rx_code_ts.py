@@ -33,19 +33,20 @@ today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 
 
 # Define a center time (centered on the jet location)
-center_time_list = ["2015-09-07 14:12:33", "2015-09-19 09:37:00", "2016-12-26 11:10:00",
-                    "2016-11-15 13:28:00", "2017-02-04 01:04:00", "2017-01-24 03:56:00",
-                    "2017-01-21 00:09:00", "2017-01-09 02:58:00", "2017-01-05 01:21:00"]
+# center_time_list = ["2015-09-07 14:12:33", "2015-09-19 09:37:00", "2016-12-26 11:10:00",
+#                     "2016-11-15 13:28:00", "2017-02-04 01:04:00", "2017-01-24 03:56:00",
+#                     "2017-01-21 00:09:00", "2017-01-09 02:58:00", "2017-01-05 01:21:00"]
 
-ind_min = 8
-ind_max = 9
+center_time_list = ["2015-09-07 12:00:00"]
+ind_min = 0
+ind_max = 1
 
 for center_time_str in center_time_list[ind_min:]:
     center_time = pd.to_datetime(center_time_str).tz_localize("UTC")
 
     # Get a start/end time 1 hour before/after the center time and set the time zone to UTC
-    start_time = (center_time - pd.Timedelta("3 hour")).tz_convert("UTC")
-    end_time = (center_time + pd.Timedelta("3 hour")).tz_convert("UTC")
+    start_time = (center_time - pd.Timedelta("12 hour")).tz_convert("UTC")
+    end_time = (center_time + pd.Timedelta("12 hour")).tz_convert("UTC")
 
     # Define an array of time ranges to loop over, between the start and end times with 1 minute
     # intervals
