@@ -784,7 +784,7 @@ def ridge_finder_multiple(
             var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
                        "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,b_imf_x,b_imf_y,"\
                        "b_imf_z,dipole,imf_clock_angle,p_dyn"
-            data_dict = {
+            data`_dict = {
                 "mms_spc_num": mms_probe_num,
                 "date_from": t_range[0],
                 "date_to": t_range[1],
