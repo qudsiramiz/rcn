@@ -414,6 +414,7 @@ def ridge_finder_multiple(
     dt=5,
     b_imf=[-5, 0, 0],
     b_msh=[-5, 0, 0],
+    v_msh=[-200, 50, 50],
     xrange=[-15.1, 15],
     yrange=[-15.1, 15],
     mms_probe_num='1',
@@ -712,6 +713,7 @@ def ridge_finder_multiple(
         # Direction of the magnetosheath magnetic field at the position of the spacecraft
         # TODO: Check if this is same as direction/magnitude given by the Cooling model
         b_msh_dir = b_msh[:3] / np.linalg.norm(b_msh[:3])
+        v_msh_dir = v_msh[:3] / np.linalg.norm(v_msh[:3])
 
         # Find the closest point on the reconnection line in the direction of the magnetosheath
         # magnetic field.
@@ -838,9 +840,13 @@ def ridge_finder_multiple(
                 f.close()
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
-        # plot an arror along the magnetosheath magnetic field direction
+        # plot an arrow along the magnetosheath magnetic field direction
         axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * b_msh_dir[1], 5 * b_msh_dir[2], head_width=0.4,
                    head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
+        
+        # Plot the arrow along the magnetosheath velocity direction
+        axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * v_msh_dir[1], 5 * v_msh_dir[2], head_width=0.4,
+                     head_length=0.7, fc='w', ec='b', linewidth=2, ls='-')
 
         # print([r0[1], x_y_point[0]], [r0[2], x_y_point[1]])
         # Plot line connecting the spacecraft position and the reconnection line
@@ -1239,8 +1245,8 @@ def get_sw_params(
     # Get mms postion in GSM coordinates for the specified time range
 
     if (mms_probe_num is not None):
-        mms_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
-        mms_vars = spd.mms.mec(trange=trange, varnames=mms_varnames, probe=mms_probe_num,
+        mms_fgm_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
+        mms_vars = spd.mms.mec(trange=trange, varnames=mms_fgm_varnames, probe=mms_probe_num,
                                data_rate='srvy', level='l2', time_clip=time_clip,
                                latest_version=True)
         mms_time = ptt.get_data(mms_vars[0])[0]
@@ -1256,11 +1262,21 @@ def get_sw_params(
                         latest_version=True)
         # mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
         mms_fgm_b_gsm = ptt.get_data(mms_fgm_varnames[0])[1:4][0]
+
+        # Get the data from the FPI
+        mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gsm_fast']
+
+        _ = spd.mms.fpi(trange=trange, probe=mms_probe_num, data_rate='fast', level='l2',
+                        datatype='dis-moms', varnames=mms_fpi_varnames, time_clip=time_clip,
+                        latest_version=True)
+        mms_fpi_bulkv_gsm = ptt.get_data(mms_fpi_varnames[0])[1:4][0]
+        print(f"\n mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}\n\n\n")
     else:
         mms_time = None
         mms_sc_pos = None
         # mms_fgm_time = None
         mms_fgm_b_gsm = None
+        mms_fpi_bulkv_gsm = None
         pass
 
     time_imf = np.nanmedian(omni_time)
@@ -1290,9 +1306,11 @@ def get_sw_params(
     if mms_probe_num is not None:
         mean_mms_sc_pos = np.round(np.nanmean(mms_sc_pos, axis=0), decimals=2)
         mean_mms_fgm_b_gsm = np.round(np.nanmedian(mms_fgm_b_gsm, axis=0), decimals=2)
+        mean_mms_fpi_bulkv_gsm = np.round(np.nanmedian(mms_fpi_bulkv_gsm, axis=0), decimals=2)
     else:
         mean_mms_sc_pos = None
         mean_mms_fgm_b_gsm = None
+        mean_mms_fpi_bulkv_gsm = None
 
     print("IMF parameters found:")
     if (verbose):
@@ -1351,6 +1369,7 @@ def get_sw_params(
     sw_dict['mms_time'] = mms_time
     sw_dict['mms_sc_pos'] = mms_sc_pos
     sw_dict['mms_b_gsm'] = mean_mms_fgm_b_gsm
+    sw_dict['mms_v_gsm'] = mean_mms_fpi_bulkv_gsm
 
     return sw_dict
 

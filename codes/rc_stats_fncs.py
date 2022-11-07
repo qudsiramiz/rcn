@@ -36,31 +36,31 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     df_va_cs = df[df.method_used == "va_cs"]
     df_bisec = df[df.method_used == "bisection"]
 
-    if cut_type == "jet":
-        # Remove all data points where the value of 'r_rc' is greater than 12
-        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.jet_detection)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.jet_detection)]
-        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.jet_detection)]
-    elif cut_type == "walen1":
-        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.walen1)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.walen1)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.walen1)]
-        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.walen1)]
-    elif cut_type == "walen2":
-        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.walen2)]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.walen2)]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.walen2)]
-        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.walen2)]
-    elif cut_type == "walen_jet":
-        df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)
-                            & ((df_shear.walen1) | (df_shear.walen2))]
-        df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.jet_detection)
-                            & ((df_rx_en.walen1) | (df_rx_en.walen2))]
-        df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.jet_detection)
-                            & ((df_va_cs.walen1) | (df_va_cs.walen2))]
-        df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.jet_detection)
-                            & ((df_bisec.walen1) | (df_bisec.walen2))]
+    # if cut_type == "jet":
+    #     # Remove all data points where the value of 'r_rc' is greater than 12
+    #     df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)]
+    #     df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.jet_detection)]
+    #     df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.jet_detection)]
+    #     df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.jet_detection)]
+    # elif cut_type == "walen1":
+    #     df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.walen1)]
+    #     df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.walen1)]
+    #     df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.walen1)]
+    #     df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.walen1)]
+    # elif cut_type == "walen2":
+    #     df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.walen2)]
+    #     df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.walen2)]
+    #     df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.walen2)]
+    #     df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.walen2)]
+    # elif cut_type == "walen_jet":
+    #     df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)
+    #                         & ((df_shear.walen1) | (df_shear.walen2))]
+    #     df_rx_en = df_rx_en[(df_rx_en.r_rc < r_lim[1]) & (df_rx_en.jet_detection)
+    #                         & ((df_rx_en.walen1) | (df_rx_en.walen2))]
+    #     df_va_cs = df_va_cs[(df_va_cs.r_rc < r_lim[1]) & (df_va_cs.jet_detection)
+    #                         & ((df_va_cs.walen1) | (df_va_cs.walen2))]
+    #     df_bisec = df_bisec[(df_bisec.r_rc < r_lim[1]) & (df_bisec.jet_detection)
+    #                         & ((df_bisec.walen1) | (df_bisec.walen2))]
 
     # # Check the sw_params to see if the conditions of b_imf
     # for i in range(len(df_shear)):
