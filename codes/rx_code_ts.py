@@ -65,7 +65,7 @@ for center_time_str in center_time_list[ind_min:ind_max]:
         # trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        #with suppress_stdout_stderr():
+        # with suppress_stdout_stderr():
         for foo in range(1):
             try:
                 mms_probe_num = str(3)
@@ -152,7 +152,8 @@ for center_time_str in center_time_list[ind_min:ind_max]:
                     "interpolation": "None",
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"rx_line_data_time_series_mms{3}_{center_time.strftime('%Y%m%d_%H%M%S')}.csv",
+                    "rc_file_name": f"rx_line_data_time_series_mms{3}_"
+                                    f"{center_time.strftime('%Y%m%d_%H%M%S')}.csv",
                     "rc_folder": "../data/rx_d/time_series/",
                     "save_rc_file": True,
                     "fig_version": f"time_series_{center_time.strftime('%Y%m%d_%H%M%S')}",

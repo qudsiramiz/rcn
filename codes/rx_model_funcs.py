@@ -1244,16 +1244,17 @@ def get_sw_params(
 
     # Get mms postion in GSM coordinates for the specified time range
 
-    if (mms_probe_num is not None):
+    # if (mms_probe_num is not None):
+    for xxxx in range(1):
         mms_fgm_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
-        mms_vars = spd.mms.mec(trange=trange, varnames=mms_fgm_varnames, probe=mms_probe_num,
+        _ = spd.mms.mec(trange=trange, varnames=mms_fgm_varnames, probe=mms_probe_num,
                                data_rate='srvy', level='l2', time_clip=time_clip,
                                latest_version=True)
-        mms_time = ptt.get_data(mms_vars[0])[0]
+        mms_time = ptt.get_data('mms3_mec_r_gsm')[0]
 
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
-        mms_sc_pos = ptt.get_data(mms_vars[0])[1:3][0] / r_e
+        mms_sc_pos = ptt.get_data('mms3_mec_r_gsm')[1:3][0] / r_e
 
         # TODO: Find out why adding 'mms_fgm_varnames' as a variable causes the code to give out no
         # data.
@@ -1261,23 +1262,31 @@ def get_sw_params(
         _ = spd.mms.fgm(trange=trange, probe=mms_probe_num, time_clip=time_clip,
                         latest_version=True)
         # mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
-        mms_fgm_b_gsm = ptt.get_data(mms_fgm_varnames[0])[1:4][0]
+        print(ptt.get_data(f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec'))
+        print("Hello")
+        mms_fgm_b_gsm = ptt.get_data(f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec')[1:4][0]
 
         # Get the data from the FPI
-        mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gsm_fast']
+        mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gse_brst']
 
-        _ = spd.mms.fpi(trange=trange, probe=mms_probe_num, data_rate='fast', level='l2',
+        _ = spd.mms.fpi(trange=trange, probe=mms_probe_num, data_rate='brst', level='l2',
                         datatype='dis-moms', varnames=mms_fpi_varnames, time_clip=time_clip,
                         latest_version=True)
-        mms_fpi_bulkv_gsm = ptt.get_data(mms_fpi_varnames[0])[1:4][0]
+        _ = spd.cotrans(name_in=f'mms{mms_probe_num}_dis_bulkv_gse_brst',
+                        name_out=f'mms{mms_probe_num}_dis_bulkv_gsm_brst', coord_in='gse',
+                        coord_out='gsm')
+
+        mms_fpi_bulkv_gsm = ptt.get_data(f'mms{mms_probe_num}_dis_bulkv_gsm_brst')[1:4][0]
+        # mms_fpi_bulkv_gsm = ptt.get_data(mms_fpi_varnames[0])[1:4][0]
         print(f"\n mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}\n\n\n")
-    else:
-        mms_time = None
-        mms_sc_pos = None
-        # mms_fgm_time = None
-        mms_fgm_b_gsm = None
-        mms_fpi_bulkv_gsm = None
-        pass
+    # else:
+    #     mms_time = None
+    #     mms_sc_pos = None
+    #     # mms_fgm_time = None
+    #     mms_fgm_b_gsm = None
+    #     mms_fpi_bulkv_gsm = None
+    #     print(f"\n mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}\n\n\n Opppsssss.....\n\n\n")
+    #     pass
 
     time_imf = np.nanmedian(omni_time)
     # print(time_imf, type(time_imf))
