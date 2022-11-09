@@ -136,7 +136,7 @@ def make_gifs(
 
 
 # Find all the folders in the current directory
-folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_20150902_164733/")
+folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_20170901_120000/")
 
 for folder in folder_list[:1]:
     image_inputs_t96 = {

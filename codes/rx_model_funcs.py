@@ -1243,6 +1243,12 @@ def get_sw_params(
     omni_vz = ptt.get_data(omni_vars[6])[1]
     omni_sym_h = ptt.get_data(omni_vars[7])[1]
 
+    # Convert omni_time to datetime objects from unix time
+    omni_time_datetime = [datetime.datetime.utcfromtimestamp(t) for t in omni_time]
+    # Get trange in datetime format
+    omni_trange_time_object = [pd.to_datetime(trange[0]).tz_localize("UTC"),
+                               pd.to_datetime(trange[1]).tz_localize("UTC")]
+
     # Get mms postion in GSM coordinates for the specified time range
 
     if (mms_probe_num is not None):
@@ -1269,7 +1275,7 @@ def get_sw_params(
         mms_mec_trange_time_object = [pd.to_datetime(mms_mec_trange[0]).tz_localize("UTC"),
                                       pd.to_datetime(mms_mec_trange[1]).tz_localize("UTC")]
 
-        print(f"\033[1:33m MMS trange is: {mms_trange_time_object} \033[0m")
+        # print(f"\033[1:33m MMS trange is: {mms_trange_time_object} \033[0m")
         mms_mec_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
         _ = spd.mms.mec(trange=mms_mec_trange, varnames=mms_mec_varnames, probe=mms_probe_num,
                                data_rate='srvy', level='l2', time_clip=time_clip,
@@ -1361,11 +1367,40 @@ def get_sw_params(
         mms_fpi_bulkv_gsm = None
         pass
 
-    time_imf = np.nanmedian(omni_time)
-    # print(time_imf, type(time_imf))
-    b_imf_x = np.nanmedian(omni_bx_gse)
-    b_imf_y = np.nanmedian(omni_by_gsm)
-    b_imf_z = np.nanmedian(omni_bz_gsm)
+    # Create the dataframe for OMNI data using omni_time_datetime as the index
+    omni_df = pd.DataFrame({
+        "time": omni_time,
+        "bx_gsm": omni_bx_gse,
+        "by_gsm": omni_by_gsm,
+        "bz_gsm": omni_bz_gsm,
+        "vx": omni_vx,
+        "vy": omni_vy,
+        "vz": omni_vz,
+        "np": omni_np,
+        "sym_h": omni_sym_h,
+    }, index=omni_time_datetime)
+
+
+    #Get the mean values of the parameters from OMNI data for the time range betwwen
+    #omni_trange_time_object[0] and omni_trange_time_object[1]
+    time_imf = np.nanmean(omni_df["time"].loc[omni_trange_time_object[0]:
+                                              omni_trange_time_object[1]])
+    b_imf_x = np.nanmean(omni_df["bx_gsm"].loc[omni_trange_time_object[0]:
+                                               omni_trange_time_object[1]])
+    b_imf_y = np.nanmean(omni_df["by_gsm"].loc[omni_trange_time_object[0]:
+                                               omni_trange_time_object[1]])
+    b_imf_z = np.nanmean(omni_df["bz_gsm"].loc[omni_trange_time_object[0]:
+                                               omni_trange_time_object[1]])
+    vx_imf = np.nanmean(omni_df["vx"].loc[omni_trange_time_object[0]:
+                                          omni_trange_time_object[1]])
+    vy_imf = np.nanmean(omni_df["vy"].loc[omni_trange_time_object[0]:
+                                          omni_trange_time_object[1]])
+    vz_imf = np.nanmean(omni_df["vz"].loc[omni_trange_time_object[0]:
+                                          omni_trange_time_object[1]])
+    np_imf = np.nanmean(omni_df["np"].loc[omni_trange_time_object[0]:
+                                          omni_trange_time_object[1]])
+    sym_h_imf = np.nanmean(omni_df["sym_h"].loc[omni_trange_time_object[0]:
+                                                omni_trange_time_object[1]])
 
     if (b_imf_z > 15 or b_imf_z < -18):
         warnings.warn(
@@ -1374,11 +1409,7 @@ def get_sw_params(
         )
 
     time_imf_hrf = datetime.datetime.utcfromtimestamp(time_imf)
-    np_imf = np.nanmedian(omni_np)
-    vx_imf = np.nanmedian(omni_vx)
-    vy_imf = np.nanmedian(omni_vy)
-    vz_imf = np.nanmedian(omni_vz)
-    sym_h_imf = np.nanmedian(omni_sym_h)
+
     v_imf = [vx_imf, vy_imf, vz_imf]
     b_imf = [b_imf_x, b_imf_y, b_imf_z]
 

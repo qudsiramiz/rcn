@@ -6,8 +6,9 @@ import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/time_series/rx_line_data_time_series_mms3_20170105_000000.csv"))
-cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
+fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221109.csv"))
+# cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
+cut_type_list = ["bz_neg", "bz_pos"]
 for file_name in fnames:
     for cut_type in cut_type_list[:]:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
@@ -18,7 +19,7 @@ for file_name in fnames:
             'dark_mode': True,
             'fig_name':  f"rx_hist_{mms_probe_num}",
             'fig_format': 'jpg',
-            'fig_folder': '../figures/rx_hist/rx_hist_vts',
+            'fig_folder': '../figures/rx_hist/rx_hist_v14',
             'fig_size': (8, 8),
             'histtype': 'step',
             'linewidth': 3,

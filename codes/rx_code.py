@@ -45,7 +45,7 @@ df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 0
+ind_min = 2
 ind_max = -1
 
 
@@ -66,6 +66,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # print(trange)
         # with suppress_stdout_stderr():
         for foo in range(1):
+            #for bar in range(1):
             try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
@@ -148,13 +149,13 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "interpolation": "None",
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221027.csv",
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221109.csv",
                     "rc_folder": "../data/rx_d/",
                     "save_rc_file": True,
                     "walen1": df_jet_reversal["walen1"][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal["jet_detection"][ind_range],
-                    "fig_version": "v13",
+                    "fig_version": "v14",
                     "r_W": df_jet_reversal["r_W"][ind_range],
                     "theta_W": df_jet_reversal["theta_w"][ind_range],
                     # "jet_time": df_jet_reversal["jet_time"][ind_range],

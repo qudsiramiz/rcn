@@ -11,8 +11,8 @@ importlib.reload(rxmf)
 importlib.reload(spf)
 importlib.reload(sfg)
 
-'''
-file_name = "../data/rx_d/reconnection_line_data_mms3_20221027.csv"
+
+file_name = "../data/rx_d/reconnection_line_data_mms3_20221109.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
@@ -193,10 +193,10 @@ for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
 
 # plt.show()
 plt.close('all')
-'''
 
-for i, df in enumerate(df_list):
-    spf.kde_plots(df=df, x='b_imf_z', y='b_imf_y', log_scale=False, y_log_scale=False,
-                  xlim=[-10, 8], ylim=[-10, 15],
-                  marker_size=20*df.r_rc.values, alpha=0.7, color=color_list[i],
-                  data_type=data_type[i], x_label=r"$B_{\rm z}$ [nT]", y_label=r"$B_{\rm y}$ [nT]")
+
+# for i, df in enumerate(df_list):
+#     spf.kde_plots(df=df, x='b_imf_z', y='b_imf_y', log_scale=False, y_log_scale=False,
+#                   xlim=[-10, 8], ylim=[-10, 15],
+#                   marker_size=20*df.r_rc.values, alpha=0.7, color=color_list[i],
+#                   data_type=data_type[i], x_label=r"$B_{\rm z}$ [nT]", y_label=r"$B_{\rm y}$ [nT]")

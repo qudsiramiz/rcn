@@ -36,6 +36,16 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     df_va_cs = df[df.method_used == "va_cs"]
     df_bisec = df[df.method_used == "bisection"]
 
+    if cut_type == "bz_neg":
+        df_shear = df_shear[df_shear["b_imf_z"] < 0]
+        df_rx_en = df_rx_en[df_rx_en["b_imf_z"] < 0]
+        df_va_cs = df_va_cs[df_va_cs["b_imf_z"] < 0]
+        df_bisec = df_bisec[df_bisec["b_imf_z"] < 0]
+    if cut_type == "bz_pos":
+        df_shear = df_shear[df_shear["b_imf_z"] > 0]
+        df_rx_en = df_rx_en[df_rx_en["b_imf_z"] > 0]
+        df_va_cs = df_va_cs[df_va_cs["b_imf_z"] > 0]
+        df_bisec = df_bisec[df_bisec["b_imf_z"] > 0]
     # if cut_type == "jet":
     #     # Remove all data points where the value of 'r_rc' is greater than 12
     #     df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)]
