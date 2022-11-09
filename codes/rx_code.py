@@ -119,7 +119,7 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "xrange": [y_min, y_max],
                     "yrange": [z_min, z_max],
                     "mms_probe_num": mms_probe_num,
-                    "mms_sc_pos": np.round(np.nanmean(sw_params["mms_sc_pos"], axis=0), 2),
+                    "mms_sc_pos": np.round(sw_params["mms_sc_pos"], 2),
                     "dr": dr,
                     "dipole_tilt_angle": sw_params["ps"],
                     "p_dyn": np.round(sw_params["p_dyn"], 2),
