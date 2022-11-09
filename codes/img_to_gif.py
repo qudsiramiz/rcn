@@ -136,7 +136,7 @@ def make_gifs(
 
 
 # Find all the folders in the current directory
-folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_20170105_000000/")
+folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_20150902_164733/")
 
 for folder in folder_list[:1]:
     image_inputs_t96 = {
@@ -146,7 +146,7 @@ for folder in folder_list[:1]:
         "vid_type": "mp4",
         "skip_rate": 1,
         "duration": 0.05,
-        "fps": 20
+        "fps": 10
     }
     print(f"Processing folder: {folder}")
     make_gifs(**image_inputs_t96)

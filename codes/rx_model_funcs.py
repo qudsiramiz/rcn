@@ -10,6 +10,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pyspedas as spd
 import pytplot as ptt
 import scipy as sp
@@ -1217,7 +1218,7 @@ def get_sw_params(
     """
 
     if trange is None:
-        raise ValueError("trange must be specified as a list of start and end times in the format" +
+        raise ValueError("trange must be specified as a list of start and end times in the format"
                          "'YYYY-MM-DD HH:MM:SS'.")
 
     # Check if trange is either a list or an array of length 2
@@ -1244,13 +1245,38 @@ def get_sw_params(
 
     # Get mms postion in GSM coordinates for the specified time range
 
-    # if (mms_probe_num is not None):
-    for xxxx in range(1):
-        mms_fgm_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
-        _ = spd.mms.mec(trange=trange, varnames=mms_fgm_varnames, probe=mms_probe_num,
+    if (mms_probe_num is not None):
+        # for xxxx in range(1):
+        # Define mms time as the center of the time range
+        mms_time_t0 = pd.to_datetime(trange[0]).tz_localize("UTC")
+        mms_time_dt = pd.to_datetime(trange[1]).tz_localize("UTC") - mms_time_t0
+        mms_time = mms_time_t0 + mms_time_dt / 2
+        #print(f"\033[1;31m Omni time is {datetime.datetime.utcfromtimestamp(omni_time[0])} to 
+        # {datetime.datetime.utcfromtimestamp(omni_time[-1])} \033[0m")
+        # print(f"\033[1:32m MMS time is {datetime.datetime.utcfromtimestamp(mms_time)} \033[0m")
+        # Define mms time range as +/- 10 seconds from the mms time
+        mms_trange = [mms_time - pd.Timedelta("5 second"), mms_time + pd.Timedelta("5 second")]
+        mms_mec_trange = [mms_time - pd.Timedelta("30 second"),
+                          mms_time + pd.Timedelta("30 second")]
+        # Convert mms time range to string
+        mms_trange = [mms_trange[0].strftime("%Y-%m-%d %H:%M:%S"),
+                      mms_trange[1].strftime("%Y-%m-%d %H:%M:%S")]
+        mms_mec_trange = [mms_mec_trange[0].strftime("%Y-%m-%d %H:%M:%S"),
+                          mms_mec_trange[1].strftime("%Y-%m-%d %H:%M:%S")]
+        # Convert mms time range to datetime
+        mms_trange_time_object = [pd.to_datetime(mms_trange[0]).tz_localize("UTC"),
+                                  pd.to_datetime(mms_trange[1]).tz_localize("UTC")]
+        mms_mec_trange_time_object = [pd.to_datetime(mms_mec_trange[0]).tz_localize("UTC"),
+                                      pd.to_datetime(mms_mec_trange[1]).tz_localize("UTC")]
+
+        print(f"\033[1:33m MMS trange is: {mms_trange_time_object} \033[0m")
+        mms_mec_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
+        _ = spd.mms.mec(trange=mms_mec_trange, varnames=mms_mec_varnames, probe=mms_probe_num,
                                data_rate='srvy', level='l2', time_clip=time_clip,
                                latest_version=True)
-        mms_time = ptt.get_data('mms3_mec_r_gsm')[0]
+        mms_mec_time = ptt.get_data('mms3_mec_r_gsm')[0]
+        # Convert mms fgm time to datetime
+        mms_mec_time = np.array([datetime.datetime.utcfromtimestamp(t) for t in mms_mec_time])
 
         # Position of MMS in GSM coordinates in earth radii (r_e) units
         r_e = 6378.137  # Earth radius in km
@@ -1259,34 +1285,81 @@ def get_sw_params(
         # TODO: Find out why adding 'mms_fgm_varnames' as a variable causes the code to give out no
         # data.
         mms_fgm_varnames = [f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec']
-        _ = spd.mms.fgm(trange=trange, probe=mms_probe_num, time_clip=time_clip,
+        _ = spd.mms.fgm(trange=mms_trange, probe=mms_probe_num, time_clip=time_clip,
                         latest_version=True)
         # mms_fgm_time = ptt.get_data(mms_fgm_varnames[0])[0]
-        print(ptt.get_data(f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec'))
-        print("Hello")
+
         mms_fgm_b_gsm = ptt.get_data(f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec')[1:4][0]
+        mms_fgm_time = ptt.get_data(f'mms{mms_probe_num}_fgm_b_gsm_srvy_l2_bvec')[0]
+        # Convert mms fgm time to datetime
+        mms_fgm_time = np.array([datetime.datetime.utcfromtimestamp(t) for t in mms_fgm_time])
 
-        # Get the data from the FPI
-        mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gse_brst']
-
-        _ = spd.mms.fpi(trange=trange, probe=mms_probe_num, data_rate='brst', level='l2',
-                        datatype='dis-moms', varnames=mms_fpi_varnames, time_clip=time_clip,
-                        latest_version=True)
-        _ = spd.cotrans(name_in=f'mms{mms_probe_num}_dis_bulkv_gse_brst',
-                        name_out=f'mms{mms_probe_num}_dis_bulkv_gsm_brst', coord_in='gse',
-                        coord_out='gsm')
-
-        mms_fpi_bulkv_gsm = ptt.get_data(f'mms{mms_probe_num}_dis_bulkv_gsm_brst')[1:4][0]
-        # mms_fpi_bulkv_gsm = ptt.get_data(mms_fpi_varnames[0])[1:4][0]
-        print(f"\n mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}\n\n\n")
-    # else:
-    #     mms_time = None
-    #     mms_sc_pos = None
-    #     # mms_fgm_time = None
-    #     mms_fgm_b_gsm = None
-    #     mms_fpi_bulkv_gsm = None
-    #     print(f"\n mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}\n\n\n Opppsssss.....\n\n\n")
-    #     pass
+        try :
+            data_rate = 'fast'
+            mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gse_{data_rate}']
+            _ = spd.mms.fpi(trange=mms_trange, probe=mms_probe_num, data_rate=data_rate,
+                            level='l2', datatype='dis-moms', varnames=mms_fpi_varnames,
+                            time_clip=time_clip, latest_version=True)
+            _ = spd.cotrans(name_in=f'mms{mms_probe_num}_dis_bulkv_gse_{data_rate}',
+                            name_out=f'mms{mms_probe_num}_dis_bulkv_gsm_{data_rate}',
+                            coord_in='gse', coord_out='gsm')
+            mms_fpi_time = ptt.get_data(f'mms{mms_probe_num}_dis_bulkv_gsm_{data_rate}')[0]
+            # Convert mms_fpi_time to datetime from unix time
+            mms_fpi_time = np.array([datetime.datetime.utcfromtimestamp(x) for x in mms_fpi_time])
+            mms_fpi_bulkv_gsm = ptt.get_data(f'mms{mms_probe_num}_dis_bulkv_gsm_{data_rate}')[1:4][0]
+            if verbose:
+                print(f"\n \033[1;31m {data_rate} mode data found for MMS{mms_probe_num} \033[0m \n")
+                # Print the minimum and maximum time of the MMS data
+                # print(f"Minimum time of MMS{mms_probe_num} data: {mms_fpi_time[0]}")
+                # print(f"Maximum time of MMS{mms_probe_num} data: {mms_fpi_time[-1]}")
+                # print(f"mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}")
+                # # Plot the bulk velocity
+                # plt.figure(figsize=(10, 3))
+                # plt.plot(mms_fpi_time, mms_fpi_bulkv_gsm[:, 0], label='Vx', color='b')
+                # plt.plot(mms_fpi_time, mms_fpi_bulkv_gsm[:, 1], label='Vy', color='g')
+                # plt.plot(mms_fpi_time, mms_fpi_bulkv_gsm[:, 2], label='Vz', color='r')
+                # plt.legend()
+                # plt.title(f'MMS{mms_probe_num} Bulk Velocity in GSM coordinates')
+                # plt.xlabel('Time')
+                # plt.ylabel('Bulk Velocity (km/s)')
+                # plt.savefig(f'../figures/mms{mms_probe_num}_bulk_velocity.png', dpi=300,
+                #             bbox_inches='tight', pad_inches=0.1)
+                # plt.close("all")
+        except:
+            # Get the data from the FPI
+            data_rate = 'brst'
+            mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gse_{data_rate}']
+            _ = spd.mms.fpi(trange=mms_trange, probe=mms_probe_num, data_rate=data_rate,
+                            level='l2', datatype='dis-moms', varnames=mms_fpi_varnames,
+                            time_clip=time_clip, latest_version=True)
+            _ = spd.cotrans(name_in=f'mms{mms_probe_num}_dis_bulkv_gse_{data_rate}',
+                            name_out=f'mms{mms_probe_num}_dis_bulkv_gsm_{data_rate}',
+                            coord_in='gse', coord_out='gsm')
+            mms_fpi_time = ptt.get_data(f'mms{mms_probe_num}_dis_bulkv_gsm_{data_rate}')[0]
+            # Convert mms_fpi_time to datetime from unix time
+            mms_fpi_time = [datetime.datetime.utcfromtimestamp(x) for x in mms_fpi_time]
+            mms_fpi_bulkv_gsm = ptt.get_data(f'mms{mms_probe_num}_dis_bulkv_gsm_{data_rate}')[1:4][0]
+            if verbose:
+                print(f"\n \033[1;32m {data_rate} mode data found for MMS{mms_probe_num} \033[0m \n")
+                # print(f"mms_fpi_bulkv_gsm: {mms_fpi_bulkv_gsm}")
+                # plt.figure(figsize=(10, 3))
+                # plt.plot(mms_fpi_time, mms_fpi_bulkv_gsm[:, 0], label='Vx', color='b')
+                # plt.plot(mms_fpi_time, mms_fpi_bulkv_gsm[:, 1], label='Vy', color='g')
+                # plt.plot(mms_fpi_time, mms_fpi_bulkv_gsm[:, 2], label='Vz', color='r')
+                # plt.legend()
+                # plt.title(f'MMS{mms_probe_num} Bulk Velocity in GSM coordinates')
+                # plt.xlabel('Time')
+                # plt.ylabel('Bulk Velocity (km/s)')
+                # plt.savefig(f'../figures/mms{mms_probe_num}_bulk_velocity.png', dpi=300,
+                #             bbox_inches='tight', pad_inches=0.1)
+                # plt.close("all")
+    else:
+        mms_time = None
+        mms_sc_pos = None
+        # mms_fgm_time = None
+        mms_fgm_b_gsm = None
+        mms_fpi_bulkv_gsm = None
+        pass
 
     time_imf = np.nanmedian(omni_time)
     # print(time_imf, type(time_imf))
@@ -1314,8 +1387,8 @@ def get_sw_params(
         imf_clock_angle += 360
     if mms_probe_num is not None:
         mean_mms_sc_pos = np.round(np.nanmean(mms_sc_pos, axis=0), decimals=2)
-        mean_mms_fgm_b_gsm = np.round(np.nanmedian(mms_fgm_b_gsm, axis=0), decimals=2)
-        mean_mms_fpi_bulkv_gsm = np.round(np.nanmedian(mms_fpi_bulkv_gsm, axis=0), decimals=2)
+        mean_mms_fgm_b_gsm = np.round(np.nanmean(mms_fgm_b_gsm, axis=0), decimals=2)
+        mean_mms_fpi_bulkv_gsm = np.round(np.nanmean(mms_fpi_bulkv_gsm, axis=0), decimals=2)
     else:
         mean_mms_sc_pos = None
         mean_mms_fgm_b_gsm = None
@@ -1365,6 +1438,40 @@ def get_sw_params(
     # Compute the dipole tilt angle
     ps = gp.recalc(time_imf)
 
+    # Create a dataframe for mms fgm data
+    df_fgm = pd.DataFrame(data=mms_fgm_b_gsm, columns=["Bx", "By", "Bz"], index=mms_fgm_time)
+
+    # Get the mean of the fgm data for time range between mms_trange_time_object[0] and
+    # mms_trange_time_object[1]
+    bx_mean = np.nanmean(df_fgm["Bx"].loc[mms_trange_time_object[0]:mms_trange_time_object[1]])
+    by_mean = np.nanmean(df_fgm["By"].loc[mms_trange_time_object[0]:mms_trange_time_object[1]])
+    bz_mean = np.nanmean(df_fgm["Bz"].loc[mms_trange_time_object[0]:mms_trange_time_object[1]])
+
+    # Create a dataframe for mms fpi data
+    df_fpi = pd.DataFrame(data=mms_fpi_bulkv_gsm, columns=["Vx", "Vy", "Vz"], index=mms_fpi_time)
+
+    # Get the mean of the fpi data for time range between mms_trange_time_object[0] and
+    # mms_trange_time_object[1]
+    vx_mean = np.nanmean(df_fpi["Vx"].loc[mms_trange_time_object[0]:mms_trange_time_object[1]])
+    vy_mean = np.nanmean(df_fpi["Vy"].loc[mms_trange_time_object[0]:mms_trange_time_object[1]])
+    vz_mean = np.nanmean(df_fpi["Vz"].loc[mms_trange_time_object[0]:mms_trange_time_object[1]])
+
+    # Create a dataframe for mms sc position data
+    df_mec = pd.DataFrame(data=mms_sc_pos, columns=["X", "Y", "Z"], index=mms_mec_time)
+
+    # Get the mean of the sc position data for time range between mms_trange_time_object[0] and
+    # mms_trange_time_object[1]
+    x_mean = np.nanmean(df_mec["X"].loc[
+                                    mms_mec_trange_time_object[0]:mms_mec_trange_time_object[1]])
+    y_mean = np.nanmean(df_mec["Y"].loc[
+                                    mms_mec_trange_time_object[0]:mms_mec_trange_time_object[1]])
+    z_mean = np.nanmean(df_mec["Z"].loc[
+                                    mms_mec_trange_time_object[0]:mms_mec_trange_time_object[1]])
+
+    # Merge the fgm and fpi dataframes
+    # df_fgm_fpi = pd.merge_asof(df_fgm, df_fpi, left_index=True, right_index=True)
+
+    
     # Make a dictionary of all the solar wind parameters
     sw_dict = {}
     sw_dict['time'] = time_imf
@@ -1376,10 +1483,11 @@ def get_sw_params(
     sw_dict['imf_clock_angle'] = imf_clock_angle
     sw_dict['param'] = param
     sw_dict['mms_time'] = mms_time
-    sw_dict['mms_sc_pos'] = mms_sc_pos
-    sw_dict['mms_b_gsm'] = mean_mms_fgm_b_gsm
-    sw_dict['mms_v_gsm'] = mean_mms_fpi_bulkv_gsm
+    sw_dict['mms_sc_pos'] = [x_mean, y_mean, z_mean]
+    sw_dict['mms_b_gsm'] = [bx_mean, by_mean, bz_mean]
+    sw_dict['mms_v_gsm'] = [vx_mean, vy_mean, vz_mean]
 
+    #return sw_dict, df_fgm, df_fpi, df_mec, df_fgm_fpi
     return sw_dict
 
 

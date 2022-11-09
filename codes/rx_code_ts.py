@@ -37,7 +37,7 @@ today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 #                     "2016-11-15 13:28:00", "2017-02-04 01:04:00", "2017-01-24 03:56:00",
 #                     "2017-01-21 00:09:00", "2017-01-09 02:58:00", "2017-01-05 01:21:00"]
 
-center_time_list = ["2015-09-19 08:35:00"]
+center_time_list = ["2015-09-02 16:47:33"]
 ind_min = 0
 ind_max = 1
 
@@ -45,15 +45,28 @@ for center_time_str in center_time_list[ind_min:ind_max]:
     center_time = pd.to_datetime(center_time_str).tz_localize("UTC")
 
     # Get a start/end time 1 hour before/after the center time and set the time zone to UTC
-    start_time = (center_time - pd.Timedelta("1 minute")).tz_convert("UTC")
-    end_time = (center_time + pd.Timedelta("1 minute")).tz_convert("UTC")
+    start_time = (center_time - pd.Timedelta("2 minute")).tz_convert("UTC")
+    end_time = (center_time + pd.Timedelta("2 minute")).tz_convert("UTC")
 
     # Define an array of time ranges to loop over, between the start and end times with 1 minute
     # intervals
-    ind_t_min = 0
-    ind_t_max = 1
-    trange_list = pd.date_range(start_time, end_time, freq="1min").tz_convert("UTC")
-    for ind_range, trange in enumerate(trange_list[ind_t_min:ind_t_max], start=ind_t_min):
+    ind_t_min = 200
+    ind_t_max = 241
+    trange_list = pd.date_range(start_time, end_time, freq="1s").tz_convert("UTC")
+    for ind_range, trange in enumerate(trange_list[ind_t_min:ind_t_max:1], start=ind_t_min):
+        trange_min = trange - pd.Timedelta("0.5 minute")
+        trange_max = trange + pd.Timedelta("0.5 minute")
+        trange = [trange_min.strftime('%Y-%m-%d %H:%M:%S'), trange_max.strftime('%Y-%m-%d %H:%M:%S')]
+        # with suppress_stdout_stderr():
+        #     sw_dict, df_mms, df_mec, df_fgm, df_fpi = rmf.get_sw_params(trange=trange,
+        #                                                                 mms_probe_num=3,
+        #                                                                 verbose=False)
+
+        # print(f"\033[1;32m{sw_dict['mms_b_gsm'][:]} \033[0m")
+        # print(f"\033[1;32m{sw_dict['mms_v_gsm'][:]} \033[0m")
+        # print(f"\033[1;32m{df_fgm.index.min()} \033[0m")
+        # print(f"\033[1;32m{df_fgm.index.max()} \033[0m")
+        # print(f"\033[1;32m{trange} \033[0m")
 
         # Print the ind_range  which is being processed in green color every 10th time
         if ind_range % 5 == 0:
@@ -65,8 +78,9 @@ for center_time_str in center_time_list[ind_min:ind_max]:
         # trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        # with suppress_stdout_stderr():
-        for foo in range(1):
+        with suppress_stdout_stderr():
+        # for foo in range(1):
+        #     for bar in range(1):
             try:
                 mms_probe_num = str(3)
                 min_max_val = 20
@@ -78,7 +92,7 @@ for center_time_str in center_time_list[ind_min:ind_max]:
                 model_type = "t96"
 
                 model_inputs = {
-                    "trange": [trange],
+                    "trange": trange,
                     "dt": 2,
                     "probe": None,
                     "omni_level": "hro",
@@ -115,7 +129,7 @@ for center_time_str in center_time_list[ind_min:ind_max]:
                 figure_inputs = {
                     "image": [shear_norm, rx_en_norm, va_cs_norm, bisec_msp_norm],
                     "convolution_order": [1, 1, 1, 1],
-                    "t_range": [trange],
+                    "t_range": trange,
                     "dt": 2,
                     "b_imf": np.round(sw_params["b_imf"], 2),
                     "b_msh": np.round(sw_params["mms_b_gsm"], 2),
@@ -123,7 +137,7 @@ for center_time_str in center_time_list[ind_min:ind_max]:
                     "xrange": [y_min, y_max],
                     "yrange": [z_min, z_max],
                     "mms_probe_num": 3,
-                    "mms_sc_pos": np.round(np.nanmean(sw_params["mms_sc_pos"], axis=0), 2),
+                    "mms_sc_pos": np.round(sw_params["mms_sc_pos"], 2),
                     "dr": dr,
                     "dipole_tilt_angle": sw_params["ps"],
                     "p_dyn": np.round(sw_params["p_dyn"], 2),
