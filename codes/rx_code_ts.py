@@ -50,8 +50,8 @@ for center_time_str in center_time_list[ind_min:ind_max]:
 
     # Define an array of time ranges to loop over, between the start and end times with 1 minute
     # intervals
-    ind_t_min = 1200
-    ind_t_max = 1441
+    ind_t_min = 0
+    ind_t_max = -1
     trange_list = pd.date_range(start_time, end_time, freq="1min").tz_convert("UTC")
     for ind_range, trange in enumerate(trange_list[ind_t_min:ind_t_max:1], start=ind_t_min):
         trange_min = trange - pd.Timedelta("0.5 minute")
