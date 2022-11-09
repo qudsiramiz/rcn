@@ -37,7 +37,7 @@ today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 #                     "2016-11-15 13:28:00", "2017-02-04 01:04:00", "2017-01-24 03:56:00",
 #                     "2017-01-21 00:09:00", "2017-01-09 02:58:00", "2017-01-05 01:21:00"]
 
-center_time_list = ["2015-09-02 16:47:33"]
+center_time_list = ["2017-09-01 12:00:00"]
 ind_min = 0
 ind_max = 1
 
@@ -45,14 +45,14 @@ for center_time_str in center_time_list[ind_min:ind_max]:
     center_time = pd.to_datetime(center_time_str).tz_localize("UTC")
 
     # Get a start/end time 1 hour before/after the center time and set the time zone to UTC
-    start_time = (center_time - pd.Timedelta("2 minute")).tz_convert("UTC")
-    end_time = (center_time + pd.Timedelta("2 minute")).tz_convert("UTC")
+    start_time = (center_time - pd.Timedelta("720 minute")).tz_convert("UTC")
+    end_time = (center_time + pd.Timedelta("720 minute")).tz_convert("UTC")
 
     # Define an array of time ranges to loop over, between the start and end times with 1 minute
     # intervals
-    ind_t_min = 200
-    ind_t_max = 241
-    trange_list = pd.date_range(start_time, end_time, freq="1s").tz_convert("UTC")
+    ind_t_min = 1200
+    ind_t_max = 1441
+    trange_list = pd.date_range(start_time, end_time, freq="1min").tz_convert("UTC")
     for ind_range, trange in enumerate(trange_list[ind_t_min:ind_t_max:1], start=ind_t_min):
         trange_min = trange - pd.Timedelta("0.5 minute")
         trange_max = trange + pd.Timedelta("0.5 minute")
