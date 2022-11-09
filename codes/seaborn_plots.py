@@ -11,7 +11,7 @@ importlib.reload(rxmf)
 importlib.reload(spf)
 importlib.reload(sfg)
 
-
+'''
 file_name = "../data/rx_d/reconnection_line_data_mms3_20221109.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
@@ -173,30 +173,30 @@ plt.rc('text', usetex=True)
 label_fontsize = 15
 tick_fontsize = 12
 data_type = ["shear", "rx_en", "va_cs", "bisec"]
-ind1 = 0
-ind2 = 10
+ind1 = 10
+ind2 = 11
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     if key == "msh_msp_shear":
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["delta_beta", "msh_msp_shear"],
-                                        labels=[r"$\Delta \beta$", key2],
+                                        labels=[r"$\\Delta \\beta$", key2],
                                         data_type=data_type, color_list=color_list, log_scale=False,
                                         x_log_scale=True, y_log_scale=False,
-                                        fig_name=None, fig_format="png", nbins=[20, 20],
+                                        fig_name=None, fig_format="pdf", nbins=[20, 20],
                                         dark_mode=dark_mode)
     else:
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
-                                       labels=[r"Reconnection Distance $(R_\oplus)$", key2],
+                                       labels=[r"Reconnection Distance $(R_\\oplus)$", key2],
                                        data_type=data_type, color_list=color_list, log_scale=False,
                                        x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
-                                       fig_name=None, fig_format="png", nbins=[20, 20],
+                                       fig_name=None, fig_format="pdf", nbins=[20, 20],
                                        dark_mode=dark_mode)
 
 # plt.show()
 plt.close('all')
+'''
 
-
-# for i, df in enumerate(df_list):
-#     spf.kde_plots(df=df, x='b_imf_z', y='b_imf_y', log_scale=False, y_log_scale=False,
-#                   xlim=[-10, 8], ylim=[-10, 15],
-#                   marker_size=20*df.r_rc.values, alpha=0.7, color=color_list[i],
-#                   data_type=data_type[i], x_label=r"$B_{\rm z}$ [nT]", y_label=r"$B_{\rm y}$ [nT]")
+for i, df in enumerate(df_list):
+    spf.kde_plots(df=df, x='b_imf_x', y='b_imf_z', log_scale=False, y_log_scale=False,
+                  xlim=[-10, 8], ylim=[-8, 8],
+                  marker_size=20*df.r_rc.values, alpha=0.7, color=color_list[i],
+                  data_type=data_type[i], x_label=r"$B_{\rm x}$ [nT]", y_label=r"$B_{\rm z}$ [nT]")

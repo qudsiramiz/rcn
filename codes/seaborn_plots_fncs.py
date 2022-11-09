@@ -140,10 +140,10 @@ def kde_plots(
     axs1.fig.tight_layout()
 
     if (fig_save):
-        fig_dir = f"../figures/seaborn_plots/20221102/"
+        fig_dir = f"../figures/seaborn_plots/20221109/"
         if not os.path.exists(fig_dir):
             os.makedirs(fig_dir)
-        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221102.png"
+        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221109.png"
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
     return axs1
@@ -227,9 +227,10 @@ def seaborn_subplots(
     gs.tight_layout(fig)
     gs.update(top=1, bottom=0.05, left=0.06, right=1, hspace=0.01, wspace=0.20)
     if fig_name is None:
-        fig_name = f"../figures/seaborn_plots/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}_20221027.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/20221109/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}" +\
+                   f"_20221109.{fig_format}"
     else:
-        fig_name = f"../figures/seaborn_plots/20221027/{fig_name}_{dark_mode}_20221027.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/20221109/{fig_name}_{dark_mode}_20221109.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
     print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
 
