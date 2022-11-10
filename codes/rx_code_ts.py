@@ -51,7 +51,7 @@ for center_time_str in center_time_list[ind_min:ind_max]:
     # Define an array of time ranges to loop over, between the start and end times with 1 minute
     # intervals
     ind_t_min = 0
-    ind_t_max = -1
+    ind_t_max = 1
     trange_list = pd.date_range(start_time, end_time, freq="1min").tz_convert("UTC")
     for ind_range, trange in enumerate(trange_list[ind_t_min:ind_t_max:1], start=ind_t_min):
         trange_min = trange - pd.Timedelta("0.5 minute")
@@ -78,8 +78,8 @@ for center_time_str in center_time_list[ind_min:ind_max]:
         # trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        with suppress_stdout_stderr():
-        # for foo in range(1):
+        #with suppress_stdout_stderr():
+        for foo in range(1):
         #     for bar in range(1):
             try:
                 mms_probe_num = str(3)
