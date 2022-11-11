@@ -107,24 +107,41 @@ for foo in range(1):
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
         indx_max = indx_min + 2
-        # create a pool of processes
-        pool = mp.Pool()
-        # create a list of processes to run
-        processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for
-                     crossing_time in df_crossings.index[indx_min:indx_max]]
-        # run the processes
+
+        # Run the jet reversal check in parallel
+        # pool = mp.Pool()
+        # pool.map(check_jet_reversal, df_crossings.index[indx_min:indx_max])
+        # pool.close()
+        # pool.join()
+        # Create a list of processes that we want to run and run them in parallel
+        processes = [mp.Process(target=check_jet_reversal, args=(crossing_time,))
+                     for crossing_time in df_crossings.index[indx_min:indx_max]]
+        # Run processes
         for p in processes:
-            p.get()
-            p.wait()
-        # close the pool and wait for the processes to finish
-        pool.close()
-        pool.join()
+            p.start()
+        # Exit the completed processes
+        for p in processes:
+            p.join()
+        # for p in processes:
+        #     p.terminate()
+        for p in processes:
+            p.close()
+        #pool = mp.Pool()
+        ## create a list of processes to run
+        #processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for
+        #             crossing_time in df_crossings.index[indx_min:indx_max]]
+        ## run the processes
+        #for p in processes:
+        #    p.get()
+        ## close the pool and wait for the processes to finish
+        #pool.close()
+        #pool.join()
     else:
-        indx_min = 28
+        indx_min = 27
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 1
+        indx_max = indx_min + 2
         for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
                                            start=indx_min):
             check_jet_reversal(crossing_time)
