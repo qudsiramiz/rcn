@@ -133,7 +133,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
         # Convert gsm to lmn
         _ = mms_cotrans_lmn.mms_cotrans_lmn(name_in=f'mms{probe}_dis_bulkv_gsm_{data_rate}',
                                             name_out=f'mms{probe}_dis_bulkv_lmn_{data_rate}',
-                                            gsm=True, probe=str(probe), data_rate=data_rate)
+                                            gse=False, gsm=True, probe=str(probe), data_rate=data_rate)
 
         mms_fpi_bulkv_lmn = ptt.get_data(f'mms{probe}_dis_bulkv_lmn_{data_rate}')[1:4][0]
 
