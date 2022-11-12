@@ -71,7 +71,7 @@ ax[3].legend()
 plt.savefig(f"../figures/fgm_data_01.png", dpi=300, bbox_inches="tight")
 plt.close("all")
 """
-data_rate = 'brst'
+data_rate = 'fast'
 data_type = ['des-moms', 'dis-moms']
 mms_fpi_varnames = [f'mms{probe}_dis_bulkv_gse_{data_rate}', f'mms{probe}_dis_bulkv_gsm_{data_rate}',
                     f'mms{probe}_dis_bulkv_gsm_lmn_{data_rate}', f'mms{probe}_dis_bulkv_gse_lmn_{data_rate}']
@@ -97,7 +97,7 @@ _ = spd.cotrans(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}',
 fpi_time_unix = ptt.get_data(mms_fpi_varnames[0])[0]
 fpi_v_gse = ptt.get_data(mms_fpi_varnames[0])[1:][0]
 fpi_v_gsm = ptt.get_data(mms_fpi_varnames[1])[1:][0]
-fpi_v_gsm_lmn = ptt.get_data(mms_fpi_varnames[2])[1:][0]
+#fpi_v_gsm_lmn = ptt.get_data(mms_fpi_varnames[2])[1:][0]
 #fpi_v_gse_lmn = ptt.get_data(mms_fpi_varnames[3])[1:][0]
 
 fpi_time_utc = spd.time_datetime(fpi_time_unix)
@@ -118,9 +118,9 @@ plt.figure(figsize=(12, 2.8))
 # plt.plot(fpi_time_utc, fpi_v_gse_lmn[:, 1], label='Vm_gse_lmn', lw=2, alpha=1, color='b')
 # plt.plot(fpi_time_utc, fpi_v_gse_lmn[:, 2], label='Vn_gse_lmn', lw=2, alpha=1, color='g')
 
-plt.plot(fpi_time_utc, fpi_v_gsm_lmn[:, 0], label='Vl_gsm_lmn', lw=1.5, alpha=0.3, color='b')
-plt.plot(fpi_time_utc, fpi_v_gsm_lmn[:, 1], label='Vm_gsm_lmn', lw=1.5, alpha=0.3, color='g')
-plt.plot(fpi_time_utc, fpi_v_gsm_lmn[:, 2], label='Vn_gsm_lmn', lw=1.5, alpha=0.3, color='r')
+plt.plot(fpi_time_utc, fpi_v_gsm[:, 0], label='Vx_gsm', lw=1.5, alpha=0.3, color='b')
+plt.plot(fpi_time_utc, fpi_v_gsm[:, 1], label='Vy_gsm', lw=1.5, alpha=0.3, color='g')
+plt.plot(fpi_time_utc, fpi_v_gsm[:, 2], label='Vz_gsm', lw=1.5, alpha=0.3, color='r')
 
 
 plt.xlabel('Time [UTC]')
