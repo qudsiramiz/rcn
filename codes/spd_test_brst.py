@@ -71,10 +71,10 @@ ax[3].legend()
 plt.savefig(f"../figures/fgm_data_01.png", dpi=300, bbox_inches="tight")
 plt.close("all")
 """
-data_rate = 'fast'
+data_rate = 'brst'
 data_type = ['des-moms', 'dis-moms']
-mms_fpi_varnames = [f'mms3_dis_bulkv_gse_{data_rate}', f'mms3_dis_bulkv_gsm_{data_rate}',
-                    f'mms3_dis_bulkv_gsm_lmn_{data_rate}', f'mms3_dis_bulkv_gse_lmn_{data_rate}']
+mms_fpi_varnames = [f'mms{probe}_dis_bulkv_gse_{data_rate}', f'mms{probe}_dis_bulkv_gsm_{data_rate}',
+                    f'mms{probe}_dis_bulkv_gsm_lmn_{data_rate}', f'mms{probe}_dis_bulkv_gse_lmn_{data_rate}']
 
 _ = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level='l2',
                 datatype=data_type, time_clip=time_clip, varnames=mms_fpi_varnames,
