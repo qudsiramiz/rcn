@@ -3,15 +3,15 @@ import pytplot as ptt
 import matplotlib.pyplot as plt
 import pyspedas.mms.cotrans.mms_cotrans_lmn as mms_cotrans_lmn
 
-trange = ['2015-09-02 16:38:44.145', '2015-09-02 16:58:44.145']
-
+# trange = ['2015-09-02 16:38:44.145', '2015-09-02 16:58:44.145']
+trange = ['2018-08-25 00:00:00', '2018-08-28 00:00:00']
 data_rate = 'srvy'
-probe = 3
+probe = 1
 time_clip = True
 
-#_ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
-#                get_fgm_ephemeris=True, varnames=mms_fgm_varnames, level='l2')
-
+# _ = spd.mms.fgm(trange=trange, probe=probe, time_clip=time_clip, latest_version=True,
+#                 get_fgm_ephemeris=True, varnames=mms_fgm_varnames, level='l2')
+"""
 mms_fgm_varnames = ['mms3_fgm_b_gsm_srvy_l2', 'mms3_fgm_b_gse_srvy_l2',
                     'mms3_fgm_b_gsm_lmn_srvy_l2_bvec', 'mms3_fgm_b_gse_lmn_srvy_l2_bvec']
 _ = spd.mms.fgm(
@@ -72,12 +72,12 @@ plt.savefig(f"../figures/fgm_data_01.png", dpi=300, bbox_inches="tight")
 plt.close("all")
 """
 data_rate = 'fast'
-
+data_type = ['des-moms', 'dis-moms']
 mms_fpi_varnames = [f'mms3_dis_bulkv_gse_{data_rate}', f'mms3_dis_bulkv_gsm_{data_rate}',
-                    f'mms3_dis_bulkv_gsm_lmn_{data_rate}', f'mms3_dis_bulkv_gse_lmn_{data_rate}',]
+                    f'mms3_dis_bulkv_gsm_lmn_{data_rate}', f'mms3_dis_bulkv_gse_lmn_{data_rate}']
 
 _ = spd.mms.fpi(trange=trange, probe=probe, data_rate=data_rate, level='l2',
-                datatype='dis-moms', time_clip=time_clip, varnames=mms_fpi_varnames,
+                datatype=data_type, time_clip=time_clip, varnames=mms_fpi_varnames,
                 latest_version=True, get_support_data=True)
 
 
@@ -85,9 +85,10 @@ _ = spd.cotrans(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}',
                 name_out=f'mms{probe}_dis_bulkv_gsm_{data_rate}', coord_in='gse',
                 coord_out='gsm')
 
-_ = mms_cotrans_lmn.mms_cotrans_lmn(name_in=f'mms{probe}_dis_bulkv_gsm_{data_rate}',
-                                    name_out=f'mms{probe}_dis_bulkv_gsm_lmn_{data_rate}',
-                                    gse=False, gsm=True, probe=str(probe), data_rate=data_rate)
+# _ = mms_cotrans_lmn.mms_cotrans_lmn(name_in=f'mms{probe}_dis_bulkv_gsm_{data_rate}',
+#                                     name_out=f'mms{probe}_dis_bulkv_gsm_lmn_{data_rate}',
+#                                     gse=False, gsm=True, probe=str(probe), 
+#                                     data_rate=data_rate)
 
 #_ = mms_cotrans_lmn.mms_cotrans_lmn(name_in=f'mms{probe}_dis_bulkv_gse_{data_rate}',
 #                                    name_out=f'mms{probe}_dis_bulkv_gse_lmn_{data_rate}',
@@ -126,6 +127,7 @@ plt.xlabel('Time [UTC]')
 plt.ylabel('V [km/s]')
 plt.xlim(fpi_time_utc[0], fpi_time_utc[-1])
 plt.legend()
-plt.title(f"MMS{probe} FPI {data_rate} data for {fpi_time_utc[0].strftime('%Y-%m-%d %H:%M:%S')} to {fpi_time_utc[-1].strftime('%Y-%m-%d %H:%M:%S')}")
+plt.title(f"MMS{probe} FPI {data_rate} data for "
+          f"{fpi_time_utc[0].strftime('%Y-%m-%d %H:%M:%S')} to "
+          f"{fpi_time_utc[-1].strftime('%Y-%m-%d %H:%M:%S')}")
 plt.savefig(f"../figures/fpi_data.png", dpi=300, bbox_inches="tight")
-"""
