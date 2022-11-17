@@ -65,10 +65,10 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
         print(f"\033[92m \n Started process for Figure number {ind_range} \033[0m \n")
-        with suppress_stdout_stderr():
-            # for foo in range(1):
-            # for bar in range(1):
-            try:
+        # with suppress_stdout_stderr():
+        for foo in range(1):
+            for bar in range(1):
+                # try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
                 dr = 0.25
@@ -167,10 +167,10 @@ for mms_probe_num in mms_probe_num_list[2:3]:
 
                 y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(
                                                             **figure_inputs, fig_format="png")
-                print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
-            except Exception as e:
-                print(f"\033[91m \n Figure not plotted for time range {trange} \n because of"
-                      f"following exception: {e} \n \033[0m")
+           #     print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
+           # except Exception as e:
+           #     print(f"\033[91m \n Figure not plotted for time range {trange} \n because of"
+           #           f"following exception: {e} \n \033[0m")
         # except Exception as e:
         #     # Print the error in green
         #     print("\033[92m", f"Figure not plotted for {trange} and index value of {ind_range}\n",
