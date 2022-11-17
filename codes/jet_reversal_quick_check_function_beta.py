@@ -89,10 +89,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     #     df_crossing_temp.set_index("jet_time", inplace=True)
     #     crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")[:]
     # except:
-    df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
-    df_crossing_temp.set_index("DateStart", inplace=True)
-    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
+    # df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
+    # df_crossing_temp.set_index("DateStart", inplace=True)
+    # crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    df_crossing_temp = pd.read_csv("../data/event_list_MMS_jet_reversals_from_steve.csv",
+                                   index_col=False)
+    df_crossing_temp.set_index("jet_time", inplace=True)
+    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")
     ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
 
     # Get the data from the FPI

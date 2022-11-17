@@ -22,9 +22,9 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 
-df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_brst.csv",
-                              index_col=False)
-
+# df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_brst.csv",
+#                               index_col=False)
+df_jet_reversal = pd.read_csv("../data/event_list_MMS_jet_reversals_from_steve.csv", index_col=False)
 # If nay column has NaN, drop that row
 df_jet_reversal = df_jet_reversal.dropna()
 
@@ -45,8 +45,8 @@ df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 2
-ind_max = -1
+ind_min = 0
+ind_max = 2
 
 
 @contextmanager
@@ -66,8 +66,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # print(trange)
         # with suppress_stdout_stderr():
         for foo in range(1):
-            #for bar in range(1):
-            try:
+            for bar in range(1):
+            # try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
                 dr = 0.25
@@ -149,13 +149,13 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "interpolation": "None",
                     "tsy_model": model_type,
                     "dark_mode": True,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221109.csv",
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221116.csv",
                     "rc_folder": "../data/rx_d/",
                     "save_rc_file": True,
                     "walen1": df_jet_reversal["walen1"][ind_range],
                     "walen2": df_jet_reversal["walen2"][ind_range],
                     "jet_detection": df_jet_reversal["jet_detection"][ind_range],
-                    "fig_version": "v14",
+                    "fig_version": "vsp",
                     "r_W": df_jet_reversal["r_W"][ind_range],
                     "theta_W": df_jet_reversal["theta_w"][ind_range],
                     # "jet_time": df_jet_reversal["jet_time"][ind_range],
@@ -167,9 +167,9 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                 y_vals, x_intr_vals_list, y_intr_vals_list = rmf.ridge_finder_multiple(
                                                             **figure_inputs, fig_format="png")
                 print(f"\033[92m \n Everything saved for Figure number {ind_range} \033[0m \n")
-            except Exception as e:
-                print(f"\033[91m \n Figure not plotted for time range {trange} \n because of"
-                      f"following exception: {e} \n \033[0m")
+            # except Exception as e:
+            #     print(f"\033[91m \n Figure not plotted for time range {trange} \n because of"
+            #           f"following exception: {e} \n \033[0m")
         # except Exception as e:
         #     # Print the error in green
         #     print("\033[92m", f"Figure not plotted for {trange} and index value of {ind_range}\n",
