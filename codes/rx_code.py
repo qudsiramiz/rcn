@@ -45,7 +45,7 @@ df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 46
+ind_min = 47
 ind_max = 400
 
 
@@ -64,8 +64,9 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         trange = [trange.split("+")[0].split(".")[0]]
         # trange = ["2015-9-9 14:11:14"]
         # print(trange)
-        # with suppress_stdout_stderr():
-        for foo in range(1):
+        print(f"\033[92m \n Started process for Figure number {ind_range} \033[0m \n")
+        with suppress_stdout_stderr():
+            # for foo in range(1):
             # for bar in range(1):
             try:
                 mms_probe_num = str(mms_probe_num)
