@@ -1164,8 +1164,8 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                             "black_background": True,
                             "crosshair": True,
                             "vertical_spacing": 0,
-                             "wsize": [1080, 1080],
-                             "title": f"Jet Detection for MMS{probe} {data_rate} data",
+                            "wsize": [1080, 1080],
+                            # "title": f"Jet Detection for MMS{probe} {data_rate} data",
                             }
     for key in tplot_global_options:
         ptt.tplot_options(key, tplot_global_options[key])

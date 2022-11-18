@@ -413,11 +413,11 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "netcdf4"
-version = "1.6.1"
+version = "1.6.2"
 description = "Provides an object-oriented python interface to the netCDF version 4 library."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 cftime = "*"
@@ -796,7 +796,7 @@ scipy = ">=0.11"
 
 [[package]]
 name = "stack-data"
-version = "0.6.0"
+version = "0.6.1"
 description = "Extract data from python stack frames and tracebacks for informative displays"
 category = "main"
 optional = false
