@@ -1154,7 +1154,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     plt.rcParams['ytick.minor.width'] = 1
 
     # Define the size of the figure
-    plt.rcParams['figure.figsize'] = [20, 6]
+    plt.rcParams['figure.figsize'] = [10, 12]
 
     # plt.style.use('dark_background')
 
@@ -1164,8 +1164,8 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                             "black_background": True,
                             "crosshair": True,
                             "vertical_spacing": 0,
-                            "wsize": [2500, 1080],
-                            # "title": f"Probe {probe} {data_rate} data",
+                             "wsize": [1080, 1080],
+                             "title": f"Jet Detection for MMS{probe} {data_rate} data",
                             }
     for key in tplot_global_options:
         ptt.tplot_options(key, tplot_global_options[key])
@@ -1189,6 +1189,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                                      'ytitle': "$p^+$",
                                      'ysubtitle': "[eV]",
                                      'ztitle': "Counts",
+                                     # 'title': f"Jet Detection for MMS{probe} {data_rate} data",
                                      }
 
     electron_energy_spectr_dict_option = {'Colormap': "Spectral_r",
@@ -1252,7 +1253,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
 
     delta_v_dict_option = {'color': ['green', 'blue', 'red'],
                            'linestyle': ['-', '--', '--'],
-                           'lw': [2, 1, 5],
+                           'lw': [1, 1, 1],
                            'yrange': [dv_min, dv_max],
                            'ytitle': '$\\Delta v$',
                            'ysubtitle': 'km/s',
@@ -1295,6 +1296,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ptt.options('delta_v_vp_lmn_diff_l', opt_dict=delta_v_dict_option)
     ptt.options('R_w', opt_dict=r_w_dict_option)
     ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
+    ptt.options('name', f"Jet Detection for MMS{probe} {data_rate} data")
 
     if (walen_v1 or walen_v2) & jet_detection:
         folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/jet_walen"

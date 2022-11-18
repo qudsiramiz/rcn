@@ -59,7 +59,7 @@ def check_jet_reversal(crossing_time):
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     try:
         # try:
-        inputs["data_rate"] = 'fast'
+        inputs["data_rate"] = 'brst'
         _ = jrcfb.jet_reversal_check(**inputs)
         # except Exception:
         #     inputs["data_rate"] = 'brst'

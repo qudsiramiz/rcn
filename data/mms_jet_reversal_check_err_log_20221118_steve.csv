@@ -159,3 +159,28 @@ DateStart,Error
 2016-10-16 12:35:07+00:00,attempt to get argmin of an empty sequence
 2016-10-16 18:05:57+00:00,v cannot be empty
 2016-10-16 18:07:41+00:00,v cannot be empty
+2016-10-16 19:27:06+00:00,attempt to get argmin of an empty sequence
+2016-10-17 15:50:21+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-17 16:09:42+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-17 16:11:07+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-17 16:16:22+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-17 16:17:52+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-17 16:43:20+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-17 16:45:46+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-22 18:28:57+00:00,attempt to get argmin of an empty sequence
+2016-10-22 18:55:26+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-28 10:57:18+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-28 10:58:52+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-28 15:22:17+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-28 15:24:36+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-10-29 18:11:14+00:00,attempt to get argmin of an empty sequence
+2016-11-02 09:52:01+00:00,attempt to get argmin of an empty sequence
+2016-11-03 17:58:12+00:00,x and y arrays must have at least 2 entries
+2016-11-03 19:18:49+00:00,attempt to get argmin of an empty sequence
+2016-11-03 19:23:24+00:00,attempt to get argmin of an empty sequence
+2016-11-12 18:19:09+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-11-12 18:20:48+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-11-12 18:23:07+00:00,attempt to get argmin of an empty sequence
+2016-11-13 08:18:53+00:00,attempt to get argmin of an empty sequence
+2016-11-13 08:26:27+00:00,attempt to get argmin of an empty sequence
+2016-11-13 14:11:27+00:00,local variable 'ind_range_msh' referenced before assignment
