@@ -33,6 +33,7 @@ h5py = "^3.7.0"
 spacepy = "^0.4.1"
 scikit-image = "^0.19.3"
 more-itertools = "^9.0.0"
+seaborn = "^0.12.1"
 
 [tool.poetry.dev-dependencies]
 

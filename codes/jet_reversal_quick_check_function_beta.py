@@ -89,13 +89,13 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     #     df_crossing_temp.set_index("jet_time", inplace=True)
     #     crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")[:]
     # except:
-    # df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
-    # df_crossing_temp.set_index("DateStart", inplace=True)
-    # crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    df_crossing_temp = pd.read_csv("../data/event_list_MMS_jet_reversals_from_steve.csv",
-                                   index_col=False)
-    df_crossing_temp.set_index("jet_time", inplace=True)
-    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")
+    df_crossing_temp = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
+    df_crossing_temp.set_index("DateStart", inplace=True)
+    crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    # df_crossing_temp = pd.read_csv("../data/event_list_MMS_jet_reversals_from_steve.csv",
+    #                                index_col=False)
+    # df_crossing_temp.set_index("jet_time", inplace=True)
+    # crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")
     ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
 
     # Get the data from the FPI
@@ -1177,8 +1177,8 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                     'mms3_fgm_b_lmn_srvy_l2',
                     f'mms{probe}_dis_bulkv_lmn_{data_rate}',
                     'delta_v_vp_lmn_diff_l',
-                    'R_w',
-                    'theta_w_deg',
+                    # 'R_w',
+                    # 'theta_w_deg',
                     ]
 
     # ptt.timebar(ptt.get_data(mms_fpi_varnames[0])[0].min() + 200, color='red', dash=True, thick=2)

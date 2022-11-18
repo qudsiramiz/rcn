@@ -25,7 +25,7 @@ df_crossings.set_index("jet_time", inplace=True)
 
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
-date_obs = "20221116"
+date_obs = "20221118"
 
 
 def check_jet_reversal(crossing_time):
@@ -94,8 +94,8 @@ def suppress_stdout_stderr():
 
 use_parallel = False
 
-#with suppress_stdout_stderr():
-for foo in range(1):
+with suppress_stdout_stderr():
+#for foo in range(1):
     if use_parallel:
         # Set the number of processes to use
         # num_processes = 20
@@ -136,11 +136,11 @@ for foo in range(1):
         #pool.close()
         #pool.join()
     else:
-        indx_min = 0
+        indx_min = 2
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 2
+        indx_max = -1
         for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
                                            start=indx_min):
             check_jet_reversal(crossing_time)

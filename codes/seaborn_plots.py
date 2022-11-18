@@ -12,7 +12,7 @@ importlib.reload(spf)
 importlib.reload(sfg)
 
 '''
-file_name = "../data/rx_d/reconnection_line_data_mms3_20221109.csv"
+file_name = "../data/rx_d/reconnection_line_data_mms3_20221116.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
