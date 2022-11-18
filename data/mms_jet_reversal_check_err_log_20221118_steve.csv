@@ -216,3 +216,84 @@ DateStart,Error
 2016-12-02 14:48:07+00:00,v cannot be empty
 2016-12-03 16:04:18+00:00,v cannot be empty
 2016-12-10 10:19:59+00:00,x and y arrays must have at least 2 entries
+2016-12-13 10:44:11+00:00,attempt to get argmin of an empty sequence
+2016-12-15 13:41:27+00:00,cannot convert float NaN to integer
+2016-12-15 13:49:47+00:00,cannot convert float NaN to integer
+2016-12-17 16:44:42+00:00,x and y arrays must have at least 2 entries
+2016-12-23 06:23:33+00:00,attempt to get argmin of an empty sequence
+2016-12-23 15:16:39+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-12-23 15:22:17+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-12-24 03:44:47+00:00,local variable 'ind_range_msh' referenced before assignment
+2016-12-26 10:50:10+00:00,attempt to get argmin of an empty sequence
+2016-12-27 09:18:59+00:00,attempt to get argmin of an empty sequence
+2016-12-29 13:38:21+00:00,cannot convert float NaN to integer
+2016-12-29 13:39:37+00:00,cannot convert float NaN to integer
+2017-01-03 02:14:51+00:00,cannot convert float NaN to integer
+2017-01-06 13:51:05+00:00,attempt to get argmin of an empty sequence
+2017-01-06 13:52:39+00:00,attempt to get argmin of an empty sequence
+2017-01-08 11:37:50+00:00,local variable 'ind_range_msp' referenced before assignment
+2017-01-08 13:04:00+00:00,x and y arrays must have at least 2 entries
+2017-01-09 07:24:31+00:00,attempt to get argmin of an empty sequence
+2017-01-09 08:06:13+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-01-09 11:00:45+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-01-09 12:08:01+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-01-09 13:51:31+00:00,attempt to get argmin of an empty sequence
+2017-01-20 10:54:00+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-01-21 01:01:09+00:00,v cannot be empty
+2017-01-21 01:22:45+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-01-23 03:06:40+00:00,attempt to get argmin of an empty sequence
+2017-01-24 02:35:09+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-01-28 08:38:42+00:00,attempt to get argmin of an empty sequence
+2017-01-28 08:41:38+00:00,attempt to get argmin of an empty sequence
+2017-01-29 10:55:17+00:00,attempt to get argmin of an empty sequence
+2017-01-31 12:25:33+00:00,x and y arrays must have at least 2 entries
+2017-09-16 19:18:23+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-09-16 19:26:34+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-09-25 02:44:51+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-09-30 17:18:24+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-09-30 17:20:53+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-09-30 17:38:39+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-09-30 17:45:24+00:00,local variable 'ind_range_msh' referenced before assignment
+2017-11-08 08:49:24+00:00,local variable 'ind_range_msp' referenced before assignment
+2017-11-14 01:48:14+00:00,attempt to get argmin of an empty sequence
+2017-11-14 02:24:37+00:00,attempt to get argmin of an empty sequence
+2017-11-14 02:27:05+00:00,attempt to get argmin of an empty sequence
+2017-11-16 19:11:31+00:00,v cannot be empty
+2017-11-16 19:20:04+00:00,v cannot be empty
+2017-11-16 19:27:48+00:00,v cannot be empty
+2017-11-28 18:00:43+00:00,local variable 'ind_range_msp' referenced before assignment
+2017-12-07 03:53:07+00:00,local variable 'ind_range_msp' referenced before assignment
+2017-12-18 08:01:47+00:00,local variable 'ind_range_msp' referenced before assignment
+2017-12-18 08:06:40+00:00,local variable 'ind_range_msp' referenced before assignment
+2018-01-15 13:58:42+00:00,attempt to get argmin of an empty sequence
+2018-01-15 14:00:16+00:00,attempt to get argmin of an empty sequence
+2018-01-21 04:05:18+00:00,attempt to get argmin of an empty sequence
+2018-02-17 23:19:03+00:00,v cannot be empty
+2018-02-17 23:30:31+00:00,v cannot be empty
+2018-02-18 10:05:53+00:00,attempt to get argmin of an empty sequence
+2018-02-18 12:01:54+00:00,v cannot be empty
+2018-03-06 20:08:15+00:00,x and y arrays must have at least 2 entries
+2018-03-06 20:16:07+00:00,x and y arrays must have at least 2 entries
+2018-03-06 20:17:42+00:00,x and y arrays must have at least 2 entries
+2018-04-10 06:09:14+00:00,cannot convert float NaN to integer
+2018-04-13 07:03:25+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-05-10 11:29:00+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-05-10 11:32:09+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-10-01 21:33:03+00:00,read length must be non-negative or -1
+2018-10-01 21:35:40+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-10-01 21:38:09+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-10-24 07:31:31+00:00,v cannot be empty
+2018-10-27 02:46:58+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-11-12 04:06:06+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-11-12 04:08:44+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-11-21 08:57:13+00:00,attempt to get argmin of an empty sequence
+2018-12-07 18:37:08+00:00,x and y arrays must have at least 2 entries
+2018-12-08 06:24:16+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-12-13 08:30:59+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-12-21 19:35:11+00:00,local variable 'ind_range_msh' referenced before assignment
+2018-12-27 21:57:36+00:00,attempt to get argmin of an empty sequence
+2019-01-28 00:12:19+00:00,local variable 'ind_range_msh' referenced before assignment
+2019-02-05 20:33:03+00:00,v cannot be empty
+2019-02-09 00:19:03+00:00,local variable 'ind_range_msh' referenced before assignment
+2019-03-02 00:54:22+00:00,x and y arrays must have at least 2 entries
+2019-03-02 01:34:29+00:00,v cannot be empty
