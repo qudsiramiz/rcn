@@ -6,7 +6,7 @@ import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
 
 data_folder = '../data/rx_d'
-fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221116.csv"))
+fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221109.csv"))
 # cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 cut_type_list = ["bz_neg", "bz_pos", 'bz']
 for file_name in fnames:
@@ -25,7 +25,7 @@ for file_name in fnames:
             'linewidth': 3,
             'cut_type': cut_type,
             'r_lim': [0.01, 20],
-            'density': False,
+            'density': True,
         }
 
         df_shear, df_rx_en, df_va_cs, df_bisec = rcsf.plot_hist(**fig_inputs)

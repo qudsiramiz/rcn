@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import numpy as np
 
 from matplotlib.pyplot import MaxNLocator
 import rx_model_funcs as rmf
@@ -31,16 +32,41 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
 
     df = pd.read_csv(file_name, index_col=False)
 
+    # Set date_from as index
+    df = df.set_index("date_from")
+
     df_shear = df[df.method_used == "shear"]
     df_rx_en = df[df.method_used == "rx_en"]
     df_va_cs = df[df.method_used == "va_cs"]
     df_bisec = df[df.method_used == "bisection"]
+
+    cone_angle_shear = np.arccos(df_shear.b_imf_x / np.sqrt(
+                       df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
+    cone_angle_rx_en = np.arccos(df_rx_en.b_imf_x / np.sqrt(
+                          df_rx_en.b_imf_x**2 +df_rx_en.b_imf_y**2+ df_rx_en.b_imf_z**2)) * 180 / np.pi
+    cone_angle_va_cs = np.arccos(df_va_cs.b_imf_x / np.sqrt(
+                            df_va_cs.b_imf_x**2 +df_va_cs.b_imf_y**2+ df_va_cs.b_imf_z**2)) * 180 / np.pi
+    cone_angle_bisec = np.arccos(df_bisec.b_imf_x / np.sqrt(
+                            df_bisec.b_imf_x**2 +df_bisec.b_imf_y**2+ df_bisec.b_imf_z**2)) * 180 / np.pi
+
+    df_shear["cone_angle"] = cone_angle_shear
+    df_rx_en["cone_angle"] = cone_angle_rx_en
+    df_va_cs["cone_angle"] = cone_angle_va_cs
+    df_bisec["cone_angle"] = cone_angle_bisec
+
+
+    # Select data where cone angle is between 0 and 90 degrees
+    df_shear = df_shear[(df_shear.cone_angle >= 30) & (df_shear.cone_angle <= 90)]
+    df_rx_en = df_rx_en[(df_rx_en.cone_angle >= 30) & (df_rx_en.cone_angle <= 90)]
+    df_va_cs = df_va_cs[(df_va_cs.cone_angle >= 30) & (df_va_cs.cone_angle <= 90)]
+    df_bisec = df_bisec[(df_bisec.cone_angle >= 30) & (df_bisec.cone_angle <= 90)]
 
     if cut_type == "bz_neg":
         df_shear = df_shear[df_shear["b_imf_z"] < 0]
         df_rx_en = df_rx_en[df_rx_en["b_imf_z"] < 0]
         df_va_cs = df_va_cs[df_va_cs["b_imf_z"] < 0]
         df_bisec = df_bisec[df_bisec["b_imf_z"] < 0]
+
     if cut_type == "bz_pos":
         df_shear = df_shear[df_shear["b_imf_z"] > 0]
         df_rx_en = df_rx_en[df_rx_en["b_imf_z"] > 0]
@@ -137,6 +163,10 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
 
     plt.close("all")
 
+    if density==True:
+        y_label = "Density"
+    else:
+        y_label = "Counts"
     fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor='k', edgecolor='w')
     fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=0., hspace=0.)
     gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1])
@@ -154,7 +184,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs1.set_xlim(r_lim[0], r_lim[1])
     axs1.set_xscale('linear')
     # axs1.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
-    axs1.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
+    axs1.set_ylabel(y_label, fontsize=label_size, color=label_color, labelpad=label_pad)
 
     # Plot the histogram of the rx_en data
     axs2 = plt.subplot(gs[0, 1])
@@ -168,7 +198,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs2.set_xlim(r_lim[0], r_lim[1])
     axs2.set_xscale('linear')
     # axs2.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
-    axs2.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
+    axs2.set_ylabel(y_label, fontsize=label_size, color=label_color, labelpad=label_pad)
     axs2.yaxis.set_label_position("right")
 
     # Plot the histogram of the va_cs data
@@ -184,7 +214,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs3.set_xscale('linear')
     axs3.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
-    axs3.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
+    axs3.set_ylabel(y_label, fontsize=label_size, color=label_color, labelpad=label_pad)
 
     # Plot the histogram of the bisection data
     axs4 = plt.subplot(gs[1, 1])
@@ -199,7 +229,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs4.set_xscale('linear')
     axs4.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
-    axs4.set_ylabel('Count', fontsize=label_size, color=label_color, labelpad=label_pad)
+    axs4.set_ylabel(y_label, fontsize=label_size, color=label_color, labelpad=label_pad)
     axs4.yaxis.set_label_position("right")
 
     # Set the tick parameters
