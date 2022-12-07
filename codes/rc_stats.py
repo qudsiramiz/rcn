@@ -8,7 +8,7 @@ importlib.reload(rcsf)
 data_folder = '../data/rx_d'
 fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221116.csv"))
 # cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
-cut_type_list = ["bz_neg", "bz_pos"]
+cut_type_list = ["bz_neg", "bz_pos", 'bz']
 for file_name in fnames:
     for cut_type in cut_type_list[:]:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
