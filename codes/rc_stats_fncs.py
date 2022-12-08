@@ -49,17 +49,17 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     cone_angle_bisec = np.arccos(df_bisec.b_imf_x / np.sqrt(
                             df_bisec.b_imf_x**2 +df_bisec.b_imf_y**2+ df_bisec.b_imf_z**2)) * 180 / np.pi
 
-    df_shear["cone_angle"] = cone_angle_shear
-    df_rx_en["cone_angle"] = cone_angle_rx_en
-    df_va_cs["cone_angle"] = cone_angle_va_cs
-    df_bisec["cone_angle"] = cone_angle_bisec
+    #df_shear["cone_angle"] = cone_angle_shear
+    #df_rx_en["cone_angle"] = cone_angle_rx_en
+    #df_va_cs["cone_angle"] = cone_angle_va_cs
+    #df_bisec["cone_angle"] = cone_angle_bisec
 
 
     # Select data where cone angle is between 0 and 90 degrees
-    df_shear = df_shear[(df_shear.cone_angle >= 30) & (df_shear.cone_angle <= 90)]
-    df_rx_en = df_rx_en[(df_rx_en.cone_angle >= 30) & (df_rx_en.cone_angle <= 90)]
-    df_va_cs = df_va_cs[(df_va_cs.cone_angle >= 30) & (df_va_cs.cone_angle <= 90)]
-    df_bisec = df_bisec[(df_bisec.cone_angle >= 30) & (df_bisec.cone_angle <= 90)]
+    #df_shear = df_shear[(df_shear.cone_angle >= 30) & (df_shear.cone_angle <= 90)]
+    #df_rx_en = df_rx_en[(df_rx_en.cone_angle >= 30) & (df_rx_en.cone_angle <= 90)]
+    #df_va_cs = df_va_cs[(df_va_cs.cone_angle >= 30) & (df_va_cs.cone_angle <= 90)]
+    #df_bisec = df_bisec[(df_bisec.cone_angle >= 30) & (df_bisec.cone_angle <= 90)]
 
     if cut_type == "bz_neg":
         df_shear = df_shear[df_shear["b_imf_z"] < 0]
