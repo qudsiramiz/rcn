@@ -179,7 +179,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs1.axvline(df_shear.r_rc.mean(), color='#1f77b4', linestyle='--', linewidth=2)
     axs1.text(df_shear.r_rc.mean()+0.2, axs1.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_shear.r_rc.mean()),
-              fontsize=0.8*t_label_size, color=label_color)
+              fontsize=1.1*t_label_size, color=label_color)
 
     axs1.set_xlim(r_lim[0], r_lim[1])
     axs1.set_xscale('linear')
@@ -194,7 +194,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs2.axvline(df_rx_en.r_rc.mean(), color='#ff7f0e', linestyle='--', linewidth=2)
     axs2.text(df_rx_en.r_rc.mean()+0.2, axs2.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_rx_en.r_rc.mean()),
-              fontsize=0.8*t_label_size, color=label_color)
+              fontsize=1.1*t_label_size, color=label_color)
     axs2.set_xlim(r_lim[0], r_lim[1])
     axs2.set_xscale('linear')
     # axs2.set_xlabel(r'$r_{rc}$', fontsize=label_size, color=label_color, labelpad=label_pad)
@@ -209,7 +209,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs3.axvline(df_va_cs.r_rc.mean(), color='#2ca02c', linestyle='--', linewidth=2)
     axs3.text(df_va_cs.r_rc.mean()+0.2, axs3.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_va_cs.r_rc.mean()),
-              fontsize=0.8*t_label_size, color=label_color)
+              fontsize=1.1*t_label_size, color=label_color)
     axs3.set_xlim(r_lim[0], r_lim[1])
     axs3.set_xscale('linear')
     axs3.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
@@ -224,7 +224,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     axs4.axvline(df_bisec.r_rc.mean(), color='#d62728', linestyle='--', linewidth=2)
     axs4.text(df_bisec.r_rc.mean()+0.2, axs4.get_ylim()[1]*0.2,
               "$R_{{\\rm{{rc}}}}$ = {:.2f}".format(df_bisec.r_rc.mean()),
-              fontsize=0.8*t_label_size, color=label_color)
+              fontsize=1.1*t_label_size, color=label_color)
     axs4.set_xlim(r_lim[0], r_lim[1])
     axs4.set_xscale('linear')
     axs4.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
