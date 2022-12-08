@@ -178,7 +178,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(df_shear.r_rc.mean(), color='#1f77b4', linestyle='--', linewidth=2)
     axs1.text(df_shear.r_rc.mean()+0.2, axs1.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = $R_{{\oplus}}$ {:.2f}".format(df_shear.r_rc.mean()),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(df_shear.r_rc.mean()),
               fontsize=1.1*t_label_size, color=label_color)
 
     axs1.set_xlim(r_lim[0], r_lim[1])
@@ -193,7 +193,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(df_rx_en.r_rc.mean(), color='#ff7f0e', linestyle='--', linewidth=2)
     axs2.text(df_rx_en.r_rc.mean()+0.2, axs2.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = $R_{{\oplus}}$ {:.2f}".format(df_rx_en.r_rc.mean()),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(df_rx_en.r_rc.mean()),
               fontsize=1.1*t_label_size, color=label_color)
     axs2.set_xlim(r_lim[0], r_lim[1])
     axs2.set_xscale('linear')
@@ -208,7 +208,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(df_va_cs.r_rc.mean(), color='#2ca02c', linestyle='--', linewidth=2)
     axs3.text(df_va_cs.r_rc.mean()+0.2, axs3.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = $R_{{\oplus}}$ {:.2f}".format(df_va_cs.r_rc.mean()),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(df_va_cs.r_rc.mean()),
               fontsize=1.1*t_label_size, color=label_color)
     axs3.set_xlim(r_lim[0], r_lim[1])
     axs3.set_xscale('linear')
@@ -223,7 +223,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(df_bisec.r_rc.mean(), color='#d62728', linestyle='--', linewidth=2)
     axs4.text(df_bisec.r_rc.mean()+0.2, axs4.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = $R_{{\oplus}}$ {:.2f}".format(df_bisec.r_rc.mean()),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(df_bisec.r_rc.mean()),
               fontsize=1.1*t_label_size, color=label_color)
     axs4.set_xlim(r_lim[0], r_lim[1])
     axs4.set_xscale('linear')
