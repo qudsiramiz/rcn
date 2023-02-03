@@ -25,7 +25,7 @@ df_crossings.set_index("DateStart", inplace=True)
 
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
-date_obs = "paper"
+date_obs = "20230120"
 
 
 def check_jet_reversal(crossing_time):
@@ -40,7 +40,7 @@ def check_jet_reversal(crossing_time):
     inputs = {'crossing_time': crossing_time,
               'dt': 600,
               'probe': 3,
-              'jet_len': 3,
+              'jet_len': 5,
               'level': 'l2',
               'coord_type': 'lmn',
               'data_type': ['dis-moms', 'des-moms'],
@@ -58,12 +58,12 @@ def check_jet_reversal(crossing_time):
     # _ =  jrcfb.jet_reversal_check(**inputs)
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     try:
-        # try:
-        inputs["data_rate"] = 'brst'
+        #try:
+        #    inputs["data_rate"] = 'brst'
+        #    _ = jrcfb.jet_reversal_check(**inputs)
+        #except Exception:
+        inputs["data_rate"] = 'fast'
         _ = jrcfb.jet_reversal_check(**inputs)
-        # except Exception:
-        #     inputs["data_rate"] = 'brst'
-        #     _ = jrcfb.jet_reversal_check(**inputs)
     except Exception as e:
         # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
         # Save the crossing time to a file
@@ -102,11 +102,11 @@ for foo in range(1):
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 18
+        indx_min = 0
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 2
+        indx_max = indx_min + 100
 
         # Run the jet reversal check in parallel
         # pool = mp.Pool()
@@ -137,13 +137,14 @@ for foo in range(1):
         #pool.close()
         #pool.join()
     else:
-        indx_min = 16515
+        indx_min = 5431
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 1
+        indx_max = indx_min + 4
         for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
                                            start=indx_min):
+
             check_jet_reversal(crossing_time)
     # indx_number = 0
     # indx_max = indx_number + 200

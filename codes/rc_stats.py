@@ -12,12 +12,12 @@ cut_type_list = ["bz_neg", "bz_pos", 'bz']
 for file_name in fnames:
     for cut_type in cut_type_list[:]:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
-
+        dark_mode = True
         fig_inputs = {
             'bins': np.linspace(0, 20, 25),
             'file_name': file_name,
-            'dark_mode': True,
-            'fig_name':  f"rx_hist_{mms_probe_num}",
+            'dark_mode': dark_mode,
+            'fig_name':  f"rx_hist_{mms_probe_num}_{dark_mode}",
             'fig_format': 'jpg',
             'fig_folder': '../figures/rx_hist/rx_hist_v14',
             'fig_size': (8, 8),

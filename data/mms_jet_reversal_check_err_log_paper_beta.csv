@@ -8,3 +8,8 @@ DateStart,Error
 2016-10-02 20:54:44.221000+00:00,local variable 'ind_range_msh' referenced before assignment
 2016-10-02 20:02:30+00:00,index 0 is out of bounds for axis 0 with size 0
 2018-04-24 15:30:53.106000+00:00,v cannot be empty
+2016-10-02 20:02:00+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-02 20:01:30+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-02 20:01:30.111000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-02 20:02:30.111000+00:00,index 0 is out of bounds for axis 0 with size 0
+2016-10-03 16:19:44.149000+00:00,local variable 'ind_range_msh' referenced before assignment
