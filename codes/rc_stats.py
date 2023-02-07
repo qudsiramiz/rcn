@@ -5,6 +5,7 @@ import numpy as np
 import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
 
+'''
 data_folder = '../data/rx_d'
 fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221109.csv"))
 # cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
@@ -29,3 +30,53 @@ for file_name in fnames:
         }
 
         df_shear, df_rx_en, df_va_cs, df_bisec = rcsf.plot_hist(**fig_inputs)
+
+'''
+
+'''
+data_folder = '../data/rx_d'
+fname = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221109.csv"))[0]
+df = pd.read_csv(fname, index_col=False)
+# Set date_from as index
+df = df.set_index("date_from")
+
+df_shear = df[df.method_used == "shear"]
+df_rx_en = df[df.method_used == "rx_en"]
+df_va_cs = df[df.method_used == "va_cs"]
+df_bisec = df[df.method_used == "bisection"]
+
+cone_angle_shear = np.arccos(df_shear.b_imf_x / np.sqrt(
+                    df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
+cone_angle_rx_en = np.arccos(df_rx_en.b_imf_x / np.sqrt(
+                        df_rx_en.b_imf_x**2 +df_rx_en.b_imf_y**2+ df_rx_en.b_imf_z**2)) * 180 / np.pi
+cone_angle_va_cs = np.arccos(df_va_cs.b_imf_x / np.sqrt(
+                        df_va_cs.b_imf_x**2 +df_va_cs.b_imf_y**2+ df_va_cs.b_imf_z**2)) * 180 / np.pi
+cone_angle_bisec = np.arccos(df_bisec.b_imf_x / np.sqrt(
+                        df_bisec.b_imf_x**2 +df_bisec.b_imf_y**2+ df_bisec.b_imf_z**2)) * 180 / np.pi
+
+df_shear["cone_angle"] = cone_angle_shear
+df_rx_en["cone_angle"] = cone_angle_rx_en
+df_va_cs["cone_angle"] = cone_angle_va_cs
+df_bisec["cone_angle"] = cone_angle_bisec
+'''
+
+
+# Select all values with 40 < cone_angle < 120 and |Bz| > 0 nT
+df_shear_lim = df_shear[(df_shear.cone_angle > 40) & (df_shear.cone_angle < 120) & (df_shear.b_imf_z.abs() > 0)]
+df_rx_en_lim = df_rx_en[(df_rx_en.cone_angle > 40) & (df_rx_en.cone_angle < 120) & (df_rx_en.b_imf_z.abs() > 0)]
+df_va_cs_lim = df_va_cs[(df_va_cs.cone_angle > 40) & (df_va_cs.cone_angle < 120) & (df_va_cs.b_imf_z.abs() > 0)]
+df_bisec_lim = df_bisec[(df_bisec.cone_angle > 40) & (df_bisec.cone_angle < 120) & (df_bisec.b_imf_z.abs() > 0)]
+
+# Select all values with cone angle > 120
+df_shear_lim = df_shear[df_shear.cone_angle > 150]
+df_rx_en_lim = df_rx_en[df_rx_en.cone_angle > 150]
+df_va_cs_lim = df_va_cs[df_va_cs.cone_angle > 150]
+df_bisec_lim = df_bisec[df_bisec.cone_angle > 150]
+
+# Print the mean and median of the 'r_rc' column in a table
+print(f"{'Method':<15}{'Mean':<15}{'Median':<15}")
+print(f"{'Shear':<15}{df_shear_lim.r_rc.mean():<15.2f}{df_shear_lim.r_rc.median():<15.2f}")
+print(f"{'Rx_en':<15}{df_rx_en_lim.r_rc.mean():<15.2f}{df_rx_en_lim.r_rc.median():<15.2f}")
+print(f"{'Va_cs':<15}{df_va_cs_lim.r_rc.mean():<15.2f}{df_va_cs_lim.r_rc.median():<15.2f}")
+print(f"{'Bisec':<15}{df_bisec_lim.r_rc.mean():<15.2f}{df_bisec_lim.r_rc.median():<15.2f}")
+

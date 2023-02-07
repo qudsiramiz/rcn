@@ -52,6 +52,8 @@ def kde_plots(
         axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
     else:
         axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
+        # axs1.plot_joint(sns.histplot, hue=df.r_rc, alpha=alpha, color=color, bins=[40, 40],
+        # stat="density",)
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
     #                     bins=bins, stat="density", common_norm=True, common_bins=True, fill=True,
     #                     linewidth=2, edgecolor=color, line_kws={"linewidth": 5, "color": color})
@@ -239,7 +241,7 @@ def seaborn_subplots(
     gs.update(top=1, bottom=0.05, left=0.07, right=1, hspace=0.01, wspace=0.18)
     if fig_name is None:
         fig_name = f"../figures/seaborn_plots/20230206/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}" +\
-                   f"_20230206_0_180.{fig_format}"
+                   f"_20230206.{fig_format}"
     else:
         fig_name = f"../figures/seaborn_plots/20230206/{fig_name}_{dark_mode}_20230206.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
