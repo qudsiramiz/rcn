@@ -40,19 +40,19 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     df_va_cs = df[df.method_used == "va_cs"]
     df_bisec = df[df.method_used == "bisection"]
 
-    cone_angle_shear = np.arccos(df_shear.b_imf_x / np.sqrt(
+    cone_angle_shear = np.arccos(abs(df_shear.b_imf_x) / np.sqrt(
                        df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
-    cone_angle_rx_en = np.arccos(df_rx_en.b_imf_x / np.sqrt(
+    cone_angle_rx_en = np.arccos(abs(df_rx_en.b_imf_x) / np.sqrt(
                           df_rx_en.b_imf_x**2 +df_rx_en.b_imf_y**2+ df_rx_en.b_imf_z**2)) * 180 / np.pi
-    cone_angle_va_cs = np.arccos(df_va_cs.b_imf_x / np.sqrt(
+    cone_angle_va_cs = np.arccos(abs(df_va_cs.b_imf_x) / np.sqrt(
                             df_va_cs.b_imf_x**2 +df_va_cs.b_imf_y**2+ df_va_cs.b_imf_z**2)) * 180 / np.pi
-    cone_angle_bisec = np.arccos(df_bisec.b_imf_x / np.sqrt(
+    cone_angle_bisec = np.arccos(abs(df_bisec.b_imf_x) / np.sqrt(
                             df_bisec.b_imf_x**2 +df_bisec.b_imf_y**2+ df_bisec.b_imf_z**2)) * 180 / np.pi
 
-    #df_shear["cone_angle"] = cone_angle_shear
-    #df_rx_en["cone_angle"] = cone_angle_rx_en
-    #df_va_cs["cone_angle"] = cone_angle_va_cs
-    #df_bisec["cone_angle"] = cone_angle_bisec
+    df_shear["cone_angle"] = cone_angle_shear
+    df_rx_en["cone_angle"] = cone_angle_rx_en
+    df_va_cs["cone_angle"] = cone_angle_va_cs
+    df_bisec["cone_angle"] = cone_angle_bisec
 
 
     # Select data where cone angle is between 0 and 90 degrees
@@ -72,6 +72,20 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
         df_rx_en = df_rx_en[df_rx_en["b_imf_z"] > 0]
         df_va_cs = df_va_cs[df_va_cs["b_imf_z"] > 0]
         df_bisec = df_bisec[df_bisec["b_imf_z"] > 0]
+    
+    if cut_type == "cone_angle":
+        # Select all data where cone angle is greater than 36.87 degrees
+        df_shear = df_shear[(df_shear.cone_angle <= 36.87)]
+        df_rx_en = df_rx_en[(df_rx_en.cone_angle <= 36.87)]
+        df_va_cs = df_va_cs[(df_va_cs.cone_angle <= 36.87)]
+        df_bisec = df_bisec[(df_bisec.cone_angle <= 36.87)]
+
+    if cut_type == "cone_and_bz_neg":
+        df_shear = df_shear[(df_shear.cone_angle >= 36.87) & (df_shear["b_imf_z"] < 0)]
+        df_rx_en = df_rx_en[(df_rx_en.cone_angle >= 36.87) & (df_rx_en["b_imf_z"] < 0)]
+        df_va_cs = df_va_cs[(df_va_cs.cone_angle >= 36.87) & (df_va_cs["b_imf_z"] < 0)]
+        df_bisec = df_bisec[(df_bisec.cone_angle >= 36.87) & (df_bisec["b_imf_z"] < 0)]
+
     # if cut_type == "jet":
     #     # Remove all data points where the value of 'r_rc' is greater than 12
     #     df_shear = df_shear[(df_shear.r_rc < r_lim[1]) & (df_shear.jet_detection)]

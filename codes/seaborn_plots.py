@@ -3,16 +3,16 @@ from tkinter.tix import Tree
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import rx_model_funcs as rxmf
+# import rx_model_funcs as rxmf
 import seaborn_plots_fncs as spf
 import SeabornFig2Grid as sfg
 
-importlib.reload(rxmf)
+# importlib.reload(rxmf)
 importlib.reload(spf)
 importlib.reload(sfg)
 
 '''
-file_name = "../data/rx_d/reconnection_line_data_mms3_20221116.csv"
+file_name = "../data/rx_d/reconnection_line_data_mms3_20221109.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
 df = pd.read_csv(file_name, index_col=False)
@@ -77,12 +77,12 @@ b_lmn_vec_msp[:, 0] = df_shear["b_lmn_vec_msp_median_l"]
 b_lmn_vec_msp[:, 1] = df_shear["b_lmn_vec_msp_median_m"]
 b_lmn_vec_msp[:, 2] = df_shear["b_lmn_vec_msp_median_n"]
 
-msh_msp_shear = []
-for xx, yy in zip(b_lmn_vec_msh, b_lmn_vec_msp):
-    try:
-        msh_msp_shear.append(rxmf.get_shear(xx, yy, angle_unit="degrees"))
-    except Exception:
-        pass
+# msh_msp_shear = []
+# for xx, yy in zip(b_lmn_vec_msh, b_lmn_vec_msp):
+#     try:
+#         msh_msp_shear.append(rxmf.get_shear(xx, yy, angle_unit="degrees"))
+#     except Exception:
+#         pass
 
 
 # Define the mass of proton in kg
@@ -118,7 +118,8 @@ delta_beta = beta_msh_mean - beta_msp_mean
 
 df_list = [df_shear, df_rx_en, df_va_cs, df_bisec]
 for dfn in df_list:
-    dfn["msh_msp_shear"] = msh_msp_shear
+    # dfn["msh_msp_shear"] = msh_msp_shear
+    dfn["msh_msp_shear"] = delta_beta.values
     dfn["delta_beta"] = delta_beta.values
     # Set values of beta_shear to nan if it is smaller than 0 or larger than 100
     dfn.loc[dfn["delta_beta"] < 0, "delta_beta"] = np.nan
@@ -142,15 +143,15 @@ for df in df_list:
 label = ["Shear", "Rx En", "Va Cs", "Bisec"]
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle", "delta_beta"]
-key2_list = ["IMF $B_{\\rm z}$ (nT)", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
+key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
-             "$Tp_{\\parallel} (10^6 K)$", "$Tp_{\\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($B_x/|B|$) (${~}^{0}$)", "$\\Delta \\beta$"]
+             "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($B_x/|B|$) [${~}^{0}$]", "$\Delta \\beta$"]
 
 x_scale_list = [False, False, False, False, False, False, False, False, True, False, False]
 y_scale_list = [False, False, False, False, True, True, True, True, False, False, True]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-dark_mode = True
+dark_mode = False
 
 if dark_mode:
     plt.style.use('dark_background')
@@ -172,31 +173,56 @@ plt.rc('text', usetex=True)
 
 label_fontsize = 15
 tick_fontsize = 12
-data_type = ["shear", "rx_en", "va_cs", "bisec"]
-ind1 = 10
-ind2 = 11
+data_type = ["Shear", "Reconnection-Energy", "Exhaust-Velocity", "Bisection"]
+'''
+'''
+ind1 = 0
+ind2 = 1
+
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     if key == "msh_msp_shear":
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["delta_beta", "msh_msp_shear"],
-                                        labels=[r"$\\Delta \\beta$", key2],
+                                        labels=[r"$\Delta \beta$", key2],
                                         data_type=data_type, color_list=color_list, log_scale=False,
                                         x_log_scale=True, y_log_scale=False,
                                         fig_name=None, fig_format="pdf", nbins=[20, 20],
                                         dark_mode=dark_mode)
     else:
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
-                                       labels=[r"Reconnection Distance $(R_\\oplus)$", key2],
+                                       labels=[r"Reconnection Distance $\left[R_\oplus \right]$", key2],
+                                       x_lim=[0, 20], y_lim=[-9, 6],
                                        data_type=data_type, color_list=color_list, log_scale=False,
                                        x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
-                                       fig_name=None, fig_format="pdf", nbins=[20, 20],
+                                       fig_name=None, fig_format="pdf", nbins=[40, 40],
                                        dark_mode=dark_mode)
 
+'''
+'''
 # plt.show()
 plt.close('all')
-'''
 
 for i, df in enumerate(df_list):
     spf.kde_plots(df=df, x='b_imf_x', y='b_imf_z', log_scale=False, y_log_scale=False,
                   xlim=[-10, 8], ylim=[-8, 8],
                   marker_size=20*df.r_rc.values, alpha=0.7, color=color_list[i],
                   data_type=data_type[i], x_label=r"$B_{\rm x}$ [nT]", y_label=r"$B_{\rm z}$ [nT]")
+
+
+'''
+ind1 = 9
+ind2 = 10
+
+key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
+             "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
+             "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($\\cos^{-1}\\left(B_{\\rm x}/|\\mathbf{B}|\\right)$) [${~}^{0}$]", "$\Delta \\beta$"]
+
+for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
+    axs_list = spf.seaborn_subplots(df_list=df_list, keys=["b_imf_z", key],
+                                labels=[r"IMF $B_{\rm z}$ [nT]", key2],
+                                x_lim=[-8, 8], y_lim=[0, 180],
+                                data_type=data_type, color_list=color_list, log_scale=False,
+                                x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
+                                fig_name=None, fig_format="pdf", nbins=[40, 40],
+                                dark_mode=dark_mode)
+
+

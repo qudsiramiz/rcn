@@ -35,11 +35,11 @@ def kde_plots(
               dark_mode=True,
               ):
 
-    pad = 7
-    labelsize = 45
-    ticklabelsize = 38
-    clabelsize = 30
-    ticklength = 10
+    pad = 5
+    labelsize = 35
+    ticklabelsize = 35
+    clabelsize = 20
+    ticklength = 15
 
     # Remove all occurances of delta_beta where delta_beta is less than 0
     if log_scale:
@@ -100,11 +100,11 @@ def kde_plots(
         x_spearman = np.linspace(0, 25, 100)
         y_spearman = spearman * x_spearman + np.mean(df[y]) - spearman*np.mean(df[x])
         axs1.fig.axes[0].plot(x_spearman, y_spearman, c=color, ls="--", lw=5)
-        axs1.fig.axes[0].text(0.02, 0.02, f"$\\rho_{{\\rm {'s'}}}$ = {spearman:.2f}\n"
-                                          f"$\\rho_{{\\rm {'p'}}}$ = {pearson:.2f}",
+        axs1.fig.axes[0].text(0.02, 0.02, #f"$\\rho_{{\\rm {'s'}}}$ = {spearman:.2f}\n"
+                                          f"$\\rho_{{\\rm {'p'}}}$ = {spearman:.2f}",
                               transform=axs1.fig.axes[0].transAxes, va="bottom", ha="left",
                               bbox=dict(facecolor=face_color, alpha=1, edgecolor=edge_color,
-                                        boxstyle='round,pad=0.2'), fontsize=1.3 * clabelsize,
+                                        boxstyle='round,pad=0.2'), fontsize=ticklabelsize,
                               color=text_color)
 
     pos_joint_ax = axs1.ax_joint.get_position()
@@ -113,7 +113,15 @@ def kde_plots(
                                 pos_joint_ax.height])
     axs1.fig.axes[-1].set_position([1, pos_joint_ax.y0, .07, pos_joint_ax.height])
 
-    axs1.fig.axes[0].tick_params(axis='both', which='major', direction='in', labelbottom=True,
+    if data_type == "Shear" or data_type == "Reconnection-Energy":
+        label_bottom = False
+        x_label = ""
+    else:
+        label_bottom = True
+        x_label = x_label
+
+    axs1.fig.axes[0].tick_params(axis='both', which='major', direction='in',
+                                 labelbottom=label_bottom,
                                  bottom=True, labeltop=False, top=True, labelleft=True, left=True,
                                  labelright=False, right=True, width=1.5, length=ticklength,
                                  labelsize=ticklabelsize, labelrotation=0, pad=pad)
@@ -130,20 +138,20 @@ def kde_plots(
                                  bottom=False, labelleft=False, left=False, width=1.5,
                                  length=ticklength, labelsize=ticklabelsize, labelrotation=0)
 
-    axs1.set_axis_labels(x_label, y_label, fontsize=labelsize)
+    axs1.set_axis_labels(x_label, y_label, fontsize=labelsize, labelpad=-1)
     axs1.fig.axes[0].text(1, 0.02, f"{data_type}", transform=axs1.fig.axes[0].transAxes,
                           va="bottom", ha="right", bbox=dict(facecolor=face_color, alpha=1,
                           edgecolor=edge_color, boxstyle='round,pad=0.2'),
-                          fontsize=1.3 * clabelsize, color=text_color)
+                          fontsize=ticklabelsize, color=text_color)
 
     # Set the tight layout
     axs1.fig.tight_layout()
 
     if (fig_save):
-        fig_dir = f"../figures/seaborn_plots/20221116/"
+        fig_dir = f"../figures/seaborn_plots/20230206/"
         if not os.path.exists(fig_dir):
             os.makedirs(fig_dir)
-        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20221116.png"
+        fname = f"{fig_dir}/{x}_vs_{y}_{data_type}_dm_{dark_mode}_20230206.png"
         axs1.savefig(fname, format='png', dpi=400)
     plt.close('all')
     return axs1
@@ -152,7 +160,7 @@ def kde_plots(
 def seaborn_subplots(
                      df_list=None,
                      keys=[],
-                     figsize=(20, 20),
+                     figsize=(16, 16),
                      labels=[],
                      data_type=[],
                      color_list=[],
@@ -208,13 +216,16 @@ def seaborn_subplots(
             bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
                     np.linspace(y_lim[0], y_lim[1], nbins[1])]
         # print(bins)
+        marker_size = 3 * df.r_rc.values**2
+        # marker_size = 100
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
-                        x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=40,
-                        xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
-                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode)
+                        x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=marker_size,
+                        xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=None,
+                        pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
 
+    print(f"The figure size is {figsize[0]}, {figsize[1]}")
     fig = plt.figure(figsize=(figsize[0], figsize[1]))
     # fig.subplots_adjust(hspace=0.01, wspace=0.01, left=0.03, right=1.5, top=0.65, bottom=0.03)
     gs = gridspec.GridSpec(2, 2)
@@ -225,12 +236,12 @@ def seaborn_subplots(
     _ = sfg.SeabornFig2Grid(axs_list[3], fig, gs[3])
 
     gs.tight_layout(fig)
-    gs.update(top=1, bottom=0.05, left=0.06, right=1, hspace=0.01, wspace=0.20)
+    gs.update(top=1, bottom=0.05, left=0.07, right=1, hspace=0.01, wspace=0.18)
     if fig_name is None:
-        fig_name = f"../figures/seaborn_plots/20221116/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}" +\
-                   f"_20221116:Wa.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/20230206/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}" +\
+                   f"_20230206_0_180.{fig_format}"
     else:
-        fig_name = f"../figures/seaborn_plots/20221116/{fig_name}_{dark_mode}_20221116.{fig_format}"
+        fig_name = f"../figures/seaborn_plots/20230206/{fig_name}_{dark_mode}_20230206.{fig_format}"
     fig.savefig(fig_name, dpi=300, bbox_inches='tight', pad_inches=0.25, format=fig_format)
     print(f"Saved figure to {fig_name} for {keys[0]} vs {keys[1]}")
 
