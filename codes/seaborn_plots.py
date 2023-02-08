@@ -104,6 +104,10 @@ b_mag_msp = np.sqrt(df_shear["b_lmn_vec_msp_mean_l"]**2 + df_shear["b_lmn_vec_ms
 cone_angle = np.arccos(df_shear.b_imf_x / np.sqrt(
                        df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
 
+# Compute the ratio of b_imf_y to the magnitude of b_imf
+b_imf_y_ratio = df_shear.b_imf_y / np.sqrt(df_shear.b_imf_x**2 + df_shear.b_imf_y**2 +
+                                           df_shear.b_imf_z**2)
+
 # Compute the magnetosheath beta value
 beta_msp_mean = 2 * mu_0 * df_shear.np_msp_mean.values * 1e6 * k_B * (
                 2 * df_shear.tp_para_msp_mean.values +
@@ -129,6 +133,7 @@ for dfn in df_list:
     # Multiply the delta_beta by 10
     dfn["delta_beta"] = dfn["delta_beta"]
     dfn["cone_angle"] = cone_angle.values
+    dfn["b_imf_y_ratio"] = b_imf_y_ratio.values
 
 
 
@@ -144,10 +149,14 @@ for df in df_list:
     df["tp_perp_msp_median"] = df["tp_perp_msp_median"] / 1e6
 label = ["Shear", "Rx En", "Va Cs", "Bisec"]
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
-            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle", "delta_beta"]
-key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
+            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle",
+            "delta_beta", "b_imf_y_ratio"]
+key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$ [nT]",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
-             "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($B_x/|B|$) [${~}^{0}$]", "$\Delta \\beta$"]
+             "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)",
+             "Cone Angle ($\\cos^{-1}\\left(B_{\\rm x}/|\\mathbf{B}|\\right)$) [${~}^{0}$]",
+             "$\Delta \\beta$", "IMF $B_{\\rm y}/|\\mathbf{B}|$"]
+
 
 x_scale_list = [False, False, False, False, False, False, False, False, True, False, False]
 y_scale_list = [False, False, False, False, True, True, True, True, False, False, True]
@@ -211,15 +220,17 @@ for i, df in enumerate(df_list):
 
 '''
 
-ind1 = 2
-ind2 = 3
+ind1 = 11
+ind2 = 12
 
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
-            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle", "delta_beta"]
-
+            "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle",
+            "delta_beta", "b_imf_y_ratio"]
 key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$ [nT]",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
-             "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($\\cos^{-1}\\left(B_{\\rm x}/|\\mathbf{B}|\\right)$) [${~}^{0}$]", "$\Delta \\beta$"]
+             "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)",
+             "Cone Angle ($\\cos^{-1}\\left(B_{\\rm x}/|\\mathbf{B}|\\right)$) [${~}^{0}$]",
+             "$\Delta \\beta$", "IMF $B_{\\rm y}/|\\mathbf{B}|$"]
 
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     axs_list = spf.seaborn_subplots(df_list=df_list, keys=["b_imf_z", key],
