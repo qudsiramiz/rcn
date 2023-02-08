@@ -238,7 +238,7 @@ def seaborn_subplots(
     _ = sfg.SeabornFig2Grid(axs_list[3], fig, gs[3])
 
     gs.tight_layout(fig)
-    gs.update(top=1, bottom=0.05, left=0.085, right=1, hspace=0.05, wspace=0.18)
+    gs.update(top=1, bottom=0.05, left=0.085, right=1, hspace=0.01, wspace=0.25)
     if fig_name is None:
         fig_name = f"../figures/seaborn_plots/20230206/{keys[0]}_vs_{keys[1]}_dm_{dark_mode}" +\
                    f"_20230206.{fig_format}"
