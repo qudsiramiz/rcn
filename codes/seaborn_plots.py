@@ -217,14 +217,14 @@ ind2 = 3
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle", "delta_beta"]
 
-key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y} (nT)$",
+key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$ [nT]",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
              "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)", "Cone Angle ($\\cos^{-1}\\left(B_{\\rm x}/|\\mathbf{B}|\\right)$) [${~}^{0}$]", "$\Delta \\beta$"]
 
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
-    axs_list = spf.seaborn_subplots(df_list=df_list, keys=["b_imf_x", key],
+    axs_list = spf.seaborn_subplots(df_list=df_list, keys=["b_imf_z", key],
                                 labels=[r"IMF $B_{\rm x}$ [nT]", key2],
-                                x_lim=[-10, 10], y_lim=[-10, 10],
+                                x_lim=[-8, 8], y_lim=[-10, 10],
                                 data_type=data_type, color_list=color_list, log_scale=False,
                                 x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
                                 fig_name=None, fig_format="pdf", nbins=[40, 40],

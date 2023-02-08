@@ -1,6 +1,7 @@
 import importlib
 import glob
 import numpy as np
+import pandas as pd
 
 import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
@@ -54,24 +55,34 @@ cone_angle_va_cs = np.arccos(df_va_cs.b_imf_x / np.sqrt(
 cone_angle_bisec = np.arccos(df_bisec.b_imf_x / np.sqrt(
                         df_bisec.b_imf_x**2 +df_bisec.b_imf_y**2+ df_bisec.b_imf_z**2)) * 180 / np.pi
 
+b_imf_mag_shear = np.sqrt(df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)
+b_imf_mag_rx_en = np.sqrt(df_rx_en.b_imf_x**2 +df_rx_en.b_imf_y**2+ df_rx_en.b_imf_z**2)
+b_imf_mag_va_cs = np.sqrt(df_va_cs.b_imf_x**2 +df_va_cs.b_imf_y**2+ df_va_cs.b_imf_z**2)
+b_imf_mag_bisec = np.sqrt(df_bisec.b_imf_x**2 +df_bisec.b_imf_y**2+ df_bisec.b_imf_z**2)
+
 df_shear["cone_angle"] = cone_angle_shear
 df_rx_en["cone_angle"] = cone_angle_rx_en
 df_va_cs["cone_angle"] = cone_angle_va_cs
 df_bisec["cone_angle"] = cone_angle_bisec
+
+df_shear["b_imf_mag"] = b_imf_mag_shear
+df_rx_en["b_imf_mag"] = b_imf_mag_rx_en
+df_va_cs["b_imf_mag"] = b_imf_mag_va_cs
+df_bisec["b_imf_mag"] = b_imf_mag_bisec
+
 '''
 
-
 # Select all values with 40 < cone_angle < 120 and |Bz| > 0 nT
-df_shear_lim = df_shear[(df_shear.cone_angle > 40) & (df_shear.cone_angle < 120) & (df_shear.b_imf_z.abs() > 0)]
-df_rx_en_lim = df_rx_en[(df_rx_en.cone_angle > 40) & (df_rx_en.cone_angle < 120) & (df_rx_en.b_imf_z.abs() > 0)]
-df_va_cs_lim = df_va_cs[(df_va_cs.cone_angle > 40) & (df_va_cs.cone_angle < 120) & (df_va_cs.b_imf_z.abs() > 0)]
-df_bisec_lim = df_bisec[(df_bisec.cone_angle > 40) & (df_bisec.cone_angle < 120) & (df_bisec.b_imf_z.abs() > 0)]
+df_shear_lim = df_shear[(df_shear.cone_angle > 40) & (df_shear.cone_angle < 120) & (df_shear.b_imf_z > 0)]
+df_rx_en_lim = df_rx_en[(df_rx_en.cone_angle > 40) & (df_rx_en.cone_angle < 120) & (df_rx_en.b_imf_z > 0)]
+df_va_cs_lim = df_va_cs[(df_va_cs.cone_angle > 40) & (df_va_cs.cone_angle < 120) & (df_va_cs.b_imf_z > 0)]
+df_bisec_lim = df_bisec[(df_bisec.cone_angle > 40) & (df_bisec.cone_angle < 120) & (df_bisec.b_imf_z > 0)]
 
 # Select all values with cone angle > 120
-df_shear_lim = df_shear[df_shear.cone_angle > 150]
-df_rx_en_lim = df_rx_en[df_rx_en.cone_angle > 150]
-df_va_cs_lim = df_va_cs[df_va_cs.cone_angle > 150]
-df_bisec_lim = df_bisec[df_bisec.cone_angle > 150]
+# df_shear_lim = df_shear[(df_shear.b_imf_y.abs() / df_shear.b_imf_mag > 0.3) & (df_shear.b_imf_z < 0)]
+# df_rx_en_lim = df_rx_en[(df_rx_en.b_imf_y.abs() / df_rx_en.b_imf_mag > 0.3) & (df_rx_en.b_imf_z < 0)]
+# df_va_cs_lim = df_va_cs[(df_va_cs.b_imf_y.abs() / df_va_cs.b_imf_mag > 0.3) & (df_va_cs.b_imf_z < 0)]
+# df_bisec_lim = df_bisec[(df_bisec.b_imf_y.abs() / df_bisec.b_imf_mag > 0.3) & (df_bisec.b_imf_z < 0)]
 
 # Print the mean and median of the 'r_rc' column in a table
 print(f"{'Method':<15}{'Mean':<15}{'Median':<15}")
