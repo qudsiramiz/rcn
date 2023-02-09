@@ -105,7 +105,7 @@ cone_angle = np.arccos(df_shear.b_imf_x / np.sqrt(
                        df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
 
 # Compute the ratio of b_imf_y to the magnitude of b_imf
-b_imf_y_ratio = df_shear.b_imf_y / np.sqrt(df_shear.b_imf_x**2 + df_shear.b_imf_y**2 +
+bb = df_shear.b_imf_y / np.sqrt(df_shear.b_imf_x**2 + df_shear.b_imf_y**2 +
                                            df_shear.b_imf_z**2)
 
 # Compute the magnetosheath beta value
@@ -133,7 +133,7 @@ for dfn in df_list:
     # Multiply the delta_beta by 10
     dfn["delta_beta"] = dfn["delta_beta"]
     dfn["cone_angle"] = cone_angle.values
-    dfn["b_imf_y_ratio"] = b_imf_y_ratio.values
+    dfn["bb"] = bb.values
 
 
 
@@ -150,7 +150,7 @@ for df in df_list:
 label = ["Shear", "Rx En", "Va Cs", "Bisec"]
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle",
-            "delta_beta", "b_imf_y_ratio"]
+            "delta_beta", "bb"]
 key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$ [nT]",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
              "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)",
@@ -158,8 +158,8 @@ key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$
              "$\Delta \\beta$", "IMF $B_{\\rm y}/|\\mathbf{B}|$"]
 
 
-x_scale_list = [False, False, False, False, False, False, False, False, True, False, False]
-y_scale_list = [False, False, False, False, True, True, True, True, False, False, True]
+x_scale_list = [False, False, False, False, False, False, False, False, True, False, False, False]
+y_scale_list = [False, False, False, False, True, True, True, True, False, False, True, False]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
 dark_mode = False
@@ -225,7 +225,7 @@ ind2 = 12
 
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle",
-            "delta_beta", "b_imf_y_ratio"]
+            "delta_beta", "bb"]
 key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$ [nT]",
              "IMF Clock Angle (${~}^{0}$)", "$\\beta_{\\rm p}$", "$N_p$ (MSP) (cm$^{-3}$)",
              "$Tp_{\parallel} (10^6 K)$", "$Tp_{\perp} (10^6 K)$", "Shear Angle (${~}^{0}$)",
