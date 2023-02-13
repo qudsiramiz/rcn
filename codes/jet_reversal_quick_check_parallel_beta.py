@@ -38,7 +38,7 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 600,
+              'dt': 300,
               'probe': 3,
               'jet_len': 3,
               'level': 'l2',
@@ -146,7 +146,7 @@ for foo in range(1):
         indx_max = indx_min + 1
         # for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
         #                                    start=indx_min):
-        for xx, crossing_time in enumerate(['2015-09-02 16:55:33.000'],
+        for xx, crossing_time in enumerate(['2015-09-02 16:50:33.000'],
                                            start=indx_min):
 
             check_jet_reversal(crossing_time)
