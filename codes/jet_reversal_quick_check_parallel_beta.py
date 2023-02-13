@@ -137,11 +137,11 @@ for foo in range(1):
         #pool.close()
         #pool.join()
     else:
-        indx_min = 19
+        indx_min = 18
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 1
+        indx_max = indx_min + 4
         for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
                                            start=indx_min):
 
