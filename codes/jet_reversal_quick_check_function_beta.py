@@ -96,8 +96,8 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
     #                                index_col=False)
     # df_crossing_temp.set_index("jet_time", inplace=True)
     # crossing_time_str = crossing_time.strftime("%Y-%m-%d %H:%M:%S")
-    # ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
-    ind_crossing = 20
+    ind_crossing = np.where(df_crossing_temp.index == crossing_time_str)[0][0]
+    # ind_crossing = 20
 
     # Get the data from the FPI
     mms_fpi_varnames = [f'mms{probe}_dis_numberdensity_{data_rate}',
