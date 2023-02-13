@@ -38,9 +38,9 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 600,
+              'dt': 500,
               'probe': 3,
-              'jet_len': 1,
+              'jet_len': 3,
               'level': 'l2',
               'coord_type': 'lmn',
               'data_type': ['dis-moms', 'des-moms'],
@@ -138,7 +138,7 @@ for foo in range(1):
         #pool.close()
         #pool.join()
     else:
-        indx_min = 19
+        indx_min = 18
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
