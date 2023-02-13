@@ -235,7 +235,7 @@ key2_list = ["IMF $B_{\\rm z}$ [nT]", "IMF $B_{\\rm x}$ (nT)", "IMF $B_{\\rm y}$
 for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
     axs_list = spf.seaborn_subplots(df_list=df_list, keys=["b_imf_z", key],
                                 labels=[r"IMF $B_{\rm z}$ [nT]", key2],
-                                x_lim=[-8, 8], y_lim=[-1, 1],
+                                x_lim=[-8, 8], y_lim=[0, 180],
                                 data_type=data_type, color_list=color_list, log_scale=False,
                                 x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
                                 fig_name=None, fig_format="pdf", nbins=[40, 40],
