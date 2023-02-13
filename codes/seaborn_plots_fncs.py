@@ -218,8 +218,8 @@ def seaborn_subplots(
             bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
                     np.linspace(y_lim[0], y_lim[1], nbins[1])]
         # print(bins)
-        marker_size = 3 * df.r_rc.values**2
-        # marker_size = 100
+        # marker_size = 3 * df.r_rc.values**2
+        marker_size = 100
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=marker_size,
