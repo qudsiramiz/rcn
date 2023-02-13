@@ -38,7 +38,7 @@ def check_jet_reversal(crossing_time):
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
     # Try with 'brst' data rate, if that fails then try with 'fast'
     inputs = {'crossing_time': crossing_time,
-              'dt': 500,
+              'dt': 600,
               'probe': 3,
               'jet_len': 3,
               'level': 'l2',
@@ -55,34 +55,35 @@ def check_jet_reversal(crossing_time):
               }
     # inputs["data_rate"] = 'fast'
     # # ptt, df_mms, ind_range_msp, ind_range_msh, t_jet_center = jrcfb.jet_reversal_check(**inputs)
-    # _ =  jrcfb.jet_reversal_check(**inputs)
+    inputs["data_rate"] = 'brst'
+    _ =  jrcfb.jet_reversal_check(**inputs)
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
-    try:
-        try:
-            inputs["data_rate"] = 'brst'
-            _ = jrcfb.jet_reversal_check(**inputs)
-        except Exception:
-            # inputs["data_rate"] = 'fast'
-            # _ = jrcfb.jet_reversal_check(**inputs)
-            pass
-    except Exception as e:
-        # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
-        # Save the crossing time to a file
-        # Check if the file exists
-        if not os.path.isfile(inputs["error_file_log_name"]):
-            # If it doesn't exist, create it
-            with open(inputs["error_file_log_name"], 'w') as f:
-                f.write("DateStart,Error\n")
-                f.write(f"{crossing_time},{e}\n")
-        else:
-            # If it exists, append to it
-            df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
-            if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
-                with open(inputs["error_file_log_name"], 'a') as f:
-                    f.write(f"{crossing_time},{e}\n")
-                f.close()
-        pass
-    #return ptt, df_mms, ind_range_msp, ind_range_msh, t_jet_center
+    # try:
+    #     try:
+    #         inputs["data_rate"] = 'brst'
+    #         _ = jrcfb.jet_reversal_check(**inputs)
+    #     except Exception:
+    #         # inputs["data_rate"] = 'fast'
+    #         # _ = jrcfb.jet_reversal_check(**inputs)
+    #         pass
+    # except Exception as e:
+    #     # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
+    #     # Save the crossing time to a file
+    #     # Check if the file exists
+    #     if not os.path.isfile(inputs["error_file_log_name"]):
+    #         # If it doesn't exist, create it
+    #         with open(inputs["error_file_log_name"], 'w') as f:
+    #             f.write("DateStart,Error\n")
+    #             f.write(f"{crossing_time},{e}\n")
+    #     else:
+    #         # If it exists, append to it
+    #         df_added_list = pd.read_csv(inputs["error_file_log_name"], sep=',', index_col=False)
+    #         if not np.any(df_added_list['DateStart'].values == str(crossing_time)):
+    #             with open(inputs["error_file_log_name"], 'a') as f:
+    #                 f.write(f"{crossing_time},{e}\n")
+    #             f.close()
+    #     pass
+    # #return ptt, df_mms, ind_range_msp, ind_range_msh, t_jet_center
     return None
 
 
@@ -143,7 +144,9 @@ for foo in range(1):
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
         indx_max = indx_min + 1
-        for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
+        # for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
+        #                                    start=indx_min):
+        for xx, crossing_time in enumerate(['2015-09-02 16:55:33.000'],
                                            start=indx_min):
 
             check_jet_reversal(crossing_time)
