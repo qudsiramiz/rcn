@@ -162,7 +162,7 @@ x_scale_list = [False, False, False, False, False, False, False, False, True, Fa
 y_scale_list = [False, False, False, False, True, True, True, True, False, False, True, False]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-dark_mode = False
+dark_mode = True
 
 if dark_mode:
     plt.style.use('dark_background')
@@ -220,8 +220,8 @@ for i, df in enumerate(df_list):
 
 '''
 
-ind1 = 11
-ind2 = 12
+ind1 = 9
+ind2 = 10
 
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle",
