@@ -58,12 +58,12 @@ def check_jet_reversal(crossing_time):
     # _ =  jrcfb.jet_reversal_check(**inputs)
     # v1, v2, ind_walen = jrcfb.jet_reversal_check(**inputs)
     try:
-        #try:
-        #    inputs["data_rate"] = 'brst'
-        #    _ = jrcfb.jet_reversal_check(**inputs)
-        #except Exception:
-        inputs["data_rate"] = 'fast'
-        _ = jrcfb.jet_reversal_check(**inputs)
+        try:
+            inputs["data_rate"] = 'brst'
+            _ = jrcfb.jet_reversal_check(**inputs)
+        except Exception:
+            inputs["data_rate"] = 'fast'
+            _ = jrcfb.jet_reversal_check(**inputs)
     except Exception as e:
         # print(f"\033[91;31m\n{e} for date {crossing_time}\n\033[0m")
         # Save the crossing time to a file
@@ -137,11 +137,11 @@ for foo in range(1):
         #pool.close()
         #pool.join()
     else:
-        indx_min = 18
+        indx_min = 19
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
-        indx_max = indx_min + 4
+        indx_max = indx_min + 1
         for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
                                            start=indx_min):
 
