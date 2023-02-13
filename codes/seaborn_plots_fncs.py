@@ -223,7 +223,7 @@ def seaborn_subplots(
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=marker_size,
-                        xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=None,
+                        xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
                         pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode)
         axs_list.append(axs)
 
