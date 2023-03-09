@@ -18,7 +18,6 @@ x_gsm = -8.00
 y_gsm = -2.00
 z_gsm = -3.00
 
-
 bx_t96, by_t96, bz_t96 = gp.t96.t96(par, ps, x_gsm, y_gsm, z_gsm)
 bx_t01, by_t01, bz_t01 = gp.t01.t01(par, ps, x_gsm, y_gsm, z_gsm)
 bx_igrf, by_igrf, bz_igrf = gp.igrf_gsm(x_gsm, y_gsm, z_gsm)
