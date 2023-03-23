@@ -226,8 +226,8 @@ for i, df in enumerate(df_list):
 
 
 
-ind1 = 9
-ind2 = 10
+ind1 = 11
+ind2 = 12
 var_marker_size = True
 
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
