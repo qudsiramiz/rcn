@@ -65,7 +65,7 @@ def kde_plots(
 
         # Add scatter plot of circles to show the size of the data points at x=0 and y=0
         for i in range(len(radii)):
-            axs1.ax_joint.scatter(x=[-7], y=[20], s=radii_size[i], color='k', alpha=1,
+            axs1.ax_joint.scatter(x=[-7], y=[-0.75], s=radii_size[i], color='k', alpha=1,
                                   facecolor="none", offset_position='screen')
             # Add labels
             axs1.ax_joint.annotate(str(int(radii[i])), xy=(-6, 10 + 5*i/1.2),  textcoords="offset points", ha='center',
