@@ -68,7 +68,7 @@ def kde_plots(
             axs1.ax_joint.scatter(x=[-7], y=[-0.75], s=radii_size[i], color='k', alpha=1,
                                   facecolor="none", offset_position='screen')
             # Add labels
-            axs1.ax_joint.annotate(str(int(radii[i])), xy=(-6, -0.95 + i/12),  textcoords="offset points", ha='center',
+            axs1.ax_joint.annotate(str(int(radii[i])), xy=(-6, -0.85 + i/12),  textcoords="offset points", ha='center',
                                    va='center', fontsize=1.2*clabelsize, color='k', alpha=alpha)
         print(f"radii: {radii}")
 
