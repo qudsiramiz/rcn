@@ -1228,7 +1228,7 @@ def get_sw_params(
             "'YYYY-MM-DD HH:MM:SS.")
 
     # Download the OMNI data (default level of 'hro_1min') for the specified timerange.
-    omni_varnames = ['BX_GSE', 'BY_GSM', 'BZ_GSM', 'proton_density', 'Vx', 'Vy', 'Vz', 'SYM_H']
+    omni_varnames = ['BX_GSE', 'BY_GSM', 'BZ_GSM', 'proton_density', 'Vx', 'Vy', 'Vz', 'SYM_H', 'T']
     omni_vars = spd.omni.data(trange=trange, varnames=omni_varnames, level=omni_level,
                               time_clip=time_clip)
 
@@ -1242,6 +1242,7 @@ def get_sw_params(
     omni_vy = ptt.get_data(omni_vars[5])[1]
     omni_vz = ptt.get_data(omni_vars[6])[1]
     omni_sym_h = ptt.get_data(omni_vars[7])[1]
+    omni_t_p = ptt.get_data(omni_vars[8])[1]
 
     # Convert omni_time to datetime objects from unix time
     omni_time_datetime = [datetime.datetime.utcfromtimestamp(t) for t in omni_time]
@@ -1378,6 +1379,7 @@ def get_sw_params(
         "vz": omni_vz,
         "np": omni_np,
         "sym_h": omni_sym_h,
+        "t_p": omni_t_p,
     }, index=omni_time_datetime)
 
 
@@ -1401,6 +1403,8 @@ def get_sw_params(
                                           omni_trange_time_object[1]])
     sym_h_imf = np.nanmean(omni_df["sym_h"].loc[omni_trange_time_object[0]:
                                                 omni_trange_time_object[1]])
+    tp_imf = np.nanmean(omni_df["t_p"].loc[omni_trange_time_object[0]:
+                                           omni_trange_time_object[1]])
 
     if (b_imf_z > 15 or b_imf_z < -18):
         warnings.warn(
@@ -1511,6 +1515,7 @@ def get_sw_params(
     sw_dict['ps'] = ps
     sw_dict['p_dyn'] = p_dyn
     sw_dict['sym_h'] = sym_h_imf
+    sw_dict['t_p'] = tp_imf
     sw_dict['imf_clock_angle'] = imf_clock_angle
     sw_dict['param'] = param
     sw_dict['mms_time'] = mms_time
@@ -1541,7 +1546,7 @@ def rx_model(
 ):
     """
     This function computes the magnetosheath and magnetospheric magnetic fields using the T96 model
-    and  sowlarind paramters and returns the value of those fields as well as the value of other
+    and  solar wind paramters and returns the value of those fields as well as the value of other
     parameters associated with dayside reconnection, such as shear angle, reconnection energy,
     exhaust velocity, and the bisection field based on bisection model, for both the magnetospheric
     and magnetosheath bisection fields.
