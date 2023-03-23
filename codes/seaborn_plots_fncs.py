@@ -60,7 +60,7 @@ def kde_plots(
         radii_min = np.sqrt(np.nanmin(marker_size) / 3)
         radii_max = np.sqrt(np.nanmax(marker_size) / 3)
         radii = np.linspace(1, radii_max, 4)
-        radii = np.array([1, 4, 9, 16])
+        radii = np.array([1, 3, 7, 12])
         radii_size = 3 * radii ** 2
 
         # Add scatter plot of circles to show the size of the data points at x=0 and y=0
