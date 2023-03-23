@@ -198,7 +198,7 @@ for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
                                         dark_mode=dark_mode)
     else:
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
-                                        labels=[r"Reconnection Distance $\left[R_\oplus \right]$", key2],
+                                        labels=[r"Reconnection Distance $\left[R_{\rm E} \right]$", key2],
                                         x_lim=[0, 20], y_lim=[-9, 6],
                                         data_type=data_type, color_list=color_list, log_scale=False,
                                         x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
@@ -316,7 +316,7 @@ for i, df in enumerate(df_list):
             boxstyle='round,pad=0.2'))
     cbar = fig.colorbar(im, ax=ax, fraction=0.05, pad=0.0)
     cbar.ax.tick_params(labelsize=tick_fontsize, direction="in")
-    cbar.set_label(r"Reconnection Distance $\left[R_\oplus \right]$", fontsize=0.75*label_fontsize,
+    cbar.set_label(r"Reconnection Distance $\left[R_{\rm E} \right]$", fontsize=0.75*label_fontsize,
                    labelpad=-28, y=0.755, rotation=90, va="top", ha="center", color="black")
     plt.tight_layout()
     # plt.savefig(f"2d_hist_bz_cone_angle_{data_type[i]}.png", format="png", dpi=300, bbox_inches='tight', pad_inches=0.1)
