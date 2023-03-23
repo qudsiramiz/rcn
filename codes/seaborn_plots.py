@@ -15,7 +15,7 @@ importlib.reload(sfg)
 
 
 
-'''
+
 file_name = "../data/rx_d/reconnection_line_data_mms3_20221109.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
@@ -186,7 +186,7 @@ plt.rc('text', usetex=True)
 label_fontsize = 15
 tick_fontsize = 12
 data_type = ["Shear", "Reconnection-Energy", "Exhaust-Velocity", "Bisection"]
-'''
+
 
 
 '''
