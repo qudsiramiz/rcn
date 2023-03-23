@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn_plots_fncs as spf
 import SeabornFig2Grid as sfg
 
-from matplotlib.ticker import  MaxNLocator, AutoMinorLocator, MultipleLocator
+from matplotlib.ticker import MaxNLocator, AutoMinorLocator, MultipleLocator
 
 # importlib.reload(rxmf)
 importlib.reload(spf)
@@ -102,11 +102,10 @@ b_mag_msp = np.sqrt(df_shear["b_lmn_vec_msp_mean_l"]**2 + df_shear["b_lmn_vec_ms
 
 # Compute the cone angle
 cone_angle = np.arccos(df_shear.b_imf_x / np.sqrt(
-                       df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
+                       df_shear.b_imf_x**2 + df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
 
 # Compute the ratio of b_imf_y to the magnitude of b_imf
-bb = df_shear.b_imf_y / np.sqrt(df_shear.b_imf_x**2 + df_shear.b_imf_y**2 +
-                                           df_shear.b_imf_z**2)
+bb = df_shear.b_imf_y / np.sqrt(df_shear.b_imf_x**2 + df_shear.b_imf_y**2 + df_shear.b_imf_z**2)
 
 # Compute the magnetosheath beta value
 beta_msp_mean = 2 * mu_0 * df_shear.np_msp_mean.values * 1e6 * k_B * (
@@ -162,7 +161,7 @@ x_scale_list = [False, False, False, False, False, False, False, False, True, Fa
 y_scale_list = [False, False, False, False, True, True, True, True, False, False, True, False]
 
 color_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-dark_mode = True
+dark_mode = False
 
 if dark_mode:
     plt.style.use('dark_background')
@@ -199,12 +198,12 @@ for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
                                         dark_mode=dark_mode)
     else:
         axs_list = spf.seaborn_subplots(df_list=df_list, keys=["r_rc", key],
-                                       labels=[r"Reconnection Distance $\left[R_\oplus \right]$", key2],
-                                       x_lim=[0, 20], y_lim=[-9, 6],
-                                       data_type=data_type, color_list=color_list, log_scale=False,
-                                       x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
-                                       fig_name=None, fig_format="pdf", nbins=[40, 40],
-                                       dark_mode=dark_mode)
+                                        labels=[r"Reconnection Distance $\left[R_\oplus \right]$", key2],
+                                        x_lim=[0, 20], y_lim=[-9, 6],
+                                        data_type=data_type, color_list=color_list, log_scale=False,
+                                        x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
+                                        fig_name=None, fig_format="pdf", nbins=[40, 40],
+                                        dark_mode=dark_mode)
 
 '''
 # plt.show()

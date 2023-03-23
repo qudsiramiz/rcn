@@ -35,10 +35,10 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Set date_from as index
     df = df.set_index("date_from")
 
-    df_shear = df[df.method_used == "shear"]
-    df_rx_en = df[df.method_used == "rx_en"]
-    df_va_cs = df[df.method_used == "va_cs"]
-    df_bisec = df[df.method_used == "bisection"]
+    df_shear = df[df.method_used == "shear"].copy()
+    df_rx_en = df[df.method_used == "rx_en"].copy()
+    df_va_cs = df[df.method_used == "va_cs"].copy()
+    df_bisec = df[df.method_used == "bisection"].copy()
 
     cone_angle_shear = np.arccos(df_shear.b_imf_x / np.sqrt(
                        df_shear.b_imf_x**2 +df_shear.b_imf_y**2+ df_shear.b_imf_z**2)) * 180 / np.pi
@@ -184,7 +184,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     va_cs_r_rc_mean = df_va_cs[df_va_cs.r_rc < r_lim_val]["r_rc"].mean()
     bisec_r_rc_mean = df_bisec[df_bisec.r_rc < r_lim_val]["r_rc"].mean()
     if density==True:
-        y_label = "Density"
+        y_label = "Frequency"
     else:
         y_label = "Counts"
     fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor='k', edgecolor='w')
@@ -198,7 +198,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the shear data and add atext to the line
     axs1.axvline(shear_r_rc_mean, color='#1f77b4', linestyle='--', linewidth=2)
     axs1.text(shear_r_rc_mean+0.2, axs1.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(shear_r_rc_mean),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\\rm E}}$".format(shear_r_rc_mean),
               fontsize=1.1*t_label_size, color=label_color)
     axs1.text(0.05, 0.9, "(a)", fontsize=1.1*t_label_size, color=label_color,
               transform=axs1.transAxes)
@@ -214,7 +214,7 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the rx_en data and add atext to the line
     axs2.axvline(rx_en_r_rc_mean, color='#ff7f0e', linestyle='--', linewidth=2)
     axs2.text(rx_en_r_rc_mean+0.2, axs2.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(rx_en_r_rc_mean),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\\rm E}}$".format(rx_en_r_rc_mean),
               fontsize=1.1*t_label_size, color=label_color)
     axs2.text(0.05, 0.9, "(b)", fontsize=1.1*t_label_size, color=label_color,
               transform=axs2.transAxes)
@@ -231,13 +231,13 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the va_cs data and add atext to the line
     axs3.axvline(va_cs_r_rc_mean, color='#2ca02c', linestyle='--', linewidth=2)
     axs3.text(va_cs_r_rc_mean+0.2, axs3.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(va_cs_r_rc_mean),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\\rm E}}$".format(va_cs_r_rc_mean),
               fontsize=1.1*t_label_size, color=label_color)
     axs3.text(0.05, 0.9, "(c)", fontsize=1.1*t_label_size, color=label_color,
               transform=axs3.transAxes)
     axs3.set_xlim(r_lim[0], r_lim[1])
     axs3.set_xscale('linear')
-    axs3.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
+    axs3.set_xlabel(r'$R_{\rm {rc}} [R_{{\rm E}}]$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
     axs3.set_ylabel(y_label, fontsize=label_size, color=label_color, labelpad=label_pad)
 
@@ -248,13 +248,13 @@ def plot_hist(file_name, fig_size=(6, 6), dark_mode=True, bins=8, fig_folder="..
     # Plot the median of the bisection data and add atext to the line
     axs4.axvline(bisec_r_rc_mean, color='#d62728', linestyle='--', linewidth=2)
     axs4.text(bisec_r_rc_mean+0.2, axs4.get_ylim()[1]*0.2,
-              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\oplus}}$ ".format(bisec_r_rc_mean),
+              "$R_{{\\rm{{rc}}}}$ = {:.2f}$R_{{\\rm E}}$".format(bisec_r_rc_mean),
               fontsize=1.1*t_label_size, color=label_color)
     axs4.text(0.05, 0.9, "(d)", fontsize=1.1*t_label_size, color=label_color,
               transform=axs4.transAxes)
     axs4.set_xlim(r_lim[0], r_lim[1])
     axs4.set_xscale('linear')
-    axs4.set_xlabel(r'$R_{\rm {rc}} (R_\oplus)$', fontsize=label_size, color=label_color,
+    axs4.set_xlabel(r'$R_{\rm {rc}} [R_{{\rm E}}]$', fontsize=label_size, color=label_color,
                     labelpad=label_pad)
     axs4.set_ylabel(y_label, fontsize=label_size, color=label_color, labelpad=label_pad)
     axs4.yaxis.set_label_position("right")

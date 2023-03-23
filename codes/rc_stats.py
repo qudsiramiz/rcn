@@ -6,7 +6,7 @@ import pandas as pd
 import rc_stats_fncs as rcsf
 importlib.reload(rcsf)
 
-'''
+
 data_folder = '../data/rx_d'
 fnames = np.sort(glob.glob(f"{data_folder}/reconnection_line_data_mms3_20221109.csv"))
 # cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
@@ -14,14 +14,14 @@ cut_type_list = ["bz_neg", "bz_pos", 'bz', 'cone_angle', 'cone_and_bz_neg']
 for file_name in fnames:
     for cut_type in cut_type_list[:]:
         mms_probe_num = file_name.split('/')[-1].split('_')[-1].split('.')[0]
-        dark_mode = True
+        dark_mode = False
         fig_inputs = {
             'bins': np.linspace(0, 20, 25),
             'file_name': file_name,
             'dark_mode': dark_mode,
             'fig_name':  f"rx_hist_{mms_probe_num}_{dark_mode}",
-            'fig_format': 'jpg',
-            'fig_folder': '../figures/rx_hist/rx_hist_v16',
+            'fig_format': 'pdf',
+            'fig_folder': '../figures/rx_hist/rx_hist_v17',
             'fig_size': (8, 8),
             'histtype': 'step',
             'linewidth': 3,
@@ -32,7 +32,6 @@ for file_name in fnames:
 
         df_shear, df_rx_en, df_va_cs, df_bisec = rcsf.plot_hist(**fig_inputs)
 
-'''
 
 '''
 data_folder = '../data/rx_d'
@@ -78,6 +77,7 @@ df_bisec["b_imf_mag"] = b_imf_mag_bisec
 # df_va_cs_lim = df_va_cs[(df_va_cs.cone_angle > 40) & (df_va_cs.cone_angle < 120) & (df_va_cs.b_imf_z > 0)]
 # df_bisec_lim = df_bisec[(df_bisec.cone_angle > 40) & (df_bisec.cone_angle < 120) & (df_bisec.b_imf_z > 0)]
 
+'''
 # Select all values with cone angle > 120
 df_shear_lim = df_shear[(df_shear.b_imf_y.abs() / df_shear.b_imf_mag > 0.7) & (df_shear.b_imf_z > 0)]
 df_rx_en_lim = df_rx_en[(df_rx_en.b_imf_y.abs() / df_rx_en.b_imf_mag > 0.7) & (df_rx_en.b_imf_z > 0)]
@@ -124,3 +124,4 @@ for i in range(len(df_list)):
     print(f"{'5 percentile':<15}{np.percentile(df_list[i].b_imf_x, 5):<15.2f}{np.percentile(df_list[i].b_imf_y, 5):<15.2f}{np.percentile(df_list[i].b_imf_z, 5):<15.2f}{np.percentile(df_list[i].b_imf_mag, 5):<15.2f}{np.percentile(df_list[i].p_dyn, 5):<15.2f}")
     print(f"{method_list[i]:<15}{df_list[i].b_imf_x.median():<15.2f}{df_list[i].b_imf_y.median():<15.2f}{df_list[i].b_imf_z.median():<15.2f}{df_list[i].b_imf_mag.median():<15.2f}{df_list[i].p_dyn.median():<15.2f}")
     print(f"{'95 percentile':<15}{np.percentile(df_list[i].b_imf_x, 95):<15.2f}{np.percentile(df_list[i].b_imf_y, 95):<15.2f}{np.percentile(df_list[i].b_imf_z, 95):<15.2f}{np.percentile(df_list[i].b_imf_mag, 95):<15.2f}{np.percentile(df_list[i].p_dyn, 95):<15.2f}")
+'''
