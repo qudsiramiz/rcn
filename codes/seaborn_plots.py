@@ -14,6 +14,8 @@ importlib.reload(spf)
 importlib.reload(sfg)
 
 
+
+
 file_name = "../data/rx_d/reconnection_line_data_mms3_20221109.csv"
 cut_type_list = ["jet", "walen1", "walen2", "walen_jet"]
 
@@ -185,6 +187,9 @@ label_fontsize = 15
 tick_fontsize = 12
 data_type = ["Shear", "Reconnection-Energy", "Exhaust-Velocity", "Bisection"]
 
+
+
+'''
 ind1 = 0
 ind2 = 1
 
@@ -204,6 +209,8 @@ for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
                                         x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
                                         fig_name=None, fig_format="pdf", nbins=[40, 40],
                                         dark_mode=dark_mode)
+'''
+
 
 '''
 # plt.show()
@@ -217,10 +224,11 @@ for i, df in enumerate(df_list):
 
 '''
 
-'''
+
 
 ind1 = 9
 ind2 = 10
+var_marker_size = True
 
 key_list = ["b_imf_z", "b_imf_x", "b_imf_y", "imf_clock_angle", "beta_msh_mean", "np_msp_median",
             "tp_para_msp_median", "tp_perp_msp_median", "msh_msp_shear", "cone_angle",
@@ -238,9 +246,9 @@ for i, (key, key2) in enumerate(zip(key_list[ind1:ind2], key2_list[ind1:ind2])):
                                 data_type=data_type, color_list=color_list, log_scale=False,
                                 x_log_scale=x_scale_list[i], y_log_scale=y_scale_list[i],
                                 fig_name=None, fig_format="pdf", nbins=[40, 40],
-                                dark_mode=dark_mode)
+                                dark_mode=dark_mode, var_marker_size=var_marker_size,)
 '''
-'''
+
 
 # Make a 2d histogram between 'b_imf_z' and 'cone_angle' with 40 bins in each direction and 'r_rc'
 # along z-axis

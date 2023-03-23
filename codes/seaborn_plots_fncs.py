@@ -33,6 +33,7 @@ def kde_plots(
               alpha=0.7,
               bins=[20, 20],
               dark_mode=True,
+              var_marker_size=False,
               ):
 
     pad = 5
@@ -52,6 +53,45 @@ def kde_plots(
         axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
     else:
         axs1.plot_joint(sns.scatterplot, s=marker_size, alpha=alpha, color=color)
+
+    # If var_marker_size is true, then make a concentric circle to show the size of the data points.
+    # Make srue that the circles do not have a facecolor
+    if var_marker_size:
+        radii_min = np.sqrt(np.nanmin(marker_size) / 3)
+        radii_max = np.sqrt(np.nanmax(marker_size) / 3)
+        radii = np.linspace(1, radii_max, 4)
+        radii = np.array([1, 4, 9, 16])
+        radii_size = 3 * radii ** 2
+
+        # Add scatter plot of circles to show the size of the data points at x=0 and y=0
+        for i in range(len(radii)):
+            axs1.ax_joint.scatter(x=[-7], y=[20], s=radii_size[i], color='k', alpha=1,
+                                  facecolor="none", offset_position='screen')
+            # Add labels
+            axs1.ax_joint.annotate(str(int(radii[i])), xy=(-6, 10 + 5*i/1.2),  textcoords="offset points", ha='center',
+                                   va='center', fontsize=1.2*clabelsize, color='k', alpha=alpha)
+        print(f"radii: {radii}")
+
+        # for i in range(len(radii)):
+        #     circle = plt.Circle((-7, 0), radii[i], color=color, alpha=alpha, fill=False,
+        #                         linewidth=2)
+        #     axs1.ax_joint.add_artist(circle)
+        #     # Add labels
+        #     axs1.ax_joint.annotate(str(int(radii[i])), xy=(-5, radii[i] - 0.5), ha='center',
+        #                            va='center', fontsize=clabelsize, color=color, alpha=alpha)
+        #     # Add value of radii (rounded to the nearest integer) as legend
+        #     axs1.ax_joint.legend([str(int(radii[i]))], loc='lower right', fontsize=clabelsize,
+        #                          frameon=False)
+            
+        # Plot a few circles at the top right corner to show the size of the data points
+        # axs1.ax_joint.scatter(x=[1e1, 1e1, 1e1], y=[1e2, 1e2, 1e2], s=[100, 200, 300], color=color,
+        #                         alpha=alpha)
+        # axs1.ax_joint.text(x=1e1, y=1e2, s="100", fontsize=clabelsize, color=color, alpha=alpha)
+        # axs1.ax_joint.text(x=1e1, y=1e2, s="200", fontsize=clabelsize, color=color, alpha=alpha)
+        # axs1.ax_joint.text(x=1e1, y=1e2, s="300", fontsize=clabelsize, color=color, alpha=alpha)
+
+        
+
         # axs1.plot_joint(sns.histplot, hue=df.r_rc, alpha=alpha, color=color, bins=[40, 40],
         # stat="density",)
     # axs1.plot_marginals(sns.histplot, kde=True, alpha=alpha, log_scale=log_scale, color=color,
@@ -176,6 +216,7 @@ def seaborn_subplots(
                      x_lim=None,
                      y_lim=None,
                      dark_mode=False,
+                     var_marker_size=True,
                      ):
 
     axs_list = []
@@ -218,13 +259,16 @@ def seaborn_subplots(
             bins = [np.linspace(x_lim[0], x_lim[1], nbins[0]),
                     np.linspace(y_lim[0], y_lim[1], nbins[1])]
         # print(bins)
-        # marker_size = 3 * df.r_rc.values**2
-        marker_size = 100
+        if var_marker_size:
+            marker_size = 3 * df.r_rc.values**2
+            spearman = None
+        else:
+            marker_size = 100
         axs = kde_plots(df=df, x=keys[0], y=keys[1], x_label=labels[0],
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=marker_size,
                         xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
-                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode)
+                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode, var_marker_size=var_marker_size)
         axs_list.append(axs)
 
     print(f"The figure size is {figsize[0]}, {figsize[1]}")
