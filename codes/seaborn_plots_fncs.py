@@ -268,7 +268,7 @@ def seaborn_subplots(
                         y_label=labels[1], data_type=data_type[i], log_scale=log_scale,
                         x_log_scale=x_log_scale, y_log_scale=y_log_scale, marker_size=marker_size,
                         xlim=x_lim, ylim=y_lim, color=color_list[i], spearman=spearman,
-                        pearson=pearson, fig_save=True, bins=bins, dark_mode=dark_mode, var_marker_size=var_marker_size)
+                        pearson=pearson, fig_save=False, bins=bins, dark_mode=dark_mode, var_marker_size=var_marker_size)
         axs_list.append(axs)
 
     print(f"The figure size is {figsize[0]}, {figsize[1]}")
