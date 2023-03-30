@@ -935,20 +935,24 @@ def ridge_finder_multiple(
                       bbox=box_style)
         if i == 0:
             # Add a label '(a)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.05, '(a)', horizontalalignment='left', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+            axs1.text(0.05, 0.1, '(a)', horizontalalignment='left', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color,
+                      fontsize=1.2 * l_label_size)
         elif i == 1:
             # Add a label '(b)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.05, '(b)', horizontalalignment='right', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+            axs1.text(0.1, 0.1, '(b)', horizontalalignment='right', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color,
+                      fontsize=1.2 * l_label_size)
         elif i == 2:
             # Add a label '(c)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.05, '(c)', horizontalalignment='left', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+            axs1.text(0.05, 0.1, '(c)', horizontalalignment='left', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color,
+                      fontsize=1.2 * l_label_size)
         elif i == 3:
             # Add a label '(d)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.05, '(d)', horizontalalignment='right', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+            axs1.text(0.1, 0.1, '(d)', horizontalalignment='right', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color,
+                      fontsize=1.2 * l_label_size)
 
 
             # Add a cicrle to indicate the status of walen relations.
