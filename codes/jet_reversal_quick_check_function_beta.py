@@ -294,7 +294,7 @@ def jet_reversal_check(crossing_time=None, dt=90, probe=3, data_rate='fast', lev
                                               'y': vp_lmn_diff_l})
 
         # Add delta_v and vp_lmn_diff_l to ptt
-        ptt.store_data('delta_v_vp_lmn_diff_l', data=['delta_v_min', 'delta_v_max', 'vp_lmn_diff_l'])
+        ptt.store_data('delta_v_vp_lmn_diff_l', data=['vp_lmn_diff_l', 'delta_v_min', 'delta_v_max'])
 
         # If jet was detected, then check if walen relation is satisfied
 
@@ -1172,10 +1172,10 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
         ptt.tplot_options(key, tplot_global_options[key])
 
     keys_to_plot = [f'mms{probe}_dis_energyspectr_omni_{data_rate}',
-                    f'mms{probe}_des_energyspectr_omni_{data_rate}',
+                    # f'mms{probe}_des_energyspectr_omni_{data_rate}',
+                    'mms3_fgm_b_lmn_srvy_l2',
                     f'mms{probe}_dis_numberdensity_{data_rate}',
                     'Tp',
-                    'mms3_fgm_b_lmn_srvy_l2',
                     f'mms{probe}_dis_bulkv_lmn_{data_rate}',
                     'delta_v_vp_lmn_diff_l',
                     # 'R_w',
@@ -1184,7 +1184,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
 
     # ptt.timebar(ptt.get_data(mms_fpi_varnames[0])[0].min() + 200, color='red', dash=True, thick=2)
     # ptt.timespan(ptt.get_data(mms_fpi_varnames[0])[0].min() + 160, 100, keyword="seconds")
-    ion_energy_spectr_dict_option = {'Colormap': "Spectral_r",
+    ion_energy_spectr_dict_option = {'Colormap': "viridis_r",
                                      'ylog': True,
                                      'zlog': True,
                                      'ytitle': "$p^+$",
@@ -1223,6 +1223,8 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
 
     bulkv_dict_option = {'ytitle': '$v_{\\rm p}$',
                          'ysubtitle': '[km/s]',
+                         'xtitle': 'Time',
+                         'xsubtitle': '(HH:MM) [UTC]',
                          'color': ['blue', 'green', 'red'],
                          'linestyle': '-',
                          'legend_names': ['L', 'M', 'N'],
@@ -1252,14 +1254,17 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     dv_min = 1.1 * min(dv_min_min, dv_max_min, dv_vpl_min)
     dv_max = 1.1 * max(dv_min_max, dv_max_max, dv_vpl_max)
 
-    delta_v_dict_option = {'color': ['green', 'blue', 'red'],
+    delta_v_dict_option = {'color': ['blue', 'green', 'red'],
                            'linestyle': ['-', '--', '--'],
-                           'lw': [1, 1, 1],
+                           'lw': [1, 2, 2],
                            'yrange': [dv_min, dv_max],
                            'ytitle': '$\\Delta v$',
-                           'ysubtitle': 'km/s',
-                           'legend_names': ['$\\Delta v_{min}$', '$\\Delta v_{max}$',
-                                      '$\\Delta v_{p,L}$'],
+                           'ysubtitle': '[km/s]',
+                           'xtitle': 'Time',
+                           'xsubtitle': '(HH:MM) [UTC]',
+                           'legend_names': ['$\\Delta \\rm v_{\\rm p,L}$',
+                                            '$\\Delta \\rm v_{\\rm min}$',
+                                            '$\\Delta \\rm v_{\\rm max}$'],
                            }
 
     r_w_dict_option = {'color': delta_v_line_color,
@@ -1297,7 +1302,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ptt.options('delta_v_vp_lmn_diff_l', opt_dict=delta_v_dict_option)
     ptt.options('R_w', opt_dict=r_w_dict_option)
     ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
-    ptt.options('name', f"Jet Detection for MMS{probe} {data_rate} data")
+
 
     if (walen_v1 or walen_v2) & jet_detection:
         folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/jet_walen"

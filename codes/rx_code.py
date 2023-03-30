@@ -22,9 +22,9 @@ start = time.time()
 
 today_date = datetime.datetime.today().strftime("%Y-%m-%d")
 
-# df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_brst.csv",
-#                               index_col=False)
-df_jet_reversal = pd.read_csv("../data/event_list_MMS_jet_reversals_from_steve.csv", index_col=False)
+df_jet_reversal = pd.read_csv("../data/mms_jet_reversal_times_list_20221027_beta_brst.csv",
+                              index_col=False)
+# df_jet_reversal = pd.read_csv("../data/event_list_MMS_jet_reversals_from_steve.csv", index_col=False)
 # If nay column has NaN, drop that row
 df_jet_reversal = df_jet_reversal.dropna()
 
@@ -45,8 +45,8 @@ df_jet_reversal = df_jet_reversal.drop(df_jet_reversal.index[np.where(time_diff 
 trange_list = df_jet_reversal.index.tolist()
 # trange_list_new = trange_list[trange_ind_list]
 mms_probe_num_list = [1, 2, 3, 4]
-ind_min = 700
-ind_max = -1
+ind_min = 141
+ind_max = 142
 
 
 @contextmanager
@@ -149,14 +149,14 @@ for mms_probe_num in mms_probe_num_list[2:3]:
                     "title_y_pos": 1.09,
                     "interpolation": "None",
                     "tsy_model": model_type,
-                    "dark_mode": True,
-                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20221116.csv",
+                    "dark_mode": False,
+                    "rc_file_name": f"reconnection_line_data_mms{mms_probe_num}_20230329.csv",
                     "rc_folder": "../data/rx_d/",
                     "save_rc_file": True,
                     #"walen1": df_jet_reversal["walen1"][ind_range],
                     #"walen2": df_jet_reversal["walen2"][ind_range],
                     #"jet_detection": df_jet_reversal["jet_detection"][ind_range],
-                    "fig_version": "vsp",
+                    "fig_version": "v_20230330",
                     #"r_W": df_jet_reversal["r_W"][ind_range],
                     #"theta_W": df_jet_reversal["theta_w"][ind_range],
                     # "jet_time": df_jet_reversal["jet_time"][ind_range],

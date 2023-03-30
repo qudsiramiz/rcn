@@ -25,7 +25,7 @@ df_crossings.set_index("DateStart", inplace=True)
 
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
-date_obs = "20230213"
+date_obs = "20230329"
 
 
 def check_jet_reversal(crossing_time):
@@ -104,7 +104,7 @@ for foo in range(1):
         # num_processes = 20
         # Ask the user for index number
         # indx_min = int(input("Enter the index number: "))
-        indx_min = 0
+        indx_min = 16517
         # indx_min = 400
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))

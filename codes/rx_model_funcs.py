@@ -591,7 +591,10 @@ def ridge_finder_multiple(
     mtick_width = 0.7  # minor tick width in points
 
     # box_style = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    box_style = box_style
+    if dark_mode:
+        box_style = box_style
+    else:
+        box_style = dict(boxstyle="round", color="w", alpha=0.8, linewidth=1)
     y_vals = []
     x_intr_vals_list = []
     y_intr_vals_list = []
@@ -842,20 +845,20 @@ def ridge_finder_multiple(
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
         # plot an arrow along the magnetosheath magnetic field direction
-        axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * b_msh_dir[1], 5 * b_msh_dir[2], head_width=0.4,
-                   head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
+        # axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * b_msh_dir[1], 5 * b_msh_dir[2], head_width=0.4,
+        #            head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
         
         # Plot the arrow along the magnetosheath velocity direction
-        axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * v_msh_dir[1], 5 * v_msh_dir[2], head_width=0.4,
-                     head_length=0.7, fc='w', ec='b', linewidth=2, ls='-')
+        # axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * v_msh_dir[1], 5 * v_msh_dir[2], head_width=0.4,
+        #              head_length=0.7, fc='w', ec='b', linewidth=2, ls='-')
 
         # print([r0[1], x_y_point[0]], [r0[2], x_y_point[1]])
         # Plot line connecting the spacecraft position and the reconnection line
         if ~np.isnan(dist_rc):
             # axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
             axs1.plot([r0[1], x_y_point[0]], [r0[2], x_y_point[1]], '--', color='w', linewidth=2)
-            distance = f"$R_c$ = {dist_rc:.2f} $R_\\oplus$"
-            axs1.text(x_intr_vals[0] - 2, y_intr_vals[0] + 2, distance, fontsize=l_label_size * 1.2,
+            distance = f"$R_c$ = {dist_rc:.2f} $R_{{\\rm E}}$"
+            axs1.text(x_intr_vals[0] - 6, y_intr_vals[0] + 2, distance, fontsize=l_label_size * 1.2,
                       color='k', ha='left', va='bottom')
 
         # Plot a horizontal line at x=0 and a vertical line at y=0
@@ -868,22 +871,26 @@ def ridge_finder_multiple(
             im1.set_clip_path(patch)
         axs1.add_patch(patch)
         if i == 0 or i == 2:
-            axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size, color=label_color)
+            axs1.set_ylabel(r'Z [GSM, $R_{\rm E}$]', fontsize=label_size, color=label_color)
         if i == 2 or i == 3:
-            axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_size, color=label_color)
+            axs1.set_xlabel(r'Y [GSM, $R_{\rm E}$]', fontsize=label_size, color=label_color)
         if i == 1 or i == 3:
-            axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_size, color=label_color)
+            axs1.set_ylabel(r'Z [GSM, $R_{\rm E}$]', fontsize=label_size, color=label_color)
             axs1.yaxis.set_label_position("right")
 
+        if dark_mode:
+            text_color = 'white'
+        else:
+            text_color = 'black'
         if i == 0:
             axs1.text(-0.15, 1.16, f'Model: {tsy_model}', horizontalalignment='left',
                       verticalalignment='bottom', transform=axs1.transAxes, rotation=0,
-                      color='white', fontsize=l_label_size, bbox=box_style)
+                      color=text_color, fontsize=l_label_size, bbox=box_style)
 
         if i == 1:
             axs1.text(1.15, 1.16, f'MMS - {mms_sc_pos}', horizontalalignment='right',
                       verticalalignment='bottom', transform=axs1.transAxes, rotation=0,
-                      color='white', fontsize=l_label_size, bbox=box_style)
+                      color=text_color, fontsize=l_label_size, bbox=box_style)
 
         # Define the location of the colorbar, it's size relative to main figure and the padding
         # between the colorbar and the figure, the orientation the colorbar
@@ -919,28 +926,46 @@ def ridge_finder_multiple(
         if i == 2:
             axs1.text(-0.17, -0.1, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\\circ$',
                       horizontalalignment='left', verticalalignment='top', transform=axs1.transAxes,
-                      rotation=0, color='white', fontsize=l_label_size, bbox=box_style)
+                      rotation=0, color=text_color, fontsize=l_label_size, bbox=box_style)
         elif i == 3:
             axs1.text(1.17, -0.1,
-                      f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} $^\\circ$',
+                      f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} ${{\hspace{{-.2em}}}}^\\circ$',
                       horizontalalignment='right', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color='white', fontsize=l_label_size,
+                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size,
                       bbox=box_style)
+        if i == 0:
+            # Add a label '(a)' to the plot to indicate the panel number
+            axs1.text(0.05, 0.05, '(a)', horizontalalignment='left', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+        elif i == 1:
+            # Add a label '(b)' to the plot to indicate the panel number
+            axs1.text(0.05, 0.05, '(b)', horizontalalignment='right', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+        elif i == 2:
+            # Add a label '(c)' to the plot to indicate the panel number
+            axs1.text(0.05, 0.05, '(c)', horizontalalignment='left', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+        elif i == 3:
+            # Add a label '(d)' to the plot to indicate the panel number
+            axs1.text(0.05, 0.05, '(d)', horizontalalignment='right', verticalalignment='top',
+                      transform=axs1.transAxes, rotation=0, color=text_color, fontsize=l_label_size)
+
+
             # Add a cicrle to indicate the status of walen relations.
-            circle_radius = 0.01
-            if walen1:
-                indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
-                                                 transform=axs1.transAxes, fc='g', ec='w', lw=0.5,
-                                                 clip_on=False)
-            if walen2:
-                indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
-                                                 transform=axs1.transAxes, fc='b', ec='w', lw=0.5,
-                                                 clip_on=False)
-            else:
-                indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
-                                                 transform=axs1.transAxes, fc='r', ec='w', lw=0.5,
-                                                 clip_on=False)
-            axs1.add_patch(indicator_patch)
+            # circle_radius = 0.01
+            # if walen1:
+            #     indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
+            #                                      transform=axs1.transAxes, fc='g', ec='w', lw=0.5,
+            #                                      clip_on=False)
+            # if walen2:
+            #     indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
+            #                                      transform=axs1.transAxes, fc='b', ec='w', lw=0.5,
+            #                                      clip_on=False)
+            # else:
+            #     indicator_patch = patches.Circle((1.1, 1.1), radius=circle_radius,
+            #                                      transform=axs1.transAxes, fc='r', ec='w', lw=0.5,
+            #                                      clip_on=False)
+            # axs1.add_patch(indicator_patch)
         # Show minor ticks
         axs1.minorticks_on()
         axs1.tick_params(axis='both', which='minor', direction='in', length=mtick_len, left=True,
@@ -954,16 +979,8 @@ def ridge_finder_multiple(
         plt.setp(axs1.get_xticklabels(), rotation=0, ha='right', va='top', visible=True)
         plt.setp(axs1.get_yticklabels(), rotation=0, va='center', visible=True)
         # Set the title of the plot
-        if dark_mode:
-            fig.suptitle(f'Time range: '
-                         f'{t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
-                         fontsize=label_size, color='w', y=title_y_pos, alpha=0.65)
-        else:
-            fig.suptitle(f'Time range: '
-                         f'{t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
-                         fontsize=label_size, color='crimson', y=title_y_pos, alpha=1)
-
-    # fig.show()
+        fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
+                     fontsize=label_size, color=text_color, y=title_y_pos, alpha=0.65)
 
     if save_fig:
         try:
