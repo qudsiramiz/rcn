@@ -66,8 +66,8 @@ for mms_probe_num in mms_probe_num_list[2:3]:
         # print(trange)
         print(f"\033[92m \n Started process for Figure number {ind_range} \033[0m \n")
         with suppress_stdout_stderr():
-        #for foo in range(1):
-           # for bar in range(1):
+        # for foo in range(1):
+            # for bar in range(1):
             try:
                 mms_probe_num = str(mms_probe_num)
                 min_max_val = 20
