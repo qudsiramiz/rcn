@@ -2,7 +2,6 @@
 import datetime
 import multiprocessing as mp
 import os
-import warnings
 
 import geopack.geopack as gp
 import h5py as hf
@@ -10,15 +9,11 @@ import matplotlib.gridspec as gridspec
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import pyspedas as spd
-import pytplot as ptt
 import scipy as sp
-from dateutil import parser
+
 from matplotlib.pyplot import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from skimage.filters import frangi
-from tabulate import tabulate
 
 
 def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
@@ -250,7 +245,7 @@ def ridge_finder_multiple(
     vmax=[None, None, None, None],
     cmap_list=["viridis", "viridis", "viridis", "viridis"],
     draw_patch=[True, True, True, True],
-    draw_ridge=[True, True, True, True],
+    draw_ridge=[False, False, False, False],
     save_fig=True,
     fig_name="new",
     fig_format="png",
@@ -482,7 +477,7 @@ def ridge_finder_multiple(
         y_val_avg = np.full(len(y_val), np.nan)
         im_max_val_avg = np.full(len(y_val), np.nan)
 
-        r_a_l = 12
+        r_a_l = 5
         for xx in range(len(y_val)):
             y_val_avg[xx] = np.nanmean(y_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
             im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - r_a_l):min(len(y_val),
@@ -505,8 +500,8 @@ def ridge_finder_multiple(
             # y_intr_vals[mask] = np.nan
             # if z component of b_imf is negative, then the ridge is on the left side of the
             # image
-            if b_imf[2] <= 0:
-                axs1.plot(x_intr_vals, y_intr_vals, color='aqua', ls='-', alpha=0.9)
+            #if b_imf[2] <= 0:
+            #    axs1.plot(x_intr_vals, y_intr_vals, color='aqua', ls='-', alpha=0.9)
         # Plot a horizontal line at x=0 and a vertical line at y=0
         if (draw_patch):
             patch = patches.Circle((0, 0), radius=xrange[1], transform=axs1.transData, fc='none',
@@ -528,7 +523,7 @@ def ridge_finder_multiple(
             #           verticalalignment='bottom', transform=axs1.transAxes, rotation=0,
             #           color=text_color, fontsize=l_label_size, bbox=box_style)
             axs1.text(-0.3, 1.16, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\\circ$',
-                      horizontalalignment='left', verticalalignment='top', transform=axs1.transAxes,
+                      horizontalalignment='left', verticalalignment='bottom', transform=axs1.transAxes,
                       rotation=0, color=text_color, fontsize=l_label_size, bbox=box_style)
 
         if i == 3:
@@ -582,22 +577,22 @@ def ridge_finder_multiple(
 
         if i == 0:
             # Add a label '(a)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.1, '(a)', horizontalalignment='left', verticalalignment='top',
+            axs1.text(0.05, 0.15, '(a)', horizontalalignment='left', verticalalignment='top',
                       transform=axs1.transAxes, rotation=0, color=text_color,
                       fontsize=1.2 * l_label_size)
         elif i == 1:
             # Add a label '(b)' to the plot to indicate the panel number
-            axs1.text(0.1, 0.1, '(b)', horizontalalignment='right', verticalalignment='top',
+            axs1.text(0.05, 0.15, '(b)', horizontalalignment='left', verticalalignment='top',
                       transform=axs1.transAxes, rotation=0, color=text_color,
                       fontsize=1.2 * l_label_size)
         elif i == 2:
             # Add a label '(c)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.1, '(c)', horizontalalignment='left', verticalalignment='top',
+            axs1.text(0.05, 0.15, '(c)', horizontalalignment='left', verticalalignment='top',
                       transform=axs1.transAxes, rotation=0, color=text_color,
                       fontsize=1.2 * l_label_size)
         elif i == 3:
             # Add a label '(d)' to the plot to indicate the panel number
-            axs1.text(0.1, 0.1, '(d)', horizontalalignment='right', verticalalignment='top',
+            axs1.text(0.05, 0.15, '(d)', horizontalalignment='left', verticalalignment='top',
                       transform=axs1.transAxes, rotation=0, color=text_color,
                       fontsize=1.2 * l_label_size)
 
@@ -632,7 +627,7 @@ def ridge_finder_multiple(
             else:
                 print(f"folder already exists: {fig_folder}\n")
 
-            fig_folder = "/home/vetinari/Desktop/git/rxn_model/figures"
+            # fig_folder = "../figures/test"
             fig_name = f'{fig_folder}/ridge_plot_{int(b_imf[0])}_{int(b_imf[1])}_{int(b_imf[2])}.{fig_format}'
             plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=200)
             print(f'Figure saved as {fig_name}')
@@ -914,6 +909,7 @@ def rx_model(
         trange_date_max = trange_date + datetime.timedelta(minutes=dt)
         trange = [trange_date_min.strftime('%Y-%m-%d %H:%M:%S'),
                   trange_date_max.strftime('%Y-%m-%d %H:%M:%S')]
+        trange = [trange[0] + 'Z', trange[1] + 'Z']
 
     n_arr_y = int((y_max - y_min) / dr) + 1
     n_arr_z = int((z_max - z_min) / dr) + 1

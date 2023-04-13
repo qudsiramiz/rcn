@@ -33,7 +33,7 @@ interp_func = interpolate.RectBivariateSpline(y_arr, z_arr, image)
 print('Interpolation done \n')
 
 # interp = input('Carry out interpolation process? (y/n)==>  ')
-interp=''
+interp = ''
 print('')
 
 if(interp):

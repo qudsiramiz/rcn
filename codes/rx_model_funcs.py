@@ -1250,16 +1250,19 @@ def get_sw_params(
     # Convert omni_time to datetime objects from unix time
     omni_time_datetime = [datetime.datetime.utcfromtimestamp(t) for t in omni_time]
     # Get trange in datetime format
-    omni_trange_time_object = [pd.to_datetime(trange[0]).tz_localize("UTC"),
-                               pd.to_datetime(trange[1]).tz_localize("UTC")]
+    omni_trange_time_object = [pd.to_datetime(trange[0]),
+                               pd.to_datetime(trange[1])]
+    # Add utc as timezone to omni_trange_time_object
+    omni_trange_time_object = [t.replace(tzinfo=datetime.timezone.utc) for t in
+                               omni_trange_time_object]
 
     # Get mms postion in GSM coordinates for the specified time range
 
     if (mms_probe_num is not None):
         # for xxxx in range(1):
         # Define mms time as the center of the time range
-        mms_time_t0 = pd.to_datetime(trange[0]).tz_localize("UTC")
-        mms_time_dt = pd.to_datetime(trange[1]).tz_localize("UTC") - mms_time_t0
+        mms_time_t0 = pd.to_datetime(trange[0])
+        mms_time_dt = pd.to_datetime(trange[1]) - mms_time_t0
         mms_time = mms_time_t0 + mms_time_dt / 2
         #print(f"\033[1;31m Omni time is {datetime.datetime.utcfromtimestamp(omni_time[0])} to 
         # {datetime.datetime.utcfromtimestamp(omni_time[-1])} \033[0m")
@@ -1274,10 +1277,10 @@ def get_sw_params(
         mms_mec_trange = [mms_mec_trange[0].strftime("%Y-%m-%d %H:%M:%S"),
                           mms_mec_trange[1].strftime("%Y-%m-%d %H:%M:%S")]
         # Convert mms time range to datetime
-        mms_trange_time_object = [pd.to_datetime(mms_trange[0]).tz_localize("UTC"),
-                                  pd.to_datetime(mms_trange[1]).tz_localize("UTC")]
-        mms_mec_trange_time_object = [pd.to_datetime(mms_mec_trange[0]).tz_localize("UTC"),
-                                      pd.to_datetime(mms_mec_trange[1]).tz_localize("UTC")]
+        mms_trange_time_object = [pd.to_datetime(mms_trange[0]),
+                                  pd.to_datetime(mms_trange[1])]
+        mms_mec_trange_time_object = [pd.to_datetime(mms_mec_trange[0]),
+                                      pd.to_datetime(mms_mec_trange[1])]
 
         # print(f"\033[1:33m MMS trange is: {mms_trange_time_object} \033[0m")
         mms_mec_varnames = [f'mms{mms_probe_num}_mec_r_gsm']
@@ -1304,7 +1307,7 @@ def get_sw_params(
         # Convert mms fgm time to datetime
         mms_fgm_time = np.array([datetime.datetime.utcfromtimestamp(t) for t in mms_fgm_time])
 
-        try :
+        try:
             data_rate = 'fast'
             mms_fpi_varnames = [f'mms{mms_probe_num}_dis_bulkv_gse_{data_rate}']
             _ = spd.mms.fpi(trange=mms_trange, probe=mms_probe_num, data_rate=data_rate,
@@ -1385,6 +1388,8 @@ def get_sw_params(
         "t_p": omni_t_p,
     }, index=omni_time_datetime)
 
+    # Add UTC as time zone to the index of omni_df
+    omni_df.index = omni_df.index.tz_localize('UTC')
 
     #Get the mean values of the parameters from OMNI data for the time range betwwen
     #omni_trange_time_object[0] and omni_trange_time_object[1]
@@ -1620,10 +1625,14 @@ def rx_model(
         trange_date_max = trange_date + datetime.timedelta(minutes=dt)
         trange = [trange_date_min.strftime('%Y-%m-%d %H:%M:%S'),
                   trange_date_max.strftime('%Y-%m-%d %H:%M:%S')]
+        # Add timezones to trange (UTC)
+        trange = [trange[0] + 'Z', trange[1] + 'Z']
+
 
     # Get the solar wind parameters for the model
     sw_params = get_sw_params(probe=probe, omni_level=omni_level, trange=trange,
                               mms_probe_num=mms_probe_num, verbose=True)
+    print(sw_params)
 
     n_arr_y = int((y_max - y_min) / dr) + 1
     n_arr_z = int((z_max - z_min) / dr) + 1

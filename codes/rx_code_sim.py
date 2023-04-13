@@ -7,7 +7,6 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 import rx_model_funcs_sim as rmf
 
@@ -20,7 +19,8 @@ plt.rc("text", usetex=True)
 
 start = time.time()
 
-today_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+# today_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+today_date = "2019-01-01 00:00:00"
 
 plt.close("all")
 
@@ -32,20 +32,20 @@ def suppress_stdout_stderr():
             yield (err, out)
 
 
-b_imf_list = np.array([np.array([-2, 2, 0]), np.array([0, 0, 5]), np.array([0, 0, -5])])
+b_imf_list = np.array([np.array([-2, 2, -2]), np.array([0, 0, 5]), np.array([0, 0, -5])])
 
 m_proton = 1.672e-27  # Mass of proton in SI unit
 
 np_imf = 5
 v_imf = np.array([-500, 0, 0])
-sym_h_imf = - 5
+sym_h_imf = - 20
 tp_imf = 1.5E6
 
 rho = np_imf * m_proton * 1.15
 
 p_dyn = 1.6726e-6 * 1.15 * np_imf * (v_imf[0]**2 + v_imf[1]**2 + v_imf[2]**2)
 
-for b_imf in b_imf_list[1:]:
+for b_imf in b_imf_list[0:1]:
     param = [p_dyn, sym_h_imf, b_imf[1], b_imf[2], 0, 0, 0, 0, 0, 0]
 
     imf_clock_angle = np.arctan2(b_imf[1], b_imf[2]) * 180 / np.pi
@@ -138,7 +138,7 @@ for b_imf in b_imf_list[1:]:
                 "vmax": [1, 1, 1, 1],
                 "cmap_list": ["viridis", "cividis", "plasma", "magma"],
                 "draw_patch": [True, True, True, True],
-                "draw_ridge": [True, True, True, True],
+                "draw_ridge": [False, False, False, False],
                 "save_fig": True,
                 "fig_name": "crossing_all_ridge_plots",
                 "c_label": ["Shear", "Reconnection Energy", "Exhaust Velocity",
