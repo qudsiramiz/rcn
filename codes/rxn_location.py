@@ -41,7 +41,7 @@ fig, ax = plt.subplots(1, 2, figsize=(17, 7.5))
 # Set wsapce between subplots
 fig.subplots_adjust(wspace=0.0, hspace=0.0)
 
-# Make sure that the aspect ratio is 
+# Make sure that the aspect ratio is
 # ax[0].set_aspect('auto')
 
 circle = plt.Circle((0, 0), 1, color='k', alpha=0.5, fill=False)
@@ -64,12 +64,13 @@ df_shear_pos_z = df_shear[df_shear.b_imf_z > 0]
 df_shear_neg_z = df_shear[df_shear.b_imf_z < 0]
 
 # Plot the reconnection locations for shear method
-marker_size = 3 * df_shear_pos_z.r_rc.values
+marker_size = 10 * df_shear_pos_z.r_rc.values
 ax[0].scatter(df_shear_pos_z.spc_pos_y, df_shear_pos_z.spc_pos_x, marker='o', color=color_list[1],
               alpha=0.5, s=marker_size, label=r'$B_{\rm Z} > 0$', facecolors=color_list[1],
               edgecolors=color_list[1])
 
-marker_size = 3 * df_shear_neg_z.r_rc.values
+marker_size = 10 * df_shear_neg_z.r_rc.values
+
 ax[0].scatter(df_shear_neg_z.spc_pos_y, df_shear_neg_z.spc_pos_x, marker='o', color=color_list[2],
               s=marker_size, label=r'$B_{\rm Z} < 0$', facecolors=color_list[2],
               edgecolors=color_list[2], alpha=0.5)
@@ -133,12 +134,12 @@ y = np.sqrt(1 - x**2)
 ax[1].fill_between(x, y, -y, where=y >= 0, color='k', alpha=0.5)
 
 
-marker_size = 3 * df_shear_pos_z.r_rc.values
+marker_size = 10 * df_shear_pos_z.r_rc.values
 ax[1].scatter(df_shear_pos_z.spc_pos_y, df_shear_pos_z.spc_pos_z, marker='o', color=color_list[1],
               alpha=0.5, s=marker_size, label=r'$B_{\rm Z} > 0$', facecolors=color_list[1],
               edgecolors=color_list[1])
 
-marker_size = 3 * df_shear_neg_z.r_rc.values
+marker_size = 10 * df_shear_neg_z.r_rc.values
 ax[1].scatter(df_shear_neg_z.spc_pos_y, df_shear_neg_z.spc_pos_z, marker='o', color=color_list[2],
               s=marker_size, label=r'$B_{\rm Z} < 0$', facecolors=color_list[2],
               edgecolors=color_list[2], alpha=0.5)

@@ -1189,7 +1189,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                                      'zlog': True,
                                      'ytitle': "$p^+$",
                                      'ysubtitle': "[eV]",
-                                     'ztitle': "Counts",
+                                     'ztitle': "$\\rm{[keV/(cm^2\\,s\\,sr\\ keV)]}$",
                                      # 'title': f"Jet Detection for MMS{probe} {data_rate} data",
                                      }
 
@@ -1300,11 +1300,11 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ptt.options('mms3_fgm_b_lmn_srvy_l2', opt_dict=b_dict_option)
     ptt.options(f'mms{probe}_dis_bulkv_lmn_{data_rate}', opt_dict=bulkv_dict_option)
     ptt.options('delta_v_vp_lmn_diff_l', opt_dict=delta_v_dict_option)
-    ptt.options('R_w', opt_dict=r_w_dict_option)
-    ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
+    # ptt.options('R_w', opt_dict=r_w_dict_option)
+    # ptt.options('theta_w_deg', opt_dict=theta_w_deg_dict_option)
 
 
-    if (walen_v1 or walen_v2) & jet_detection:
+    if(walen_v1 or walen_v2) & jet_detection:
         folder_name = f"../figures/jet_reversal_checks/check_{date_obs}/{data_rate}/jet_walen"
         # If the folder doesn't exist, create it
         if not os.path.exists(folder_name):
