@@ -51,8 +51,8 @@ def suppress_stdout_stderr():
 
 # with suppress_stdout_stderr():
 for xxxx in range(1):
-    indx_number = 179
-    indx_max = indx_number + 1
+    indx_number = 16
+    indx_max = indx_number + 10
     # for crossing_time in df_crossings.index[indx_number:indx_max]:
     for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
         # Convert the crossing time to a datetime object

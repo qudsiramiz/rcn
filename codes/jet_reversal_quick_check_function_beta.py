@@ -1187,7 +1187,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
     ion_energy_spectr_dict_option = {'Colormap': "viridis_r",
                                      'ylog': True,
                                      'zlog': True,
-                                     'ytitle': "$p^+$",
+                                     'ytitle': "$i^+$",
                                      'ysubtitle': "[eV]",
                                      'ztitle': "$\\rm{[keV/(cm^2\\,s\\,sr\\ keV)]}$",
                                      # 'title': f"Jet Detection for MMS{probe} {data_rate} data",
@@ -1201,7 +1201,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                                           'ztitle': "Counts",
                                           }
 
-    number_density_dict_option = {'ytitle': '$n_{\\rm p}$',
+    number_density_dict_option = {'ytitle': '$n_{\\rm i}$',
                                   'ysubtitle': '[cm$^{-3}$]',
                                   'ylog': True,
                                   }
@@ -1210,7 +1210,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                       'color': ['red', 'blue'],
                       'linestyle': '-',
                       'legend_names': ['$\\parallel$', '$\\perp$'],
-                      'ytitle': '$T_{\\rm p}$',
+                      'ytitle': '$T_{\\rm i}$',
                       'ysubtitle': '[eV]',
                       }
 
@@ -1221,7 +1221,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                      'linestyle': '-',
                      }
 
-    bulkv_dict_option = {'ytitle': '$v_{\\rm p}$',
+    bulkv_dict_option = {'ytitle': '$v_{\\rm i}$',
                          'ysubtitle': '[km/s]',
                          'xtitle': 'Time',
                          'xsubtitle': '(HH:MM) [UTC]',
@@ -1262,7 +1262,7 @@ def tplot_fnc(ptt=None, probe=3, data_rate='brst', df_mms=None, ind_range_msp=No
                            'ysubtitle': '[km/s]',
                            'xtitle': 'Time',
                            'xsubtitle': '(HH:MM) [UTC]',
-                           'legend_names': ['$\\Delta \\rm v_{\\rm p,L}$',
+                           'legend_names': ['$\\Delta \\rm v_{\\rm i,L}$',
                                             '$\\Delta \\rm v_{\\rm min}$',
                                             '$\\Delta \\rm v_{\\rm max}$'],
                            }

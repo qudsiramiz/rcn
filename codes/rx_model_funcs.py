@@ -361,7 +361,7 @@ def ridge_finder(
     axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
     axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
 
-    if(draw_patch):
+    if (draw_patch):
         patch = patches.Circle((0, 0), radius=(xrange[1] - xrange[0]) / 2.,
                                transform=axs1.transData, fc='none', ec='k', lw=0.1)
         axs1.add_patch(patch)
@@ -707,8 +707,8 @@ def ridge_finder_multiple(
         # Direction of the magnetosheath magnetic field at the position of the spacecraft
         # TODO: Check if this is same as direction/magnitude given by the Cooling model
         b_msh_dir = b_msh[:3] / np.linalg.norm(b_msh[:3])
-        # v_msh_dir = v_msh[:3] / np.linalg.norm(v_msh[:3])
-
+        v_msh_dir = v_msh[:3] / np.linalg.norm(v_msh[:3])
+        print(f"v_msh_dir: {v_msh_dir}")
         # Find the closest point on the reconnection line in the direction of the magnetosheath
         # magnetic field.
         # TODO: Implement the 3D property of the reconnection line. Find a way to incorporate X_shu
@@ -771,7 +771,7 @@ def ridge_finder_multiple(
         if save_rc_file:
             if not os.path.exists(rc_folder):
                 os.makedirs(rc_folder)
-            #var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
+            # var_list = "mms_spc_num,date_from,date_to,spc_pos_x,spc_pos_y,spc_pos_z,"\
             #           "b_msh_x,b_msh_y,b_msh_z,r_rc,method_used,walen1,walen2,jet_detection,"\
             #           "r_W,theta_W,np_median_msp,np_median_msh,b_imf_x,b_imf_y,"\
             #           "b_imf_z,dipole,imf_clock_angle,p_dyn"
@@ -834,19 +834,19 @@ def ridge_finder_multiple(
                 print(f"Saved data to {rc_folder + rc_file_name}")
 
         # plot an arrow along the magnetosheath magnetic field direction
-        # axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * b_msh_dir[1], 5 * b_msh_dir[2], head_width=0.4,
-        #            head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
+        axs1.arrow(r0[1], r0[2], 5 * b_msh_dir[1], 5 * b_msh_dir[2], head_width=0.4,
+                   head_length=0.7, fc='w', ec='r', linewidth=2, ls='-')
 
         # Plot the arrow along the magnetosheath velocity direction
-        # axs1.arrow(r0[1] - 1.5, r0[2] - 1.5, 5 * v_msh_dir[1], 5 * v_msh_dir[2], head_width=0.4,
-        #              head_length=0.7, fc='w', ec='b', linewidth=2, ls='-')
+        axs1.arrow(r0[1], r0[2], 5 * v_msh_dir[1], 5 * v_msh_dir[2], head_width=0.4,
+                     head_length=0.7, fc='w', ec='b', linewidth=2, ls='-')
 
         # print([r0[1], x_y_point[0]], [r0[2], x_y_point[1]])
         # Plot line connecting the spacecraft position and the reconnection line
         if ~np.isnan(dist_rc):
             # axs1.plot(x_intr_vals, y_intr_vals, '--', color='w', linewidth=2)
             axs1.plot([r0[1], x_y_point[0]], [r0[2], x_y_point[1]], '--', color='w', linewidth=2)
-            distance = f"$R_c$ = {dist_rc:.2f} $R_{{\\rm E}}$"
+            distance = f"$R_{{\\rm rc}}$ = {dist_rc:.2f} $R_{{\\rm E}}$"
             axs1.text(x_intr_vals[0] - 6, y_intr_vals[0] + 2, distance, fontsize=l_label_size * 1.2,
                       color='k', ha='left', va='bottom')
 
@@ -877,7 +877,8 @@ def ridge_finder_multiple(
                       color=text_color, fontsize=l_label_size, bbox=box_style)
 
         if i == 1:
-            axs1.text(1.15, 1.16, f'MMS - {mms_sc_pos}', horizontalalignment='right',
+            axs1.text(1.15, 1.16, f'MMS Position [GSM] - {mms_sc_pos[0], mms_sc_pos[1], mms_sc_pos[2]}',
+                      horizontalalignment='right',
                       verticalalignment='bottom', transform=axs1.transAxes, rotation=0,
                       color=text_color, fontsize=l_label_size, bbox=box_style)
 
@@ -972,7 +973,7 @@ def ridge_finder_multiple(
         plt.setp(axs1.get_xticklabels(), rotation=0, ha='right', va='top', visible=True)
         plt.setp(axs1.get_yticklabels(), rotation=0, va='center', visible=True)
         # Set the title of the plot
-        fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf}',
+        fig.suptitle(f'Time range: {t_range[0]} - {t_range[1]} \n $B_{{\\rm {{imf}}}}$ = {b_imf[0], b_imf[1], b_imf[2]}',
                      fontsize=label_size, color=text_color, y=title_y_pos, alpha=0.65)
 
     if save_fig:
