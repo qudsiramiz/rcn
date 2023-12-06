@@ -8,6 +8,10 @@ plt.rc("font", family="serif")
 
 
 def get_magnetopause(sw_params):
+    """
+    NOTE: This function is only valid under the following conditions:
+        1. p_dyn is in the range of 0.1 to 10 nPa
+    """
     # Shue et al.,1998, equation 9
     ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params["b_imf"][2] + 8.14))) * (
         sw_params["p_dyn"]
