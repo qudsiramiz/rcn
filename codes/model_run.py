@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def model_run(*args):
     """
     Returns the value of the magnetic field at a given point in the model grid using three different
