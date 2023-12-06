@@ -34,11 +34,7 @@ def check_jet_reversal(crossing_time):
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
     crossing_time = datetime.datetime.strptime(
-<<<<<<< Updated upstream
         crossing_time.split("+")[0], "%Y-%m-%d %H:%M:%S.%f"
-=======
-        crossing_time.split("+")[0], "%Y-%m-%d %H:%M:%S"
->>>>>>> Stashed changes
     )
     # Set the timezone to UTC
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)

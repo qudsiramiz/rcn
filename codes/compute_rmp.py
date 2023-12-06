@@ -30,7 +30,7 @@ def get_magnetopause(sw_params):
 # and compute the magnetopause for each point
 # Plot the results
 bz_grid = np.linspace(-10, 10, 100)
-p_dyn_grid = np.linspace(0.1, 20, 100)
+p_dyn_grid = np.linspace(0.1, 40, 100)
 bz_grid, p_dyn_grid = np.meshgrid(bz_grid, p_dyn_grid)
 
 rmp_grid = np.zeros(bz_grid.shape)
@@ -68,5 +68,13 @@ ax.text2D(
     fontsize=12,
     verticalalignment="top",
 )
+
+# Set the viewing angle
+ax.view_init(90, 0)
+
+# Color the points where Rmp < 6.1 RE
+rmp_grid[rmp_grid >= 6.1] = np.nan
+ax.plot_surface(bz_grid, p_dyn_grid, rmp_grid, color="red", alpha=0.5)
+
 
 plt.show()
