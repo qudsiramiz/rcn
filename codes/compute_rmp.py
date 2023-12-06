@@ -6,6 +6,10 @@ import numpy as np
 plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
 
+# Equation for pdyn
+# p_dyn = 1.6726e-6 * 1.15 * np_imf * v_imf**2
+# where p_dyn is in nPa, np_imf is in cm^-3, v_imf is in km/s
+
 
 def get_magnetopause(sw_params):
     """
@@ -42,6 +46,13 @@ for i in range(bz_grid.shape[0]):
         }
         rmp_grid[i, j] = get_magnetopause(sw_params)
 
+
+# if np_imf = 30 cm^-3, find the velocity of the solar wind at which the magnetopause is at 6.1 RE
+# p_dyn = 1.6726e-6 * 1.15 * np_imf * v_imf**2
+v_imf = np.sqrt(50 / (1.6726e-6 * 1.15 * 30))
+
+print(f"v_imf = {v_imf:.2f} km/s")
+
 # Plot the results
 fig = plt.figure()
 ax = fig.gca(projection="3d")
@@ -74,7 +85,7 @@ ax.view_init(90, 0)
 
 # Color the points where Rmp < 6.1 RE
 rmp_grid[rmp_grid >= 6.1] = np.nan
-ax.plot_surface(bz_grid, p_dyn_grid, rmp_grid, color="red", alpha=0.5)
+ax.plot_surface(bz_grid, p_dyn_grid, rmp_grid, color="red", alpha=1)
 
 
 plt.show()
