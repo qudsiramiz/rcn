@@ -9,7 +9,9 @@ import imageio as iio
 import numpy as np
 
 
-def gif_maker(file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", duration=0.05, fps=25):
+def gif_maker(
+    file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", duration=0.05, fps=25
+):
     """
     Make a gif from a list of images.
 
@@ -73,8 +75,10 @@ def gif_maker(file_list, vid_name, mode="I", skip_rate=10, vid_type="mp4", durat
                 count += 1
                 # Print the image number being processed every 10 images, in green color
                 if count % 10 == 0:
-                    print(f"Processed images ==> \033[92m {count} \033[00m of"
-                          f" \033[91m {len(file_list)} \033[00m")
+                    print(
+                        f"Processed images ==> \033[92m {count} \033[00m of"
+                        f" \033[91m {len(file_list)} \033[00m"
+                    )
                 img = iio.imread(filename)
                 writer.append_data(img)
     writer.close()
@@ -89,7 +93,7 @@ def make_gifs(
     vid_type="mp4",
     skip_rate=1,
     duration=0.05,
-    fps=10
+    fps=10,
 ):
     """
     Make a gif from a list of images.
@@ -118,8 +122,10 @@ def make_gifs(
         None.
     """
 
-    print("Code execution started at (UTC):" +
-          f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}\n")
+    print(
+        "Code execution started at (UTC):"
+        + f"{datetime.datetime.utcfromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')}\n"
+    )
 
     file_list_dict = {}
 
@@ -128,25 +134,34 @@ def make_gifs(
     for i, key in enumerate(list(file_list_dict.keys())):
         vid_name = f"{vid_folder}{vid_name}_{fps}fps.mp4"
         try:
-            gif_maker(file_list_dict[key], vid_name, mode="I", skip_rate=skip_rate,
-                      vid_type=vid_type, fps=fps, duration=0.05)
+            gif_maker(
+                file_list_dict[key],
+                vid_name,
+                mode="I",
+                skip_rate=skip_rate,
+                vid_type=vid_type,
+                fps=fps,
+                duration=0.05,
+            )
         except ValueError as e:
             print(e)
             pass
 
 
 # Find all the folders in the current directory
-folder_list = glob.glob("../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_20170901_120000/")
+folder_list = glob.glob(
+    "../figures/all_ridge_plots/t96/None_interpolation_mms3/time_series_20170901_120000/"
+)
 
 for folder in folder_list[:1]:
     image_inputs_t96 = {
         "img_folder": folder,
-        "vid_folder": "/home/cephadrius/Desktop/git/rcn/figures/moving_pictures/",
+        "vid_folder": "../figures/moving_pictures/",
         "vid_name": folder.split("/")[-2],
         "vid_type": "mp4",
         "skip_rate": 1,
         "duration": 0.05,
-        "fps": 10
+        "fps": 10,
     }
     print(f"Processing folder: {folder}")
     make_gifs(**image_inputs_t96)

@@ -12,11 +12,13 @@ import jet_reversal_quick_check_function_beta as jrcfb
 importlib.reload(jrcfb)
 
 # Read the data from csv files
-df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
+# df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv", index_col=False)
+df_crossings = pd.read_csv("../data/brst_intervals.csv", index_col=False)
 # df_jet_reversal_times = pd.read_csv("../data/mms_jet_reversal_times_list_20221017_beta.csv",
 #                                    index_col=False)
 # Set the index to the date column
-df_crossings.set_index("DateStart", inplace=True)
+# df_crossings.set_index("DateStart", inplace=True)
+df_crossings.set_index("start_time", inplace=True)
 # df_jet_reversal_times.set_index("jet_time", inplace=True)
 # Select only those times where index is unique
 # df_jet_reversal_times = df_jet_reversal_times.loc[~df_jet_reversal_times.index.duplicated(
@@ -24,7 +26,7 @@ df_crossings.set_index("DateStart", inplace=True)
 
 # for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
 
-date_obs = "20230329"
+date_obs = "20230901"
 
 
 def check_jet_reversal(crossing_time):
@@ -32,7 +34,11 @@ def check_jet_reversal(crossing_time):
     # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
     # '2017-01-02 02:58:13.0+00:00'
     crossing_time = datetime.datetime.strptime(
+<<<<<<< Updated upstream
         crossing_time.split("+")[0], "%Y-%m-%d %H:%M:%S.%f"
+=======
+        crossing_time.split("+")[0], "%Y-%m-%d %H:%M:%S"
+>>>>>>> Stashed changes
     )
     # Set the timezone to UTC
     crossing_time = crossing_time.replace(tzinfo=pytz.utc)
@@ -132,6 +138,7 @@ for foo in range(1):
         for p in processes:
             p.close()
         # pool = mp.Pool()
+<<<<<<< Updated upstream
         # # create a list of processes to run
         # processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for
         #              crossing_time in df_crossings.index[indx_min:indx_max]]
@@ -139,6 +146,15 @@ for foo in range(1):
         # for p in processes:
         #     p.get()
         # # close the pool and wait for the processes to finish
+=======
+        ## create a list of processes to run
+        # processes = [pool.apply_async(check_jet_reversal, args=(crossing_time,)) for
+        #             crossing_time in df_crossings.index[indx_min:indx_max]]
+        ## run the processes
+        # for p in processes:
+        #    p.get()
+        ## close the pool and wait for the processes to finish
+>>>>>>> Stashed changes
         # pool.close()
         # pool.join()
     else:
@@ -147,10 +163,23 @@ for foo in range(1):
         # Ask the user for the maximum index number
         # indx_max = int(input("Enter the maximum index number: "))
         indx_max = indx_min + 1
+<<<<<<< Updated upstream
         # for xx, crossing_time in enumerate(df_crossings.index[indx_min:indx_max],
         #                                    start=indx_min):
         for xx, crossing_time in enumerate(["2015-09-02 16:50:33.000"], start=indx_min):
             check_jet_reversal(crossing_time)
+=======
+        for xx, crossing_time in enumerate(
+            df_crossings.index[indx_min:indx_max], start=indx_min
+        ):
+            # for xx, crossing_time in enumerate(['2015-09-02 16:50:33.000'],
+            #                                    start=indx_min):
+
+            try:
+                check_jet_reversal(crossing_time)
+            except Exception as e:
+                pass
+>>>>>>> Stashed changes
     # indx_number = 0
     # indx_max = indx_number + 200
     # if __name__ == '__main__':

@@ -35,6 +35,8 @@ scikit-image = "^0.19.3"
 more-itertools = "^9.0.0"
 seaborn = "^0.12.1"
 matplotlib = "3.5.1"
+imageio-ffmpeg = "0.4.7"
+imageio = "2.21.1"
 
 [tool.poetry.dev-dependencies]
 
