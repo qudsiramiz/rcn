@@ -33,7 +33,7 @@ def get_magnetopause(sw_params):
 # Create a grid of points with bz in range of -5 to 5 and p_dyn in range of 0.1 to 10
 # and compute the magnetopause for each point
 # Plot the results
-bz_grid = np.linspace(-10, 10, 100)
+bz_grid = np.linspace(-10, -9, 100)
 p_dyn_grid = np.linspace(0.1, 40, 100)
 bz_grid, p_dyn_grid = np.meshgrid(bz_grid, p_dyn_grid)
 
@@ -46,10 +46,22 @@ for i in range(bz_grid.shape[0]):
         }
         rmp_grid[i, j] = get_magnetopause(sw_params)
 
+# Find the grid location where Rmp is closest to 6.1 RE
+rmp_diff = np.abs(rmp_grid - 6.1)
+rmp_diff_min = np.nanmin(rmp_diff)
+rmp_diff_min_loc = np.where(rmp_diff == rmp_diff_min)
+# print(f"rmp_diff_min = {rmp_diff_min:.2f} RE")
+# print(f"rmp_diff_min_loc = {rmp_diff_min_loc}")
+print(f"rmp = {rmp_grid[rmp_diff_min_loc]}")
+print(f"bz = {bz_grid[rmp_diff_min_loc]}")
+print(f"p_dyn = {p_dyn_grid[rmp_diff_min_loc]}")
 
+
+"""
 # if np_imf = 30 cm^-3, find the velocity of the solar wind at which the magnetopause is at 6.1 RE
 # p_dyn = 1.6726e-6 * 1.15 * np_imf * v_imf**2
 v_imf = np.sqrt(50 / (1.6726e-6 * 1.15 * 30))
+
 
 print(f"v_imf = {v_imf:.2f} km/s")
 
@@ -89,3 +101,4 @@ ax.plot_surface(bz_grid, p_dyn_grid, rmp_grid, color="red", alpha=1)
 
 
 plt.show()
+"""

@@ -5,6 +5,9 @@ import pandas as pd
 import pytz
 
 import jet_reversal_quick_check_function_beta as jrcfb
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from os import devnull
+
 
 importlib.reload(jrcfb)
 
@@ -24,9 +27,9 @@ r_e = 6378.137  # Earth radius in km
 
 dt = 120
 probe = 3
-data_rate = 'brst'
-level = 'l2'
-data_type = 'dis-moms'
+data_rate = "brst"
+level = "l2"
+data_type = "dis-moms"
 time_clip = True
 latest_version = True
 jet_len = 3
@@ -37,14 +40,11 @@ df_crossings = pd.read_csv("../data/mms_magnetopause_crossings.csv")
 # Set the index to the date column
 df_crossings.set_index("DateStart", inplace=True)
 
-from contextlib import contextmanager, redirect_stderr, redirect_stdout
-from os import devnull
-
 
 @contextmanager
 def suppress_stdout_stderr():
     """A context manager that redirects stdout and stderr to devnull"""
-    with open(devnull, 'w') as fnull:
+    with open(devnull, "w") as fnull:
         with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
             yield (err, out)
 
@@ -54,34 +54,38 @@ for xxxx in range(1):
     indx_number = 16
     indx_max = indx_number + 10
     # for crossing_time in df_crossings.index[indx_number:indx_max]:
-    for xx, crossing_time in enumerate(df_crossings.index[indx_number:indx_max], start=indx_number):
+    for xx, crossing_time in enumerate(
+        df_crossings.index[indx_number:indx_max], start=indx_number
+    ):
         # Convert the crossing time to a datetime object
         # TODO: Something weird is happening with the timestamp. Check it later: crossing_time =
         # '2017-01-02 02:58:13.0+00:00'
         # crossing_time = '2017-01-02 02:58:13.0+00:00'
-        crossing_time = datetime.datetime.strptime(crossing_time.split('+')[0],
-                                                   "%Y-%m-%d %H:%M:%S.%f")
+        crossing_time = datetime.datetime.strptime(
+            crossing_time.split("+")[0], "%Y-%m-%d %H:%M:%S.%f"
+        )
         print(crossing_time)
         # Set the timezone to UTC
         crossing_time = crossing_time.replace(tzinfo=pytz.utc)
         print(crossing_time)
         # Try with 'brst' data rate, if that fails then try with 'fast'
-        inputs = {'crossing_time': crossing_time,
-                  'dt': 120,
-                  'probe': 3,
-                  'jet_len': 3,
-                  'level': 'l2',
-                  'coord_type': 'lmn',
-                  'data_type': 'dis-moms',
-                  'time_clip': True,
-                  'latest_version': True,
-                  'figname': 'mms_jet_reversal_check_lmn_mean',
-                  'fname': '../data/mms_jet_reversal_times_list_20220922_beta.csv',
-                  # 'fname': '../data/test.csv',
-                  'error_file_log_name': "../data/mms_jet_reversal_check_error_log_20220922_beta.csv",
-                  "verbose": True
-                  }
-        inputs["data_rate"] = 'brst'
+        inputs = {
+            "crossing_time": crossing_time,
+            "dt": 120,
+            "probe": 3,
+            "jet_len": 3,
+            "level": "l2",
+            "coord_type": "lmn",
+            "data_type": "dis-moms",
+            "time_clip": True,
+            "latest_version": True,
+            "figname": "mms_jet_reversal_check_lmn_mean",
+            "fname": "../data/mms_jet_reversal_times_list_20220922_beta.csv",
+            # 'fname': '../data/test.csv',
+            "error_file_log_name": "../data/mms_jet_reversal_check_error_log_20220922_beta.csv",
+            "verbose": True,
+        }
+        inputs["data_rate"] = "brst"
         df_fpi, df_fgm, df_mms, rw, tw = jrcfb.jet_reversal_check(**inputs)
     # try:
     #     try:
