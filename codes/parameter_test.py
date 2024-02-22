@@ -11,10 +11,6 @@ plt.rc("text", usetex=True)
 plt.rc("font", family="serif")
 plt.rcParams.update({"font.size": 18})
 
-# Define a 3 months long period centered on winter solstice of 2014.
-start_date = "2014-11-01 00:00:00"
-end_date = "2015-02-01 00:00:00"
-
 
 def get_magnetopause(sw_params):
     """
@@ -170,8 +166,18 @@ def get_sw_params(omni_level="hro", time_clip=True, trange=None, verbose=False):
     return omni_df
 
 
-start_date_1day = "2004-11-01 00:00:00"
-end_date_1day = "2005-02-01 00:00:00"
+# start_date_1day = "2004-11-01 00:00:00"
+# end_date_1day = "2005-02-01 00:00:00"
+
+start_date_1day = "2014-11-01 00:00:00"
+end_date_1day = "2015-02-01 00:00:00"
+
+# Define a 3 months long period centered on winter solstice of 2014.
+# start_date = "2004-11-01 00:00:00"
+# end_date = "2005-02-01 00:00:00"
+
+start_date = "2014-11-01 00:00:00"
+end_date = "2015-02-01 00:00:00"
 
 omni_df = get_sw_params(
     omni_level="hro",
@@ -371,7 +377,7 @@ for_atleast_30_min_rmp = sum(long_periods_rmp) * 100 / len(omni_df)
 axs[5].text(
     0.02,
     0.95,
-    f"$R_{{\\rm mp}} > [R_{{\\oplus}}]$: {above_threshold_percent_rmp:.2f}\%",
+    f"$R_{{\\rm mp}} >= {rmp_threshold} R_{{\\oplus}}$: {above_threshold_percent_rmp:.2f}\%",
     horizontalalignment="left",
     verticalalignment="top",
     transform=axs[5].transAxes,
@@ -381,7 +387,7 @@ axs[5].text(
 # plt.tight_layout()
 # Save the figure
 plt.savefig(
-    f"../figures/omni_params_{start_date[0:10]}_{end_date[0:10]}_rolling.png",
+    f"../figures/omni_params_{start_date[0:10]}_{end_date[0:10]}_rmp_threshold_{rmp_threshold}_rolling.png",
     dpi=300,
     bbox_inches="tight",
 )
