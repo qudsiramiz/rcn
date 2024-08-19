@@ -23,6 +23,7 @@ _ = spd.mms.fgm(
      get_fgm_ephemeris=True,
      varnames=mms_fgm_varnames,
      level="l2",
+     no_update=True,
  )
 
 fgm_time_unix = ptt.get_data('mms3_fgm_b_gsm_srvy_l2_bvec')[0]
