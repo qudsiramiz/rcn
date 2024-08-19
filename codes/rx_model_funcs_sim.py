@@ -43,9 +43,9 @@ def get_shear(b_vec_1, b_vec_2, angle_unit="radians"):
     unit_vec_2 = b_vec_2 / np.linalg.norm(b_vec_2)
     angle = np.arccos(np.dot(unit_vec_1, unit_vec_2))
 
-    if (angle_unit == "radians"):
+    if angle_unit == "radians":
         return angle
-    elif (angle_unit == "degrees"):
+    elif angle_unit == "degrees":
         return angle * 180 / np.pi
     else:
         raise KeyError("angle_unit must be radians or degrees")
@@ -93,7 +93,7 @@ def get_rxben(b_vec_1, b_vec_2):
     rx_b_mag_2 = np.linalg.norm(rx_b_2)
 
     # Reconnection energy (from Hesse2013)
-    rx_en = rx_b_mag_1 ** 2 * rx_b_mag_2 ** 2
+    rx_en = rx_b_mag_1**2 * rx_b_mag_2**2
 
     return rx_en
 
@@ -138,8 +138,9 @@ def get_vcs(b_vec_1, b_vec_2, n_1, n_2):
     rx_mag_1 = np.linalg.norm(rx_b_1)
     rx_mag_2 = np.linalg.norm(rx_b_2)
 
-    vcs = va_p1 * np.sqrt(rx_mag_1 * rx_mag_2 * (rx_mag_1 +
-                          rx_mag_2) / (rx_mag_1 * n_2 + rx_mag_2 * n_1))
+    vcs = va_p1 * np.sqrt(
+        rx_mag_1 * rx_mag_2 * (rx_mag_1 + rx_mag_2) / (rx_mag_1 * n_2 + rx_mag_2 * n_1)
+    )
 
     return vcs
 
@@ -214,9 +215,9 @@ def get_ca(b_vec, angle_unit="radians"):
     """
     angle = np.arctan(b_vec[1] / b_vec[2])
 
-    if (angle_unit == "radians"):
+    if angle_unit == "radians":
         return angle
-    elif (angle_unit == "degrees"):
+    elif angle_unit == "degrees":
         return angle * 180 / np.pi
     else:
         raise KeyError("angle_unit must be radians or degrees")
@@ -225,14 +226,14 @@ def get_ca(b_vec, angle_unit="radians"):
 def ridge_finder_multiple(
     image=[None, None, None, None],
     convolution_order=[1, 1, 1, 1],
-    t_range=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
+    t_range=["2016-12-24 15:08:00", "2016-12-24 15:12:00"],
     dt=5,
     b_imf=[-5, 0, 0],
     b_msh=[-5, 0, 0],
     v_msh=[-200, 50, 50],
     xrange=[-15.1, 15],
     yrange=[-15.1, 15],
-    mms_probe_num='1',
+    mms_probe_num="1",
     mms_sc_pos=[0, 0],
     dr=0.5,
     dipole_tilt_angle=None,
@@ -240,7 +241,7 @@ def ridge_finder_multiple(
     imf_clock_angle=None,
     sigma=[2.2, 2.2, 2.2, 2.2],
     mode="nearest",
-    alpha=1.,
+    alpha=1.0,
     vmin=[None, None, None, None],
     vmax=[None, None, None, None],
     cmap_list=["viridis", "viridis", "viridis", "viridis"],
@@ -256,7 +257,7 @@ def ridge_finder_multiple(
     fig_size=(10, 10),
     box_style=None,
     title_y_pos=0.95,
-    interpolation='nearest',
+    interpolation="nearest",
     tsy_model="t96",
     dark_mode=True,
     rc_file_name="rc_file.csv",
@@ -265,7 +266,7 @@ def ridge_finder_multiple(
     walen1=False,
     walen2=False,
     jet_detection=False,
-    fig_version='v6',
+    fig_version="v6",
     r_W=None,
     theta_W=None,
     jet_time=None,
@@ -365,31 +366,35 @@ def ridge_finder_multiple(
         if isinstance(t_range[0], datetime.datetime):
             t_range_date = t_range[0]
         else:
-            t_range_date = datetime.datetime.strptime(t_range[0], '%Y-%m-%d %H:%M:%S')
+            t_range_date = datetime.datetime.strptime(t_range[0], "%Y-%m-%d %H:%M:%S")
         t_range_date_min = t_range_date - datetime.timedelta(minutes=dt)
         t_range_date_max = t_range_date + datetime.timedelta(minutes=dt)
-        t_range = [t_range_date_min.strftime('%Y-%m-%d %H:%M:%S'),
-                   t_range_date_max.strftime('%Y-%m-%d %H:%M:%S')]
+        t_range = [
+            t_range_date_min.strftime("%Y-%m-%d %H:%M:%S"),
+            t_range_date_max.strftime("%Y-%m-%d %H:%M:%S"),
+        ]
 
     if dark_mode:
-        plt.style.use('dark_background')
+        plt.style.use("dark_background")
         # tick_color = 'w'  # color of the tick lines
-        mtick_color = 'w'  # color of the minor tick lines
-        label_color = 'w'  # color of the tick labels
-        clabel_color = 'w'  # color of the colorbar label
+        mtick_color = "w"  # color of the minor tick lines
+        label_color = "w"  # color of the tick labels
+        clabel_color = "w"  # color of the colorbar label
     else:
-        plt.style.use('default')
+        plt.style.use("default")
         # tick_color = 'k'  # color of the tick lines
-        mtick_color = 'k'  # color of the minor tick lines
-        label_color = 'k'  # color of the tick labels
-        clabel_color = 'k'  # color of the colorbar label
+        mtick_color = "k"  # color of the minor tick lines
+        label_color = "k"  # color of the tick labels
+        clabel_color = "k"  # color of the colorbar label
 
     # Set the fontstyle to Times New Roman
-    font = {'family': 'serif', 'weight': 'normal', 'size': 10}
-    plt.rc('font', **font)
-    plt.rc('text', usetex=True)
-    fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor='w', edgecolor='k')
-    fig.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=wspace, hspace=hspace)
+    font = {"family": "serif", "weight": "normal", "size": 10}
+    plt.rc("font", **font)
+    plt.rc("text", usetex=True)
+    fig = plt.figure(num=None, figsize=fig_size, dpi=200, facecolor="w", edgecolor="k")
+    fig.subplots_adjust(
+        left=0.01, right=0.99, top=0.99, bottom=0.01, wspace=wspace, hspace=hspace
+    )
     gs = gridspec.GridSpec(1, 4, width_ratios=[1, 1, 1, 1])
 
     # Set the font size for the axes
@@ -423,8 +428,8 @@ def ridge_finder_multiple(
         X, Y = np.ogrid[:n_rows, :n_cols]
 
         # Find the central row and column
-        c_row = int(n_rows/2)
-        c_col = int(n_cols/2)
+        c_row = int(n_rows / 2)
+        c_col = int(n_cols / 2)
         # Find the distance of each pixel from the central pixel in terms of pixels
         dist_pxl = np.sqrt((X - c_row) ** 2 + (Y - c_col) ** 2)
         mask_image = dist_pxl > 15 / dr
@@ -433,18 +438,20 @@ def ridge_finder_multiple(
             cmap_list = ["viridis", "viridis", "viridis", "viridis"]
         else:
             cmap_list = cmap_list
-        if(vmin is not None and vmax is not None):
+        if vmin is not None and vmax is not None:
             norm = plt.Normalize(vmin=vmin[i], vmax=vmax[i])
         else:
             norm = plt.Normalize()
 
-        kwargs = {'sigmas': [sigma[i]], 'black_ridges': False, 'mode': mode, 'alpha': 1}
+        kwargs = {"sigmas": [sigma[i]], "black_ridges": False, "mode": mode, "alpha": 1}
 
         # Smoothen the image
-        image_smooth = sp.ndimage.gaussian_filter(image_rotated, order=convolution_order[i],
-                                                  sigma=[5, 5], mode=mode)
-        image_smooth_p = sp.ndimage.gaussian_filter(image_rotated, order=0, sigma=[5, 5],
-                                                    mode=mode)
+        image_smooth = sp.ndimage.gaussian_filter(
+            image_rotated, order=convolution_order[i], sigma=[5, 5], mode=mode
+        )
+        image_smooth_p = sp.ndimage.gaussian_filter(
+            image_rotated, order=0, sigma=[5, 5], mode=mode
+        )
         result = frangi(image_smooth, **kwargs)  # frangi, hessian, meijering, sato
 
         m_result = result.copy()
@@ -466,12 +473,18 @@ def ridge_finder_multiple(
                 pass
 
         axs1 = plt.subplot(gs[0, i])
-        im1 = axs1.imshow(image_smooth_p, extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
-                          origin='lower', cmap=cmap_list[i], norm=norm, interpolation=interpolation,
-                          alpha=1)
+        im1 = axs1.imshow(
+            image_smooth_p,
+            extent=[xrange[0], xrange[1], yrange[0], yrange[1]],
+            origin="lower",
+            cmap=cmap_list[i],
+            norm=norm,
+            interpolation=interpolation,
+            alpha=1,
+        )
         divider1 = make_axes_locatable(axs1)
         # Draw a circle of radius 10 around the center of the image
-        axs1.add_patch(plt.Circle((0, 0), radius=15, color='gray', fill=False, lw=0.5))
+        # axs1.add_patch(plt.Circle((0, 0), radius=15, color='gray', fill=False, lw=0.5))
 
         # Take rolling average of the y_val array
         y_val_avg = np.full(len(y_val), np.nan)
@@ -479,12 +492,15 @@ def ridge_finder_multiple(
 
         r_a_l = 5
         for xx in range(len(y_val)):
-            y_val_avg[xx] = np.nanmean(y_val[max(0, xx - r_a_l):min(len(y_val), xx + r_a_l)])
-            im_max_val_avg[xx] = np.nanmean(im_max_val[max(0, xx - r_a_l):min(len(y_val),
-                                            xx + r_a_l)])
+            y_val_avg[xx] = np.nanmean(
+                y_val[max(0, xx - r_a_l) : min(len(y_val), xx + r_a_l)]
+            )
+            im_max_val_avg[xx] = np.nanmean(
+                im_max_val[max(0, xx - r_a_l) : min(len(y_val), xx + r_a_l)]
+            )
 
-        axs1.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
-        axs1.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.5)
+        axs1.axhline(0, color="k", linestyle="-", linewidth=0.5, alpha=0.5)
+        axs1.axvline(0, color="k", linestyle="-", linewidth=0.5, alpha=0.5)
 
         if draw_ridge:
             # axs1.plot(np.linspace(xrange[0], xrange[1], x_len), y_val_avg, color='aqua', ls='-',
@@ -500,37 +516,62 @@ def ridge_finder_multiple(
             # y_intr_vals[mask] = np.nan
             # if z component of b_imf is negative, then the ridge is on the left side of the
             # image
-            #if b_imf[2] <= 0:
+            # if b_imf[2] <= 0:
             #    axs1.plot(x_intr_vals, y_intr_vals, color='aqua', ls='-', alpha=0.9)
         # Plot a horizontal line at x=0 and a vertical line at y=0
-        if (draw_patch):
-            patch = patches.Circle((0, 0), radius=xrange[1], transform=axs1.transData, fc='none',
-                                   ec='k', lw=0.5)
-            im1.set_clip_path(patch)
-        axs1.add_patch(patch)
+        if draw_patch:
+            patch = patches.Circle(
+                (0, 0),
+                radius=xrange[1],
+                transform=axs1.transData,
+                fc="none",
+                ec="k",
+                lw=0.5,
+            )
+            # im1.set_clip_path(patch)
+        # axs1.add_patch(patch)
         if i == 0 or i == 3:
-            axs1.set_ylabel(r'Z [GSM, $R_{\rm E}$]', fontsize=label_size, color=label_color)
+            axs1.set_ylabel(
+                r"Z [GSM, $R_{\rm E}$]", fontsize=label_size, color=label_color
+            )
         if i == 3:
             axs1.yaxis.set_label_position("right")
 
-        axs1.set_xlabel(r'Y [GSM, $R_{\rm E}$]', fontsize=label_size, color=label_color)
+        axs1.set_xlabel(r"Y [GSM, $R_{\rm E}$]", fontsize=label_size, color=label_color)
         if dark_mode:
-            text_color = 'white'
+            text_color = "white"
         else:
-            text_color = 'black'
+            text_color = "black"
         if i == 0:
             # axs1.text(-0.3, 1.16, f'Model: {tsy_model}', horizontalalignment='left',
             #           verticalalignment='bottom', transform=axs1.transAxes, rotation=0,
             #           color=text_color, fontsize=l_label_size, bbox=box_style)
-            axs1.text(-0.3, 1.16, f'Clock Angle: {np.round(imf_clock_angle, 2)}$^\\circ$',
-                      horizontalalignment='left', verticalalignment='bottom', transform=axs1.transAxes,
-                      rotation=0, color=text_color, fontsize=l_label_size, bbox=box_style)
+            axs1.text(
+                -0.3,
+                1.16,
+                f"Clock Angle: {np.round(imf_clock_angle, 2)}$^\\circ$",
+                horizontalalignment="left",
+                verticalalignment="bottom",
+                transform=axs1.transAxes,
+                rotation=0,
+                color=text_color,
+                fontsize=l_label_size,
+                bbox=box_style,
+            )
 
         if i == 3:
-            axs1.text(1.3, 1.16, f'$B_{{\\rm {{imf}}}}$ = [{b_imf[0]}, {b_imf[1]}, {b_imf[2]}]',
-                      horizontalalignment='right',
-                      verticalalignment='bottom', transform=axs1.transAxes, rotation=0,
-                      color=text_color, fontsize=l_label_size, bbox=box_style)
+            axs1.text(
+                1.3,
+                1.16,
+                f"$B_{{\\rm {{imf}}}}$ = [{b_imf[0]}, {b_imf[1]}, {b_imf[2]}]",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+                transform=axs1.transAxes,
+                rotation=0,
+                color=text_color,
+                fontsize=l_label_size,
+                bbox=box_style,
+            )
         # elif i == 3:
         #     axs1.text(1.3, -0.15,
         #               f'Dipole tilt: {np.round(dipole_tilt_angle * 180/np.pi, 2)} ${{\\hspace{{-.2em}}}}^\\circ$',
@@ -541,11 +582,20 @@ def ridge_finder_multiple(
         # Define the location of the colorbar, it's size relative to main figure and the padding
         # between the colorbar and the figure, the orientation the colorbar
         cax1 = divider1.append_axes("top", size="5%", pad=0.01)
-        cbar1 = plt.colorbar(im1, cax=cax1, orientation='horizontal', ticks=None, fraction=0.05,
-                             pad=0.01)
-        cbar1.ax.tick_params(axis="x", direction="in", top=True, labeltop=True, bottom=False,
-                             labelbottom=False, pad=0.01, labelsize=ct_tick_size,
-                             labelcolor=label_color)
+        cbar1 = plt.colorbar(
+            im1, cax=cax1, orientation="horizontal", ticks=None, fraction=0.05, pad=0.01
+        )
+        cbar1.ax.tick_params(
+            axis="x",
+            direction="in",
+            top=True,
+            labeltop=True,
+            bottom=False,
+            labelbottom=False,
+            pad=0.01,
+            labelsize=ct_tick_size,
+            labelcolor=label_color,
+        )
         # Get the location of all ticks on the colorbar
         cbar_ticks = cbar1.ax.get_xticks()
         # Remove the first tick
@@ -553,72 +603,154 @@ def ridge_finder_multiple(
         # Set the ticks to the new tick values
         cbar1.ax.set_xticks(cbar_ticks)
 
-        cbar1.ax.xaxis.set_label_position('top')
+        cbar1.ax.xaxis.set_label_position("top")
 
-        cbar1.ax.set_xlabel(f'{c_label[i]}', fontsize=c_label_size,
-                            color=clabel_color)
+        cbar1.ax.set_xlabel(f"{c_label[i]}", fontsize=c_label_size, color=clabel_color)
 
         # Set tick label parameters
         if i == 0:
-            axs1.tick_params(axis='both', direction='in', which='major', left=True, right=True,
-                             top=True, bottom=True, labelleft=True, labelright=False,
-                             labeltop=False, labelbottom=True, labelsize=t_label_size,
-                             length=tick_len, width=tick_width, labelcolor=label_color)
+            axs1.tick_params(
+                axis="both",
+                direction="in",
+                which="major",
+                left=True,
+                right=True,
+                top=True,
+                bottom=True,
+                labelleft=True,
+                labelright=False,
+                labeltop=False,
+                labelbottom=True,
+                labelsize=t_label_size,
+                length=tick_len,
+                width=tick_width,
+                labelcolor=label_color,
+            )
         elif i == 1 or i == 2:
-            axs1.tick_params(axis='both', direction='in', which='major', left=True, right=True,
-                             top=True, bottom=True, labelleft=False, labelright=False,
-                             labeltop=False, labelbottom=True, labelsize=t_label_size,
-                             length=tick_len, width=tick_width, labelcolor=label_color)
+            axs1.tick_params(
+                axis="both",
+                direction="in",
+                which="major",
+                left=True,
+                right=True,
+                top=True,
+                bottom=True,
+                labelleft=False,
+                labelright=False,
+                labeltop=False,
+                labelbottom=True,
+                labelsize=t_label_size,
+                length=tick_len,
+                width=tick_width,
+                labelcolor=label_color,
+            )
         else:
-            axs1.tick_params(axis='both', direction='in', which='major', left=True, right=True,
-                             top=True, bottom=True, labelleft=False, labelright=True,
-                             labeltop=False, labelbottom=True, labelsize=t_label_size,
-                             length=tick_len, width=tick_width, labelcolor=label_color)
+            axs1.tick_params(
+                axis="both",
+                direction="in",
+                which="major",
+                left=True,
+                right=True,
+                top=True,
+                bottom=True,
+                labelleft=False,
+                labelright=True,
+                labeltop=False,
+                labelbottom=True,
+                labelsize=t_label_size,
+                length=tick_len,
+                width=tick_width,
+                labelcolor=label_color,
+            )
 
         if i == 0:
             # Add a label '(a)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.15, '(a)', horizontalalignment='left', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color,
-                      fontsize=1.2 * l_label_size)
+            axs1.text(
+                0.05,
+                0.15,
+                "(a)",
+                horizontalalignment="left",
+                verticalalignment="top",
+                transform=axs1.transAxes,
+                rotation=0,
+                color=text_color,
+                fontsize=1.2 * l_label_size,
+            )
         elif i == 1:
             # Add a label '(b)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.15, '(b)', horizontalalignment='left', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color,
-                      fontsize=1.2 * l_label_size)
+            axs1.text(
+                0.05,
+                0.15,
+                "(b)",
+                horizontalalignment="left",
+                verticalalignment="top",
+                transform=axs1.transAxes,
+                rotation=0,
+                color=text_color,
+                fontsize=1.2 * l_label_size,
+            )
         elif i == 2:
             # Add a label '(c)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.15, '(c)', horizontalalignment='left', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color,
-                      fontsize=1.2 * l_label_size)
+            axs1.text(
+                0.05,
+                0.15,
+                "(c)",
+                horizontalalignment="left",
+                verticalalignment="top",
+                transform=axs1.transAxes,
+                rotation=0,
+                color=text_color,
+                fontsize=1.2 * l_label_size,
+            )
         elif i == 3:
             # Add a label '(d)' to the plot to indicate the panel number
-            axs1.text(0.05, 0.15, '(d)', horizontalalignment='left', verticalalignment='top',
-                      transform=axs1.transAxes, rotation=0, color=text_color,
-                      fontsize=1.2 * l_label_size)
+            axs1.text(
+                0.05,
+                0.15,
+                "(d)",
+                horizontalalignment="left",
+                verticalalignment="top",
+                transform=axs1.transAxes,
+                rotation=0,
+                color=text_color,
+                fontsize=1.2 * l_label_size,
+            )
 
         # Show minor ticks
         axs1.minorticks_on()
-        axs1.tick_params(axis='both', which='minor', direction='in', length=mtick_len, left=True,
-                         right=True, top=True, bottom=True, color=mtick_color, width=mtick_width)
+        axs1.tick_params(
+            axis="both",
+            which="minor",
+            direction="in",
+            length=mtick_len,
+            left=True,
+            right=True,
+            top=True,
+            bottom=True,
+            color=mtick_color,
+            width=mtick_width,
+        )
         # Set the number of ticks on the x-axis
-        axs1.xaxis.set_major_locator(MaxNLocator(nbins=5, prune='lower'))
+        axs1.xaxis.set_major_locator(MaxNLocator(nbins=5, prune="lower"))
         # Set the number of ticks on the y-axis
-        axs1.yaxis.set_major_locator(MaxNLocator(nbins=5, prune='lower'))
+        axs1.yaxis.set_major_locator(MaxNLocator(nbins=5, prune="lower"))
 
         # Setting the tickmarks labels in such a way that they don't overlap
-        plt.setp(axs1.get_xticklabels(), rotation=0, ha='right', va='top', visible=True)
-        plt.setp(axs1.get_yticklabels(), rotation=0, va='center', visible=True)
+        plt.setp(axs1.get_xticklabels(), rotation=0, ha="right", va="top", visible=True)
+        plt.setp(axs1.get_yticklabels(), rotation=0, va="center", visible=True)
         # Set the title of the plot
         # fig.suptitle(f'$B_{{\\rm {{imf}}}}$ = {b_imf}',
         #              fontsize=label_size, color=text_color, y=title_y_pos, alpha=0.65)
 
-    #plt.show()
+    # plt.show()
     if save_fig:
         try:
             # TODO: Add folder name as one of the path and make sure that the code creates the
             # folder. Gives out error if the folder can't be created.
-            fig_folder = f"../figures/test/{tsy_model}/{interpolation}" +\
-                         f"_interpolation_mms{mms_probe_num}/{fig_version}"
+            fig_folder = (
+                f"../figures/test/{tsy_model}/{interpolation}"
+                + f"_interpolation_mms{mms_probe_num}/{fig_version}"
+            )
             check_folder = os.path.isdir(fig_folder)
             # If folder doesn't exist, then create it.
             if not check_folder:
@@ -628,21 +760,32 @@ def ridge_finder_multiple(
                 print(f"folder already exists: {fig_folder}\n")
 
             # fig_folder = "../figures/test"
-            fig_name = f'{fig_folder}/ridge_plot_{int(b_imf[0])}_{int(b_imf[1])}_{int(b_imf[2])}.{fig_format}'
-            plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=fig_format, dpi=200)
-            print(f'Figure saved as {fig_name}')
+            fig_name = f"{fig_folder}/ridge_plot_{int(b_imf[0])}_{int(b_imf[1])}_{int(b_imf[2])}.{fig_format}"
+            plt.savefig(
+                fig_name, bbox_inches="tight", pad_inches=0.05, format=fig_format, dpi=200
+            )
+            print(f"Figure saved as {fig_name}")
         except Exception as e:
             print(e)
-            print('Figure not saved, folder does not exist. Create folder ../figures')
+            print("Figure not saved, folder does not exist. Create folder ../figures")
             # pass
         # plt.close()
     plt.close()
     return y_vals, x_intr_vals_list, y_intr_vals_list
 
 
-def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None, save_fig=True,
-                       fig_name="draping_field", figure_format="pdf", tick_fontsize=16,
-                       label_fontsize=18):
+def draping_field_plot(
+    x_coord=None,
+    y_coord=None,
+    by=None,
+    bz=None,
+    scale=None,
+    save_fig=True,
+    fig_name="draping_field",
+    figure_format="pdf",
+    tick_fontsize=16,
+    label_fontsize=18,
+):
     r"""
     Plots the draping field.
 
@@ -676,32 +819,43 @@ def draping_field_plot(x_coord=None, y_coord=None, by=None, bz=None, scale=None,
         raise ValueError("No coordinates or field components given")
 
     fig, axs1 = plt.subplots(1, 1, figsize=(8, 6))
-    im1 = axs1.quiver(x_coord, y_coord, by, bz, scale=scale,
-                      scale_units='inches', angles='uv', width=0.002)
-    axs1.set_xlabel(r'Y [GSM, $R_\oplus$]', fontsize=label_fontsize)
-    axs1.set_ylabel(r'Z [GSM, $R_\oplus$]', fontsize=label_fontsize)
+    im1 = axs1.quiver(
+        x_coord,
+        y_coord,
+        by,
+        bz,
+        scale=scale,
+        scale_units="inches",
+        angles="uv",
+        width=0.002,
+    )
+    axs1.set_xlabel(r"Y [GSM, $R_\oplus$]", fontsize=label_fontsize)
+    axs1.set_ylabel(r"Z [GSM, $R_\oplus$]", fontsize=label_fontsize)
     patch = patches.Circle(
-        (0, 0), radius=15, transform=axs1.transData, fc='none', ec='none', lw=0.1)
+        (0, 0), radius=15, transform=axs1.transData, fc="none", ec="none", lw=0.1
+    )
     axs1.add_patch(patch)
     axs1.set_clip_path(patch)
     im1.set_clip_path(patch)
 
     axs1.set_xlim([-15, 15])
     axs1.set_ylim([-15, 15])
-    axs1.set_aspect('equal')
+    axs1.set_aspect("equal")
     if fig_name == "magnetosheath":
-        axs1.set_title(r'Magnetosheath Field (nT)', fontsize=label_fontsize)
+        axs1.set_title(r"Magnetosheath Field (nT)", fontsize=label_fontsize)
     elif fig_name == "magnetosphere":
-        axs1.set_title(r'Magnetosphere Field (nT)', fontsize=label_fontsize)
+        axs1.set_title(r"Magnetosphere Field (nT)", fontsize=label_fontsize)
     else:
-        axs1.set_title(r'Draping Field (nT)', fontsize=label_fontsize)
+        axs1.set_title(r"Draping Field (nT)", fontsize=label_fontsize)
 
-    axs1.tick_params(axis='both', which='major', labelsize=tick_fontsize)
+    axs1.tick_params(axis="both", which="major", labelsize=tick_fontsize)
 
     if save_fig:
-        fig_name = f'../figures/draping_field_plot_{fig_name}.{figure_format}'
-        plt.savefig(fig_name, bbox_inches='tight', pad_inches=0.05, format=figure_format, dpi=300)
-        print(f'Figure saved as {fig_name}')
+        fig_name = f"../figures/draping_field_plot_{fig_name}.{figure_format}"
+        plt.savefig(
+            fig_name, bbox_inches="tight", pad_inches=0.05, format=figure_format, dpi=300
+        )
+        print(f"Figure saved as {fig_name}")
     return fig
 
 
@@ -750,7 +904,7 @@ def model_run(*args):
         else:
             signz = np.sign(z0)
 
-        if (rp <= zp):
+        if rp <= zp:
             # print(index, rp, zp)
             # print(f'Value of theta = {theta}')
 
@@ -760,19 +914,19 @@ def model_run(*args):
             phi = np.arctan2(z0, y0)
             # print( j, k, theta, x_shu[j,k])
 
-            if (abs(y0) == 0 or abs(z0) == 0):
-                if (abs(y0) == 0):
+            if abs(y0) == 0 or abs(z0) == 0:
+                if abs(y0) == 0:
                     y_shu = 0
                     z_shu = (r - m_p) * np.sin(theta)
-                elif (abs(z0) == 0):
+                elif abs(z0) == 0:
                     z_shu = 0
                     y_shu = (r - m_p) * np.sin(theta)
             else:
-                z_shu = np.sqrt((rp - 1.0)**2 / (1 + np.tan(phi)**(-2)))
+                z_shu = np.sqrt((rp - 1.0) ** 2 / (1 + np.tan(phi) ** (-2)))
                 y_shu = z_shu / np.tan(phi)
 
             m_proton = 1.672e-27  # Mass of proton in SI unit
-            n_sh = sw_params['rho'] * (1.509 * np.exp(x_shu / rmp) + .1285) / m_proton
+            n_sh = sw_params["rho"] * (1.509 * np.exp(x_shu / rmp) + 0.1285) / m_proton
 
             y_shu = abs(y_shu) * signy
             z_shu = abs(z_shu) * signz
@@ -781,23 +935,32 @@ def model_run(*args):
             # the distance from the focus to the magnetopause surface
             A = 2
             ll = 3 * rmp / 2 - x0
-            b_msx = - A * (- sw_params['b_imf'][0] * (1 - rmp / (2 * ll)) + sw_params['b_imf'][1]
-                           * (y0 / ll) + sw_params['b_imf'][2] * (z0 / ll))
-            b_msy = A * (- sw_params['b_imf'][0] * (y0 / (2 * ll)) + sw_params['b_imf'][1]
-                         * (2 - y0**2 / (ll * rmp)) - sw_params['b_imf'][2] * (y0 * z0 / (ll *
-                                                                                          rmp)))
-            b_msz = A * (- sw_params['b_imf'][0] * (z0 / (2 * ll)) - sw_params['b_imf'][1]
-                         * (y0 * z0 / (ll * rmp)) + sw_params['b_imf'][2] * (2 - z0**2 / (ll *
-                                                                                          rmp)))
+            b_msx = -A * (
+                -sw_params["b_imf"][0] * (1 - rmp / (2 * ll))
+                + sw_params["b_imf"][1] * (y0 / ll)
+                + sw_params["b_imf"][2] * (z0 / ll)
+            )
+            b_msy = A * (
+                -sw_params["b_imf"][0] * (y0 / (2 * ll))
+                + sw_params["b_imf"][1] * (2 - y0**2 / (ll * rmp))
+                - sw_params["b_imf"][2] * (y0 * z0 / (ll * rmp))
+            )
+            b_msz = A * (
+                -sw_params["b_imf"][0] * (z0 / (2 * ll))
+                - sw_params["b_imf"][1] * (y0 * z0 / (ll * rmp))
+                + sw_params["b_imf"][2] * (2 - z0**2 / (ll * rmp))
+            )
             try:
-                if model_type == 't96':
-                    bx_ext, by_ext, bz_ext = gp.t96.t96(sw_params['param'], sw_params['ps'], x_shu,
-                                                        y_shu, z_shu)
-                elif model_type == 't01':
-                    bx_ext, by_ext, bz_ext = gp.t01.t01(sw_params['param'], sw_params['ps'], x_shu,
-                                                        y_shu, z_shu)
+                if model_type == "t96":
+                    bx_ext, by_ext, bz_ext = gp.t96.t96(
+                        sw_params["param"], sw_params["ps"], x_shu, y_shu, z_shu
+                    )
+                elif model_type == "t01":
+                    bx_ext, by_ext, bz_ext = gp.t01.t01(
+                        sw_params["param"], sw_params["ps"], x_shu, y_shu, z_shu
+                    )
             except Exception:
-                print(f'Skipped for {x_shu, y_shu, z_shu}')
+                print(f"Skipped for {x_shu, y_shu, z_shu}")
                 pass
 
             bx_igrf, by_igrf, bz_igrf = gp.igrf_gsm(x_shu, y_shu, z_shu)
@@ -814,18 +977,34 @@ def model_run(*args):
             bisec_msp, bisec_msh = get_bis([bx, by, bz], [b_msx, b_msy, b_msz])
             break
 
-    return (j, k, bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, x_shu, y_shu, z_shu, b_msx,
-            b_msy, b_msz)
+    return (
+        j,
+        k,
+        bx,
+        by,
+        bz,
+        shear,
+        rx_en,
+        va_cs,
+        bisec_msp,
+        bisec_msh,
+        x_shu,
+        y_shu,
+        z_shu,
+        b_msx,
+        b_msy,
+        b_msz,
+    )
 
 
 def rx_model(
     probe=None,
-    trange=['2016-12-24 15:08:00', '2016-12-24 15:12:00'],
+    trange=["2016-12-24 15:08:00", "2016-12-24 15:12:00"],
     sw_params=None,
     dt=5,
-    omni_level='hro',
-    mms_probe_num='3',
-    model_type='t96',
+    omni_level="hro",
+    mms_probe_num="3",
+    model_type="t96",
     m_p=0.5,
     dr=0.5,
     min_max_val=15,
@@ -834,7 +1013,7 @@ def rx_model(
     z_min=None,
     z_max=None,
     save_data=False,
-    nprocesses=None
+    nprocesses=None,
 ):
     """
     This function computes the magnetosheath and magnetospheric magnetic fields using the T96 model
@@ -904,12 +1083,14 @@ def rx_model(
         if isinstance(trange[0], datetime.datetime):
             trange_date = trange[0]
         else:
-            trange_date = datetime.datetime.strptime(trange[0], '%Y-%m-%d %H:%M:%S')
+            trange_date = datetime.datetime.strptime(trange[0], "%Y-%m-%d %H:%M:%S")
         trange_date_min = trange_date - datetime.timedelta(minutes=dt)
         trange_date_max = trange_date + datetime.timedelta(minutes=dt)
-        trange = [trange_date_min.strftime('%Y-%m-%d %H:%M:%S'),
-                  trange_date_max.strftime('%Y-%m-%d %H:%M:%S')]
-        trange = [trange[0] + 'Z', trange[1] + 'Z']
+        trange = [
+            trange_date_min.strftime("%Y-%m-%d %H:%M:%S"),
+            trange_date_max.strftime("%Y-%m-%d %H:%M:%S"),
+        ]
+        trange = [trange[0] + "Z", trange[1] + "Z"]
 
     n_arr_y = int((y_max - y_min) / dr) + 1
     n_arr_z = int((z_max - z_min) / dr) + 1
@@ -934,11 +1115,14 @@ def rx_model(
     b_msz = np.full((n_arr_y, n_arr_z), np.nan)
 
     # Shue et al.,1998, equation 10
-    ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params['b_imf'][2] + 8.14))) * (
-        sw_params['p_dyn'])**(-1.0 / 6.6)
+    ro = (10.22 + 1.29 * np.tanh(0.184 * (sw_params["b_imf"][2] + 8.14))) * (
+        sw_params["p_dyn"]
+    ) ** (-1.0 / 6.6)
 
     # Shue et al.,1998, equation 11
-    alpha = (0.58 - 0.007 * sw_params['b_imf'][2]) * (1 + 0.024 * np.log(sw_params['p_dyn']))
+    alpha = (0.58 - 0.007 * sw_params["b_imf"][2]) * (
+        1 + 0.024 * np.log(sw_params["p_dyn"])
+    )
     rmp = ro * (2 / (1 + np.cos(0.0))) ** alpha  # Stand off position of the magnetopause
 
     len_y = int((y_max - y_min) / dr) + 1
@@ -949,8 +1133,11 @@ def rx_model(
     else:
         p = mp.Pool(processes=nprocesses)
 
-    input = ((j, k, y_max, z_max, dr, m_p, ro, alpha, rmp, sw_params, model_type)
-             for j in range(len_y) for k in range(len_z))
+    input = (
+        (j, k, y_max, z_max, dr, m_p, ro, alpha, rmp, sw_params, model_type)
+        for j in range(len_y)
+        for k in range(len_z)
+    )
 
     print("Running the model \n")
     res = p.map(model_run, input)
@@ -982,37 +1169,54 @@ def rx_model(
 
     if save_data:
         try:
-            today_date = datetime.datetime.today().strftime('%Y-%m-%d')
-            fn = f'../data/all_data_rx_model_{dr}re_{m_p}mp_{model_type}_{today_date}.h5'
-            data_file = hf.File(fn, 'w')
+            today_date = datetime.datetime.today().strftime("%Y-%m-%d")
+            fn = f"../data/all_data_rx_model_{dr}re_{m_p}mp_{model_type}_{today_date}.h5"
+            data_file = hf.File(fn, "w")
 
-            data_file.create_dataset('bx', data=bx)
-            data_file.create_dataset('by', data=by)
-            data_file.create_dataset('bz', data=bz)
+            data_file.create_dataset("bx", data=bx)
+            data_file.create_dataset("by", data=by)
+            data_file.create_dataset("bz", data=bz)
 
-            data_file.create_dataset('b_msx', data=b_msx)
-            data_file.create_dataset('b_msy', data=b_msy)
-            data_file.create_dataset('b_msz', data=b_msz)
+            data_file.create_dataset("b_msx", data=b_msx)
+            data_file.create_dataset("b_msy", data=b_msy)
+            data_file.create_dataset("b_msz", data=b_msz)
 
-            data_file.create_dataset('shear', data=shear)
-            data_file.create_dataset('rx_en', data=rx_en)
-            data_file.create_dataset('va_cs', data=va_cs)
-            data_file.create_dataset('bisec_msp', data=bisec_msp)
-            data_file.create_dataset('bisec_msh', data=bisec_msh)
+            data_file.create_dataset("shear", data=shear)
+            data_file.create_dataset("rx_en", data=rx_en)
+            data_file.create_dataset("va_cs", data=va_cs)
+            data_file.create_dataset("bisec_msp", data=bisec_msp)
+            data_file.create_dataset("bisec_msh", data=bisec_msh)
 
-            data_file.create_dataset('x_shu', data=x_shu)
-            data_file.create_dataset('y_shu', data=y_shu)
-            data_file.create_dataset('z_shu', data=z_shu)
+            data_file.create_dataset("x_shu", data=x_shu)
+            data_file.create_dataset("y_shu", data=y_shu)
+            data_file.create_dataset("z_shu", data=z_shu)
 
             data_file.close()
-            print(f'Date saved to file {fn} \n')
+            print(f"Date saved to file {fn} \n")
         except Exception as e:
             print(e)
-            print(f'Data not saved to file {fn}. Please make sure that file name is correctly' +
-                  ' assigned and that the directory exists and you have write permissions')
+            print(
+                f"Data not saved to file {fn}. Please make sure that file name is correctly"
+                + " assigned and that the directory exists and you have write permissions"
+            )
 
-    return (bx, by, bz, shear, rx_en, va_cs, bisec_msp, bisec_msh, sw_params, x_shu, y_shu, z_shu,
-            b_msx, b_msy, b_msz)
+    return (
+        bx,
+        by,
+        bz,
+        shear,
+        rx_en,
+        va_cs,
+        bisec_msp,
+        bisec_msh,
+        sw_params,
+        x_shu,
+        y_shu,
+        z_shu,
+        b_msx,
+        b_msy,
+        b_msz,
+    )
 
 
 def line_fnc(
@@ -1070,7 +1274,7 @@ def line_fnc_der(x, y):
 def target_fnc(r, r0, b_msh, line_fnc, line_intrp):
     p_line = line_fnc(r0=r0, b_msh=b_msh, r=r)
     z_surface = line_intrp(p_line[1])
-    return np.sum((p_line[2] - z_surface)**2)
+    return np.sum((p_line[2] - z_surface) ** 2)
 
 
 def nan_helper(y):
