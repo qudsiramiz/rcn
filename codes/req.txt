@@ -4,7 +4,7 @@ backcall==0.2.0
 bokeh==2.4.1
 cdasws==1.7.36
 cdflib==0.3.20
-certifi==2021.10.8
+certifi==2022.12.7
 cftime==1.5.1.1
 charset-normalizer==2.0.7
 cycler==0.11.0
